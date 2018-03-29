@@ -1,13 +1,10 @@
 # -*- coding: utf-8 -*-
 """
-Created on Wed Feb 21 12:53:07 2018
-
-@author: adrien
+    This module is dedicated to preprocessing tasks for logistic regression and post-learning graphical tools.
 """
 
 import numpy as np
 import sklearn as sk
-import sklearn.linear_model
 import warnings
 
 from scipy import stats
@@ -23,7 +20,21 @@ def vectorized(prob_matrix, items):
 
 class glmdisc:
     
-    def __init__(self,predictors_cont,predictors_qual,labels,test=True,validation=True,criterion="bic",iter=100,m_start=20):
+    """
+    This class implements a supervised multivariate discretization method, factor levels grouping and interaction discovery for logistic regression.
+    """
+
+    def __init__(self,test=True,validation=True,criterion="bic",iter=100,m_start=20):
+        
+        """Initializes self by checking if its arguments are appropriately specified.
+        
+        Keyword arguments:
+        test            -- Boolean (T/F) specifying if a test set is required. If True, the provided data is split to provide 20% of observations in a test set and the reported performance is the Gini index on test set.
+        validation      -- Boolean (T/F) specifying if a validation set is required. If True, the provided data is split to provide 20% of observations in a validation set and the reported performance is the Gini index on the validation set (if no test=False). The quality of the discretization at each step is evaluated using the Gini index on the validation set, so criterion must be set to "gini".
+        criterion       -- The criterion to be used to assess the goodness-of-fit of the discretization: "bic" or "aic" if no validation set, else "gini".
+        iter            -- Number of MCMC steps to perform. The more the better, but it may be more intelligent to use several MCMCs. Computation time can increase dramatically.
+        m_start         -- Number of initial discretization intervals for all variables. If m_start is bigger than the number of factor levels for a given variable in predictors_qual, m_start is set (for this variable only) to this variable's number of factor levels.
+        """
         
                 ################## Tests des variables d'entrée ##################
     
@@ -50,6 +61,36 @@ class glmdisc:
         # m_start doit être pas déconnant
         if not 2 <= m_start <= 50:
             raise ValueError('Please set 2 <= m_start <= 50')
+            
+        if not(validation) and criterion=='gini':
+            warnings.warn('Using Gini index on training set might yield an overfitted model')
+            
+        if validation and criterion in ['aic','bic']:
+            warnings.warn('No need to penalize the log-likelihood when a validation set is used. Using log-likelihood instead.')
+
+        
+        self.test = test
+        self.validation = validation
+        self.criterion = criterion
+        self.iter = iter
+        self.m_start = m_start
+        
+        self.criterion_iter = []
+        self.best_link = []
+        self.best_reglog = 0
+        self.affectations = []
+        self.best_encoder_emap = []
+        
+
+    def fit(self,predictors_cont,predictors_qual,labels):
+        
+        """Fits the glmdisc object.
+        
+        Keyword arguments:
+        predictors_cont -- Continuous predictors to be discretized in a numpy "numeric" array. Can be provided either here or with the __init__ method.
+        predictors_qual -- Categorical features which levels are to be merged (also in a numpy "string" array). Can be provided either here or with the __init__ method.
+        labels          -- Boolean (0/1) labels of the observations. Must be of the same length as predictors_qual and predictors_cont (numpy "numeric" array).
+        """
         
         # Tester la présence de labels
         if not type(labels) is np.ndarray:
@@ -70,32 +111,11 @@ class glmdisc:
             ## Tester la même longueur que labels
             if predictors_qual.shape[0] != labels.shape[0]:
                 raise ValueError('Predictors and labels must be of same size')
-    
-        if not(validation) and criterion=='gini':
-            warnings.warn('Using Gini index on training set might yield an overfitted model')
-            
-        if validation and criterion in ['aic','bic']:
-            warnings.warn('No need to penalize the log-likelihood when a validation set is used. Using log-likelihood instead.')
 
-        
         self.predictors_cont = predictors_cont
         self.predictors_qual = predictors_qual
         self.labels = labels
-        self.test = test
-        self.validation = validation
-        self.criterion = criterion
-        self.iter = iter
-        self.m_start = m_start
-        
-        self.criterion_iter = []
-        self.best_link = []
-        self.best_reglog = 0
-        self.affectations = []
-        self.best_encoder_emap = []
 
-    def fit(self):
-        
-    
         ################## Calcul des variables locales utilisées dans la suite ##################
     
         # Calculate shape of predictors (re-used multiple times)
@@ -134,8 +154,8 @@ class glmdisc:
         
         for j in range(d2):
             self.affectations[j+d1] = sk.preprocessing.LabelEncoder().fit(self.predictors_qual[:,j])
-            if (self.m_start > stats.describe(sk.preprocessing.LabelEncoder().fit(self.predictors_qual[:,j]).transform(self.predictors_qual[:,j])).minmax[1]):
-                edisc[:,j+d1] = np.random.choice(list(range(stats.describe(sk.preprocessing.LabelEncoder().fit(self.predictors_qual[:,j]).transform(self.predictors_qual[:,j])).minmax[1]-1)), size = n)
+            if (self.m_start > stats.describe(sk.preprocessing.LabelEncoder().fit(self.predictors_qual[:,j]).transform(self.predictors_qual[:,j])).minmax[1]+1):
+                edisc[:,j+d1] = np.random.choice(list(range(stats.describe(sk.preprocessing.LabelEncoder().fit(self.predictors_qual[:,j]).transform(self.predictors_qual[:,j])).minmax[1])), size = n)
             else:
                 edisc[:,j+d1] = np.random.choice(list(range(self.m_start)),size = n)
         
@@ -227,10 +247,7 @@ class glmdisc:
                 # On commence par les quantitatives
                 if (j<d1):
                     # On apprend e^j | x^j
-                    try:
-                        link[j].fit(y=edisc[continu_complete_case[train,j],j],X=self.predictors_cont[continu_complete_case[train,j],j].reshape(-1,1))
-                    except ValueError:
-                        link[j].fit(y=edisc[continu_complete_case[train,j],j],X=self.predictors_cont[continu_complete_case[train,j],j].reshape(-1,1))
+                    link[j].fit(y=edisc[train,:][continu_complete_case[train,j],j],X=predictors_cont[train,:][continu_complete_case[train,j],j].reshape(-1,1))
             
                     y_p = np.zeros((n,len(m[j])))
                     
@@ -251,17 +268,18 @@ class glmdisc:
                     if (np.invert(continu_complete_case[:,j]).sum() == 0):
                         t = t*y_p
                     else:
-                        t = t*y_p[continu_complete_case[:,j],0:(len(m[j])-1)]
+                        t = t[:,0:(len(m[j])-1)]*y_p[continu_complete_case[:,j],0:(len(m[j])-1)]
                          
                     t = t/(t.sum(axis=1)[:,None])
                     
                     # On met à jour e^j
-                    edisc[:,j] = vectorized(t, m[j])
+                    edisc[continu_complete_case[:,j],j] = vectorized(t, m[j])
+                    edisc[np.invert(continu_complete_case[:,j]),j] = max(m[j])
                     
                 # Variables qualitatives
                 else:
                     # On fait le tableau de contingence e^j | x^j
-                    link[j] = Counter([tuple(element) for element in np.column_stack((predictors_trans[train,j],edisc[train,j]))])
+                    link[j] = Counter([tuple(element) for element in np.column_stack((predictors_trans[train,j-d1],edisc[train,j]))])
             
                     y_p = np.zeros((n,len(m[j])))
                     
@@ -306,32 +324,33 @@ class glmdisc:
         
         
 
-
-    def bestScore(self):
-        return self.best_reglog
     
     def bestFormula(self):
+        """Returns the best formula found by the MCMC."""
+
         return 0
     
-    def bestLink(self):
-        return self.best_link
-    
-    def affectations_qual(self):
-        return self.affectations
-    
-    def performanceEvolution(self):
-        return self.criterion_iter
-    
     def performance(self):
+        """Returns the best performance found by the MCMC."""
+
         return 0
     
     def discreteData(self):
+        """Returns the best discrete data found by the MCMC."""
         return 0
     
     def contData(self):
+        """Returns the continuous data provided to the MCMC as a single pandas dataframe."""
         return [self.predictors_cont, self.predictors_qual, self.labels]
     
     def discretize(self,predictors_cont,predictors_qual):
+        """Discretizes new continuous and categorical features using a previously fitted glmdisc object.
+        
+        Keyword arguments:
+        predictors_cont -- Continuous predictors to be discretized in a numpy "numeric" array. Can be provided either here or with the __init__ method.
+        predictors_qual -- Categorical features which levels are to be merged (also in a numpy "string" array). Can be provided either here or with the __init__ method.
+        """
+
         try:
             n = predictors_cont.shape[0]
         except AttributeError:
@@ -357,7 +376,7 @@ class glmdisc:
 
         for j in range(d_1+d_2):
             if d_1bis[j]:
-                emap[np.invert(np.isnan(predictors_cont[:,j])),j] = self.best_link[j].predict(predictors_cont[np.invert(np.isnan(predictors_cont[:,j])),j].reshape(-1,1))
+                emap[np.invert(np.isnan(predictors_cont[:,j])),j] = np.argmax(self.best_link[j].predict_proba(predictors_cont[np.invert(np.isnan(predictors_cont[:,j])),j].reshape(-1,1)),axis=1)
                 emap[np.isnan(predictors_cont[:,j]),j] = stats.describe(emap[:,j]).minmax[1] + 1
             elif d_2bis[j]:
                 m = max(self.best_link[j].keys(),key=lambda key: key[1])[1]
@@ -374,37 +393,30 @@ class glmdisc:
         return emap
     
     def discretizeDummy(self,predictors_cont,predictors_qual):
-        emap = self.discretize(predictors_cont,predictors_qual)
-        return self.best_encoder_emap.transform(emap.astype(str))
+        """Discretizes new continuous and categorical features using a previously fitted glmdisc object as Dummy Variables usable with the best_reglog object.
+        
+        Keyword arguments:
+        predictors_cont -- Continuous predictors to be discretized in a numpy "numeric" array. Can be provided either here or with the __init__ method.
+        predictors_qual -- Categorical features which levels are to be merged (also in a numpy "string" array). Can be provided either here or with the __init__ method.
+        """
+
+        return self.best_encoder_emap.transform(self.discretize(predictors_cont,predictors_qual).astype(str))
     
     
     def predict(self,predictors_cont,predictors_qual):
-        emap = self.discretize(predictors_cont,predictors_qual)
-        emap_dummy = self.best_encoder_emap.transform(emap.astype(str))
-        return self.best_reglog.predict_proba(emap_dummy)
+        """Predicts the label values with new continuous and categorical features using a previously fitted glmdisc object.
+        
+        Keyword arguments:
+        predictors_cont -- Continuous predictors to be discretized in a numpy "numeric" array. Can be provided either here or with the __init__ method.
+        predictors_qual -- Categorical features which levels are to be merged (also in a numpy "string" array). Can be provided either here or with the __init__ method.
+        """
+
+        return self.best_reglog.predict_proba(self.discretizeDummy(predictors_cont,predictors_qual))
+
+
+## Faire un try catch pour warm start ?
+## Implémenter les méthodes plot
+    
 
 
 
-## Faire un try catch pour warm start
-## Implémenter les méthodes discrétisation predict plot
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
