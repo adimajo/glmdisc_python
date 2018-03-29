@@ -1,31 +1,79 @@
----
-title: "The `glmdisc` package: discretization at its finest"
-author: "Adrien Ehrhardt"
-date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{`glmdisc} package}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
----
+# Supervised multivariate discretization and factor levels merging for logistic regression
 
-```{r setup, include = FALSE}
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>",
-  fig.width = 7,
-  fig.align = "center",
-  fig.height = 4
-)
+Credit institutions are interested in the refunding probability of a loan given the applicant’s characteristics in order to assess the worthiness of the credit. For regulatory and interpretability reasons, the logistic regression is still widely used to learn this probability from the data. Although logistic regression handles naturally both quantitative and qualitative data, three pre-processing steps are usually performed: firstly, continuous features are discretized by assigning factor levels to pre-determined intervals; secondly, qualitative features, if they take numerous values, are grouped; thirdly, interactions (products between two different predictors) are sparsely introduced. By reinterpreting discretized (resp. grouped) features as latent variables, we are able, through the use of a Stochastic Expectation-Maximization (SEM) algorithm and a Gibbs sampler to find the best discretization (resp. grouping) scheme w.r.t. the logistic regression loss. For detecting interacting features, the same scheme is used by replacing the Gibbs sampler by a Metropolis-Hastings algorithm. The good performances of this approach are illustrated on simulated and real data from Credit Agricole Consumer Finance.
+
+## Getting started
+
+These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
+
+### Prerequisites
+
+As specified by the setup file...
+
+Python 3
+
+'sklearn','numpy','scipy','math','warnings','collections'
+
+
+### Installing the package
+
+- [] explain pip command
+
+- [] explain conda command
+
+- [] focus on proxy...
+
+- [] link to pip and conda instructions
+
+
+
+## Use case example
+
+In practice, the statistical modeler has historical data about each customer's characteristics. For obvious reasons, only data available at the time of inquiry must be used to build a future application scorecard. Those data often take the form of a well-structured table with one line per client alongside their performance (did they pay back their loan or not?) as can be seen in the following table:
+
+- [] convert table to markdown format
+
+```{r, echo=FALSE, results='asis'}
+knitr::kable(data.frame(Job=c("Craftsman","Technician","Executive","Office employee"),Habitation = c("Owner","Renter","Starter","By family"),Time_in_job = c(10,20,5,2), Children = c(0,1,2,3), Family_status=  c("Divorced","Widower","Single","Married"),Default = c("No","No","Yes","No")))
 ```
 
-# Context
 
-This research has been financed by Crédit Agricole Consumer Finance (CA CF), subsidiary of the Crédit Agricole Group which provides all kinds of banking and insurance services. CA CF specializes in consumer loans. It is a joint work at [Inria Nord-Europe](https://www.inria.fr/en/centre/lille) between Adrien Ehrhardt (CA CF, Inria), Christophe Biernacki (Inria, Lille University), Vincent Vandewalle (Inria, Lille University) and Philippe Heinrich (Lille University).
 
-In order to accept / reject loan applications more efficiently (both quicker and to select better applicants), most financial institutions resort to Credit Scoring: given the applicant's characteristics he/she is given a Credit Score, which has been statistically designed using previously accepted applicants, and which partly decides whether the financial institution will grant the loan or not.
 
-The current methodology for building a Credit Score in most financial institutions is based on logistic regression for several (mostly practical) reasons: it generally gives satisfactory discriminant results, it is reasonably well explainable (contrary to a random forest for example), it is robust to missing data (in particular not financed clients) that follow a MAR missingness mechanism.
+## Authors
+
+* [Adrien Ehrhardt](https://adimajo.github.io)
+* [Vincent Vandewalle](https://sites.google.com/site/vvandewa/)
+* [Philippe Heinrich](http://math.univ-lille1.fr/~heinrich/)
+* [Christophe Biernacki](http://math.univ-lille1.fr/~biernack/)
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Acknowledgments
+
+This research has been financed by [Crédit Agricole Consumer Finance]() through a CIFRE PhD.
+
+This research is supported by [Inria Lille - Nord-Europe]() and [Lille University]() as part of a PḧD.
+
+## References
+
+Celeux, G., Chauveau, D., Diebolt, J. (1995), On Stochastic Versions of the EM Algorithm. [Research Report] RR-2514, INRIA. 1995. <inria-00074164>
+
+Agresti, A. (2002) **Categorical Data**. Second edition. Wiley.
+
+Ramírez‐Gallego, S., García, S., Mouriño‐Talín, H., Martínez‐Rego, D., Bolón‐Canedo, V., Alonso‐Betanzos, A. and Herrera, F. (2016). Data discretization: taxonomy and big data challenge. *Wiley Interdisciplinary Reviews: Data Mining and Knowledge Discovery*, 6(1), 5-21.
+
+
+
+
+
+
+
+
+
+
 
 ## Example
 

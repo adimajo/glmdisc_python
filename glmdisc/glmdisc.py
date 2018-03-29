@@ -5,6 +5,8 @@
 
 import numpy as np
 import sklearn as sk
+import sklearn.preprocessing
+import sklearn.linear_model
 import warnings
 
 from scipy import stats
@@ -163,9 +165,9 @@ class glmdisc:
         
         emap = np.ndarray.copy(edisc)
         
-        model_edisc = sk.linear_model.LogisticRegression(solver='liblinear',C=1e40,tol=1e-8,max_iter=25,warm_start=False)
+        model_edisc = sk.linear_model.LogisticRegression(solver='liblinear',C=1e40,tol=tol=0.001,max_iter=25,warm_start=False)
         
-        model_emap = sk.linear_model.LogisticRegression(solver='liblinear',C=1e40,tol=1e-8,max_iter=25,warm_start=False)
+        model_emap = sk.linear_model.LogisticRegression(solver='liblinear',C=1e40,tol=tol=0.001,max_iter=25,warm_start=False)
         
         current_encoder_edisc = sk.preprocessing.OneHotEncoder()
         
@@ -176,18 +178,18 @@ class glmdisc:
         m=[None]*(d1+d2)        
     
         for j in range(d1):
-            link[j] = sk.linear_model.LogisticRegression(C=1e40,multi_class='multinomial',solver='newton-cg',max_iter=25,warm_start=False)
+            link[j] = sk.linear_model.LogisticRegression(C=1e40,multi_class='multinomial',solver='newton-cg',max_iter=25,tol=0.001,warm_start=False)
         
         ################## Random splitting ##################
     
         if self.validation and self.test:
-            train, validate, test_rows = np.split(np.random.choice(n,n), [int(.6*n), int(.8*n)])
+            train, validate, test_rows = np.split(np.random.choice(n,n,replace=False), [int(.6*n), int(.8*n)])
         elif self.validation:
-            train, validate = np.split(np.random.choice(n,n), int(.6*n))
+            train, validate = np.split(np.random.choice(n,n,replace=False), int(.6*n))
         elif self.test:
-            train, test_rows = np.split(np.random.choice(n,n), int(.6*n))
+            train, test_rows = np.split(np.random.choice(n,n,replace=False), int(.6*n))
         else:
-            train = np.random.choice(n,n)
+            train = np.random.choice(n,n,replace=False)
     
         ################## Itérations MCMC ##################
     
@@ -323,12 +325,41 @@ class glmdisc:
         
         
         
-
+        
     
     def bestFormula(self):
         """Returns the best formula found by the MCMC."""
+        emap_best = self.discretize(self.predictors_cont,self.predictors_qual)
+        
+        # Traitement des variables continues
+        
+        # Calculate shape of predictors (re-used multiple times)
+        try:
+            d1 = self.predictors_cont.shape[1]
+        except AttributeError:
+            d1 = 0
+    
+        try:
+            d2 = self.predictors_qual.shape[1]
+        except AttributeError:
+            d2 = 0
+        
+        best_disc = []
+        
+        for j in range(d1):
+            best_disc.append([])
+            for k in np.unique(emap_best[:,j]):
+                best_disc[j].append(np.nanmin(self.predictors_cont[emap_best[:,j]==k,j]))
+            del best_disc[j][np.where(best_disc[j]==np.nanmin(best_disc[j]))[0][0]]
+            print("Cut-points found for variable",j,"are",best_disc[j])
+                
+        for j in range(d2):
+            best_disc.append([])
+            for k in np.unique(emap_best[:,j+d1]):
+                best_disc[j+d1].append(np.unique(self.predictors_qual[emap_best[:,j+d1]==k,j]))
+            print("Regroupments made for variable",j,"are",best_disc[j+d1])
 
-        return 0
+        return best_disc
     
     def performance(self):
         """Returns the best performance found by the MCMC."""
