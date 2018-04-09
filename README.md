@@ -8,36 +8,67 @@ These instructions will get you a copy of the project up and running on your loc
 
 ### Prerequisites
 
-As specified by the setup file...
+This code is supported on Python 3.
 
-Python 3
-
-'sklearn','numpy','scipy','math','warnings','collections'
-
+As specified by the setup file, this package requires you to have packages sklearn, numpy, scipy, math, warnings and collections. For instructions on how to install these, please refer to their respective documentation.
 
 ### Installing the package
 
-- [] explain pip command
+#### Installing the development version
 
-- [] explain conda command
+If `git` is installed on your machine, you can use:
 
-- [] focus on proxy...
+```PowerShell
+pip install git+https://github.com/jkbr/httpie.git
+```
 
-- [] link to pip and conda instructions
+If `git` is not installed, you can also use:
 
+```PowerShell
+pip install --upgrade https://github.com/adimajo/glmdisc_python/archive/master.tar.gz
+```
+
+#### Installing through the `pip` command
+
+You can install a stable version from [PyPi](https://pypi.org/project/glmdisc/) by using:
+
+```PowerShell
+pip install glmdisc
+```
+
+#### Installation guide for Anaconda
+
+The installation with the `pip` command **should** work. If not, please raise an issue.
+
+#### For people behind proxy(ies)...
+
+A lot of people, including myself, work behind a proxy at work...
+
+A simple solution to get the package is to use the `--proxy` option of `pip`:
+
+```PowerShell
+pip --proxy=http://username:password@server:port install glmdisc
+```
+
+where *username*, *password*, *server* and *port* should be replaced by your own values.
 
 
 ## Use case example
 
 In practice, the statistical modeler has historical data about each customer's characteristics. For obvious reasons, only data available at the time of inquiry must be used to build a future application scorecard. Those data often take the form of a well-structured table with one line per client alongside their performance (did they pay back their loan or not?) as can be seen in the following table:
 
-- [] convert table to markdown format
+| Job | Habitation | Time in job | Children | Family status || Default |
+| --- | --- | --- | --- | --- || --- |
+| Craftsman | Owner | 10 | 0 | Divorced ||  No |
+| Technician | Renter | 20 | 1 | Widower || No |
+| Executive | Starter | 5 | 2 | Single ||  Yes |
+| Office employee | By family | 2 | 3 | Married || No |
 
-```{r, echo=FALSE, results='asis'}
-knitr::kable(data.frame(Job=c("Craftsman","Technician","Executive","Office employee"),Habitation = c("Owner","Renter","Starter","By family"),Time_in_job = c(10,20,5,2), Children = c(0,1,2,3), Family_status=  c("Divorced","Widower","Single","Married"),Default = c("No","No","Yes","No")))
-```
+## Notations
 
+In the rest of the vignette, the random vector <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;$X=(X^j)_1^d$" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;$X=(X^j)_1^d$" title="$X=(X^j)_1^d$" /></a>  will designate the predictive features, i.e. the characteristics of a client. The random variable <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;Y&space;\in&space;\{0,1\}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;Y&space;\in&space;\{0,1\}" title="Y \in \{0,1\}" /></a>  will designate the label, i.e. if the client has defaulted (<a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;Y=1" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;Y=1" title="Y=1" /></a>) or not (<a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;Y=0" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;Y=0" title="Y=0" /></a>).
 
+We are provided with an i.i.d. sample <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;(\bar{x},\bar{y})&space;=&space;(x_i,y_i)_1^n" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;(\bar{x},\bar{y})&space;=&space;(x_i,y_i)_1^n" title="(\bar{x},\bar{y}) = (x_i,y_i)_1^n" /></a> consisting in <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;n" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;n" title="n" /></a> observations of <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;X" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;X" title="X" /></a> and <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;Y" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;Y" title="Y" /></a>.
 
 
 ## Authors
@@ -53,9 +84,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Acknowledgments
 
-This research has been financed by [Crédit Agricole Consumer Finance]() through a CIFRE PhD.
+This research has been financed by [Crédit Agricole Consumer Finance](https://www.ca-consumerfinance.com/en.html) through a CIFRE PhD.
 
-This research is supported by [Inria Lille - Nord-Europe]() and [Lille University]() as part of a PḧD.
+This research is supported by [Inria Lille - Nord-Europe](https://www.inria.fr/centre/lille) and [Lille University](https://www.univ-lille.fr/en/home/) as part of a PḧD.
 
 ## References
 
@@ -74,18 +105,7 @@ Ramírez‐Gallego, S., García, S., Mouriño‐Talín, H., Martínez‐Rego, D.
 
 
 
-
-## Example
-
-In practice, the statistical modeler has historical data about each customer's characteristics. For obvious reasons, only data available at the time of inquiry must be used to build a future application scorecard. Those data often take the form of a well-structured table with one line per client alongside their performance (did they pay back their loan or not?) as can be seen in the following table:
-
-```{r, echo=FALSE, results='asis'}
-knitr::kable(data.frame(Job=c("Craftsman","Technician","Executive","Office employee"),Habitation = c("Owner","Renter","Starter","By family"),Time_in_job = c(10,20,5,2), Children = c(0,1,2,3), Family_status=  c("Divorced","Widower","Single","Married"),Default = c("No","No","Yes","No")))
-```
-
 ## Notations
-
-In the rest of the vignette, the random vector $X=(X^j)_1^d$ will designate the predictive features, i.e. the characteristics of a client. The random variable $Y \in \{0,1\}$ will designate the label, i.e. if the client has defaulted ($Y=1$) or not ($Y=0$).
 
 We are provided with an i.i.d. sample $(\bar{x},\bar{y}) = (x_i,y_i)_1^n$ consisting in $n$ observations of $X$ and $Y$.
 
