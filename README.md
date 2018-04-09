@@ -57,18 +57,56 @@ where *username*, *password*, *server* and *port* should be replaced by your own
 
 In practice, the statistical modeler has historical data about each customer's characteristics. For obvious reasons, only data available at the time of inquiry must be used to build a future application scorecard. Those data often take the form of a well-structured table with one line per client alongside their performance (did they pay back their loan or not?) as can be seen in the following table:
 
-| Job | Habitation | Time in job | Children | Family status || Default |
-| --- | --- | --- | --- | --- || --- |
-| Craftsman | Owner | 10 | 0 | Divorced ||  No |
-| Technician | Renter | 20 | 1 | Widower || No |
-| Executive | Starter | 5 | 2 | Single ||  Yes |
-| Office employee | By family | 2 | 3 | Married || No |
+| Job | Habitation | Time in job | Children | Family status | Default |
+| --- | --- | --- | --- | --- | --- |
+| Craftsman | Owner | 10 | 0 | Divorced |  No |
+| Technician | Renter | 20 | 1 | Widower | No |
+| Executive | Starter | 5 | 2 | Single |  Yes |
+| Office employee | By family | 2 | 3 | Married | No |
 
 ## Notations
 
 In the rest of the vignette, the random vector <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;$X=(X^j)_1^d$" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;$X=(X^j)_1^d$" title="$X=(X^j)_1^d$" /></a>  will designate the predictive features, i.e. the characteristics of a client. The random variable <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;Y&space;\in&space;\{0,1\}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;Y&space;\in&space;\{0,1\}" title="Y \in \{0,1\}" /></a>  will designate the label, i.e. if the client has defaulted (<a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;Y=1" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;Y=1" title="Y=1" /></a>) or not (<a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;Y=0" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;Y=0" title="Y=0" /></a>).
 
 We are provided with an i.i.d. sample <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;(\bar{x},\bar{y})&space;=&space;(x_i,y_i)_1^n" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;(\bar{x},\bar{y})&space;=&space;(x_i,y_i)_1^n" title="(\bar{x},\bar{y}) = (x_i,y_i)_1^n" /></a> consisting in <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;n" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;n" title="n" /></a> observations of <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;X" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;X" title="X" /></a> and <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;Y" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;Y" title="Y" /></a>.
+
+## Logistic regression
+
+The logistic regression model assumes the following relation between <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;X" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;X" title="X" /></a> and <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;Y" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;Y" title="Y" /></a> :
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=\ln&space;\left(&space;\frac{p_\theta(Y=1|x)}{p_\theta(Y=0|x)}&space;\right)&space;=&space;\theta_0&space;&plus;&space;\sum_{j=1}^d&space;\theta_j*x^j" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\ln&space;\left(&space;\frac{p_\theta(Y=1|x)}{p_\theta(Y=0|x)}&space;\right)&space;=&space;\theta_0&space;&plus;&space;\sum_{j=1}^d&space;\theta_j*x^j" title="\ln \left( \frac{p_\theta(Y=1|x)}{p_\theta(Y=0|x)} \right) = \theta_0 + \sum_{j=1}^d \theta_j*x^j" /></a>
+
+where <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;\theta&space;=&space;(\theta_j)_0^d" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;\theta&space;=&space;(\theta_j)_0^d" title="\theta = (\theta_j)_0^d" /></a> are estimated using <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;(\bar{x},\bar{y})" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;(\bar{x},\bar{y})" title="(\bar{x},\bar{y})" /></a>.
+
+Clearly, the model assumes linearity of the logit transform of the response <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;Y" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;Y" title="Y" /></a> with respect to <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;X" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;X" title="X" /></a>.
+
+## Common problems with logistic regression on "raw" data
+
+Fitting a logistic regression model on "raw" data presents several problems, among which some are tackled here.
+
+### Feature selection
+
+First, among all collected information on individuals, some are irrelevant for predicting <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;Y" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;Y" title="Y" /></a>. Their coefficient <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;\theta_j" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;\theta_j" title="\theta_j" /></a> should be 0  which might (eventually) be the case asymptotically (i.e. <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;$n&space;\rightarrow&space;\infty$" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;$n&space;\rightarrow&space;\infty$" title="$n \rightarrow \infty$" /></a>).
+
+Second, some collected information are highly correlated and affect each other's coefficient estimation.
+
+As a consequence, data scientists often perform feature selection before training a machine learning algorithm such as logistic regression.
+
+There already exists methods and packages to perform feature selection, see for example the `feature_selection` submodule in the `scklearn` package.
+
+`glmdisc` is not a feature selection tool but acts as such as a side-effect: when a continuous feature is discretized into only one interval, or when a categorical feature is regrouped into only one value, then this feature gets out of the model.
+
+For a thorough reference on feature selection, see e.g. Guyon, I., & Elisseeff, A. (2003). An introduction to variable and feature selection. *Journal of machine learning research, 3*(Mar), 1157-1182.
+
+### Linearity 
+
+When provided with continuous features, the logistic regression model assumes linearity of the logit transform of the response <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;Y" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;Y" title="Y" /></a> with respect to <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;X" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;X" title="X" /></a>. This might not be the case at all.
+
+For example, we can simulate a logistic model with an arbitrary power of <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;X" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;X" title="X" /></a> and then try to fit a linear logistic model:
+
+- [ ] Show the Python code
+
+- [ ] Get this graph online
 
 
 ## Authors
@@ -96,48 +134,15 @@ Agresti, A. (2002) **Categorical Data**. Second edition. Wiley.
 
 Ramírez‐Gallego, S., García, S., Mouriño‐Talín, H., Martínez‐Rego, D., Bolón‐Canedo, V., Alonso‐Betanzos, A. and Herrera, F. (2016). Data discretization: taxonomy and big data challenge. *Wiley Interdisciplinary Reviews: Data Mining and Knowledge Discovery*, 6(1), 5-21.
 
+- [ ] Do a notebook
+
+- [ ] Do tests
+
+- [ ] Do sphinx + readthedocs documentation
 
 
 
 
-
-
-
-
-
-## Notations
-
-We are provided with an i.i.d. sample $(\bar{x},\bar{y}) = (x_i,y_i)_1^n$ consisting in $n$ observations of $X$ and $Y$.
-
-## Logistic regression
-
-The logistic regression model assumes the following relation between $X$ (supposed continuous here) and $Y$:
-$$\ln \left( \frac{p_\theta(Y=1|x)}{p_\theta(Y=0|x)} \right) = \theta_0 + \sum_{j=1}^d \theta_j*x^j  $$
-where $\theta = (\theta_j)_0^d$ are estimated using $(\bar{x},\bar{y})$.
-
-Clearly, the model assumes linearity of the logit transform of the response $Y$ with respect to $X$.
-
-## Common problems with logistic regression on "raw" data
-
-Fitting a logistic regression model on "raw" data presents several problems, among which some are tackled here.
-
-### Feature selection
-
-First, among all collected information on individuals, some are irrelevant for predicting $Y$. Their coefficient $\theta_j$ should subsequently be $0$ which might (eventually) be the case asymptotically (i.e. $n \rightarrow \infty$).
-
-Second, some collected information are highly correlated and affect each other's coefficient estimation.
-
-As a consequence, data scientists often perform feature selection before training a machine learning algorithm such as logistic regression.
-
-There already exists methods and packages to perform feature selection, see for example the `caret` package.
-
-`glmdisc` is not a feature selection tool but acts as such as a side-effect as we will see in the next part.
-
-### Linearity 
-
-When provided with continuous features, the logistic regression model assumes linearity of the logit transform of the response $Y$ with respect to $X$. This might not be the case at all.
-
-For example, we can simulate a logistic model with an arbitrary power of $X$ and then try to fit a linear logistic model:
 
 ```{r, echo=TRUE, results='asis'}
 x = matrix(runif(1000), nrow = 1000, ncol = 1)
@@ -151,6 +156,7 @@ pred_lin_logit <- predict(modele_lin,as.data.frame(x))
 ```{r, echo=FALSE}
 knitr::kable(head(data.frame(True_prob = p,Pred_lin = pred_lin)))
 ```
+
 
 Of course, providing the `glm` function with a `formula` object containing $X^5$ would solve the problem. This can't be done in practice for two reasons: first, it is too time-consuming to examine all features and candidate polynomials; second, we lose the interpretability of the logistic decision function which was of primary interest.
 
