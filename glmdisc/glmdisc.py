@@ -165,9 +165,9 @@ class glmdisc:
         
         emap = np.ndarray.copy(edisc)
         
-        model_edisc = sk.linear_model.LogisticRegression(solver='liblinear',C=1e40,tol=tol=0.001,max_iter=25,warm_start=False)
+        model_edisc = sk.linear_model.LogisticRegression(solver='liblinear',C=1e40,tol=0.001,max_iter=25,warm_start=False)
         
-        model_emap = sk.linear_model.LogisticRegression(solver='liblinear',C=1e40,tol=tol=0.001,max_iter=25,warm_start=False)
+        model_emap = sk.linear_model.LogisticRegression(solver='liblinear',C=1e40,tol=0.001,max_iter=25,warm_start=False)
         
         current_encoder_edisc = sk.preprocessing.OneHotEncoder()
         
