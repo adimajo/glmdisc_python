@@ -53,6 +53,14 @@ pip --proxy=http://username:password@server:port install glmdisc
 where *username*, *password*, *server* and *port* should be replaced by your own values.
 
 
+**What follows is a quick introduction to the problem of discretization and how this package answers the question.**
+
+**If you wish to see the package in action, please refer to the accompanying Jupyter Notebook.**
+
+**If you seek specific assistance regarding the package or one of its function, please refer to the ReadTheDocs.**
+
+
+
 ## Use case example
 
 In practice, the statistical modeler has historical data about each customer's characteristics. For obvious reasons, only data available at the time of inquiry must be used to build a future application scorecard. Those data often take the form of a well-structured table with one line per client alongside their performance (did they pay back their loan or not?) as can be seen in the following table:
@@ -108,6 +116,174 @@ For example, we can simulate a logistic model with an arbitrary power of <a href
 
 - [ ] Get this graph online
 
+Of course, providing the `sklearn.linear_model.LogisticRegression` function with a dataset containing <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;X^5" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;X^5" title="X^5" /></a> would solve the problem. This can't be done in practice for two reasons: first, it is too time-consuming to examine all features and candidate polynomials; second, we lose the interpretability of the logistic decision function which was of primary interest.
+
+Consequently, we wish to discretize the input variable <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;X" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;X" title="X" /></a> into a categorical feature which will "minimize" the error with respect to the "true" underlying relation:
+
+- [ ] Show the Python code
+
+- [ ] Get this graph online
+
+
+### Too many values per categorical feature
+
+When provided with categorical features, the logistic regression model fits a coefficient for all its values (except one which is taken as a reference). A common problem arises when there are too many values as each value will be taken by a small number of observations <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;x_i^j" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;x_i^j" title="x_i^j" /></a> which makes the estimation of a logistic regression coefficient unstable:
+
+
+- [ ] Show the Python code
+
+- [ ] Get this graph online
+
+
+If we divide the training set in 10 and estimate the variance of each coefficient, we get:
+
+- [ ] Show the Python code
+
+- [ ] Get this graph online
+
+
+
+All intervals crossing 0 are non-significant! We should group factor values to get a stable estimation and (hopefully) significant coefficient values.
+
+
+# Discretization and grouping: theoretical background
+
+## Notations
+
+Let <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;E=(E^j)_1^d" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;E=(E^j)_1^d" title="E=(E^j)_1^d" /></a> be the latent discretized transform of <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;X" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;X" title="X" /></a>, i.e. taking values in <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;\{0,\ldots,m_j\}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;\{0,\ldots,m_j\}" title="\{0,\ldots,m_j\}" /></a> where the number of values of each covariate <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;m_j" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;m_j" title="m_j" /></a> is also latent.
+
+The fitted logistic regression model is now:
+<a href="https://www.codecogs.com/eqnedit.php?latex=\ln&space;\left(&space;\frac{p_\theta(Y=1|e)}{p_\theta(Y=0|e)}&space;\right)&space;=&space;\theta_0&space;&plus;&space;\sum_{j=1}^d&space;\sum_{k=1}^{m_j}&space;\theta^j_k*{1}_{e^j=k}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\ln&space;\left(&space;\frac{p_\theta(Y=1|e)}{p_\theta(Y=0|e)}&space;\right)&space;=&space;\theta_0&space;&plus;&space;\sum_{j=1}^d&space;\sum_{k=1}^{m_j}&space;\theta^j_k*{1}_{e^j=k}" title="\ln \left( \frac{p_\theta(Y=1|e)}{p_\theta(Y=0|e)} \right) = \theta_0 + \sum_{j=1}^d \sum_{k=1}^{m_j} \theta^j_k*{1}_{e^j=k}" /></a>
+
+Clearly, the number of parameters has grown which allows for flexible approximation of the true underlying model <a href="https://www.codecogs.com/eqnedit.php?latex=p(Y|E)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?p(Y|E)" title="p(Y|E)" /></a>.
+
+## Best discretization?
+
+Our goal is to obtain the model <a href="https://www.codecogs.com/eqnedit.php?latex=p_\theta(Y|e)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?p_\theta(Y|e)" title="p_\theta(Y|e)" /></a> with best predictive power. As <a href="https://www.codecogs.com/eqnedit.php?latex=E" target="_blank"><img src="https://latex.codecogs.com/gif.latex?E" title="E" /></a> and <a href="https://www.codecogs.com/eqnedit.php?latex=\theta" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\theta" title="\theta" /></a> are both optimized, a formal goodness-of-fit criterion could be:
+<a href="https://www.codecogs.com/eqnedit.php?latex=(\hat{\theta},\hat{\bar{e}})&space;=&space;\arg&space;\max_{\theta,\bar{e}}&space;\text{AIC}(p_\theta(\bar{y}|\bar{e}))" target="_blank"><img src="https://latex.codecogs.com/gif.latex?(\hat{\theta},\hat{\bar{e}})&space;=&space;\arg&space;\max_{\theta,\bar{e}}&space;\text{AIC}(p_\theta(\bar{y}|\bar{e}))" title="(\hat{\theta},\hat{\bar{e}}) = \arg \max_{\theta,\bar{e}} \text{AIC}(p_\theta(\bar{y}|\bar{e}))" /></a>
+where AIC stands for Akaike Information Criterion.
+
+
+## Combinatorics
+
+The problem seems well-posed: if we were able to generate all discretization schemes transforming <a href="https://www.codecogs.com/eqnedit.php?latex=X" target="_blank"><img src="https://latex.codecogs.com/gif.latex?X" title="X" /></a> to <a href="https://www.codecogs.com/eqnedit.php?latex=E" target="_blank"><img src="https://latex.codecogs.com/gif.latex?E" title="E" /></a>, learn <a href="https://www.codecogs.com/eqnedit.php?latex=p_\theta(y|e)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?p_\theta(y|e)" title="p_\theta(y|e)" /></a> for each of them and compare their AIC values, the problem would be solved.
+
+Unfortunately, there are way too many candidates to follow this procedure. Suppose we want to construct k intervals of <a href="https://www.codecogs.com/eqnedit.php?latex=E^j" target="_blank"><img src="https://latex.codecogs.com/gif.latex?E^j" title="E^j" /></a> given n distinct <a href="https://www.codecogs.com/eqnedit.php?latex=(x^j_i)_1^n" target="_blank"><img src="https://latex.codecogs.com/gif.latex?(x^j_i)_1^n" title="(x^j_i)_1^n" /></a>. There is <a href="https://www.codecogs.com/eqnedit.php?latex=n&space;\choose&space;k" target="_blank"><img src="https://latex.codecogs.com/gif.latex?n&space;\choose&space;k" title="n \choose k" /></a> models. The true value of k is unknown, so it must be looped over. Finally, as logistic regression is a multivariate model, the discretization of <a href="https://www.codecogs.com/eqnedit.php?latex=E^j" target="_blank"><img src="https://latex.codecogs.com/gif.latex?E^j" title="E^j" /></a> can influence the discretization of <a href="https://www.codecogs.com/eqnedit.php?latex=E^k" target="_blank"><img src="https://latex.codecogs.com/gif.latex?E^k" title="E^k" /></a>, <a href="https://www.codecogs.com/eqnedit.php?latex=k&space;\neq&space;j" target="_blank"><img src="https://latex.codecogs.com/gif.latex?k&space;\neq&space;j" title="k \neq j" /></a>. 
+
+As a consequence, existing approaches to discretization (in particular discretization of continuous attributes) rely on strong assumptions to simplify the search of good candidates as can be seen in the review of Ramírez‐Gallego, S. et al. (2016) - see References section.
+
+
+
+# Discretization and grouping: estimation
+
+## Likelihood estimation
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=E" target="_blank"><img src="https://latex.codecogs.com/gif.latex?E" title="E" /></a> can be introduced in <a href="https://www.codecogs.com/eqnedit.php?latex=p(Y|X)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?p(Y|X)" title="p(Y|X)" /></a>:
+<a href="https://www.codecogs.com/eqnedit.php?latex=\forall&space;\:&space;x,y,&space;\;&space;p(y|x)&space;=&space;\sum_e&space;p(y|x,e)p(e|x)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\forall&space;\:&space;x,y,&space;\;&space;p(y|x)&space;=&space;\sum_e&space;p(y|x,e)p(e|x)" title="\forall \: x,y, \; p(y|x) = \sum_e p(y|x,e)p(e|x)" /></a>
+
+First, we assume that all information about <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;Y" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;Y" title="Y" /></a> in <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;X" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;X" title="X" /></a> is already contained in <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;E" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;E" title="E" /></a> so that:
+<a href="https://www.codecogs.com/eqnedit.php?latex=\forall&space;\:&space;x,y,e,&space;\;&space;p(y|x,e)=p(y|e)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\forall&space;\:&space;x,y,e,&space;\;&space;p(y|x,e)=p(y|e)" title="\forall \: x,y,e, \; p(y|x,e)=p(y|e)" /></a>
+Second, we assume the conditional independence of <a href="https://www.codecogs.com/eqnedit.php?latex=E^j" target="_blank"><img src="https://latex.codecogs.com/gif.latex?E^j" title="E^j" /></a> given <a href="https://www.codecogs.com/eqnedit.php?latex=X^j" target="_blank"><img src="https://latex.codecogs.com/gif.latex?X^j" title="X^j" /></a>, i.e. knowing <a href="https://www.codecogs.com/eqnedit.php?latex=X^j" target="_blank"><img src="https://latex.codecogs.com/gif.latex?X^j" title="X^j" /></a>, the discretization <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;E^j" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;E^j" title="E^j" /></a> is independent of the other features <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;X^k" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;X^k" title="X^k" /></a> and <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;E^k" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;E^k" title="E^k" /></a> for all <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;k&space;\neq&space;j" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;k&space;\neq&space;j" title="k \neq j" /></a>:
+<a href="https://www.codecogs.com/eqnedit.php?latex=\forall&space;\:x,&space;k\neq&space;j,&space;\;&space;E^j&space;|&space;x^j&space;\perp&space;E^k&space;|&space;x^k" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\forall&space;\:x,&space;k\neq&space;j,&space;\;&space;E^j&space;|&space;x^j&space;\perp&space;E^k&space;|&space;x^k" title="\forall \:x, k\neq j, \; E^j | x^j \perp E^k | x^k" /></a>
+The first equation becomes:
+<a href="https://www.codecogs.com/eqnedit.php?latex=\forall&space;\:&space;x,y,&space;\;&space;p(y|x)&space;=&space;\sum_e&space;p(y|e)&space;\prod_{j=1}^d&space;p(e^j|x^j)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\forall&space;\:&space;x,y,&space;\;&space;p(y|x)&space;=&space;\sum_e&space;p(y|e)&space;\prod_{j=1}^d&space;p(e^j|x^j)" title="\forall \: x,y, \; p(y|x) = \sum_e p(y|e) \prod_{j=1}^d p(e^j|x^j)" /></a>
+As said earlier, we consider only logistic regression models on discretized data <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;p_\theta(y|e)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;p_\theta(y|e)" title="p_\theta(y|e)" /></a>. Additionnally, it seems like we have to make further assumptions on the nature of the relationship of <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;e^j" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;e^j" title="e^j" /></a> to <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;x^j" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;x^j" title="x^j" /></a>. We chose to use polytomous logistic regressions for continuous <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;X^j" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;X^j" title="X^j" /></a> and contengency tables for qualitative <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;X^j" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;X^j" title="X^j" /></a>. This is an arbitrary choice and future versions will include the possibility of plugging your own model.
+
+The first equation becomes:
+<a href="https://www.codecogs.com/eqnedit.php?latex=\forall&space;\:&space;x,y,&space;\;&space;p(y|x)&space;=&space;\sum_e&space;p_\theta(y|e)&space;\prod_{j=1}^d&space;p_{\alpha_j}(e^j|x^j)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\forall&space;\:&space;x,y,&space;\;&space;p(y|x)&space;=&space;\sum_e&space;p_\theta(y|e)&space;\prod_{j=1}^d&space;p_{\alpha_j}(e^j|x^j)" title="\forall \: x,y, \; p(y|x) = \sum_e p_\theta(y|e) \prod_{j=1}^d p_{\alpha_j}(e^j|x^j)" /></a>
+
+
+## The SEM algorithm
+
+It is still hard to optimize over <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;p(y|x;\theta,\alpha)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;p(y|x;\theta,\alpha)" title="p(y|x;\theta,\alpha)" /></a> as the number of candidate discretizations is gigantic as said earlier.
+
+However, calculating <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;p(y,e|x)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;p(y,e|x)" title="p(y,e|x)" /></a> is easy:
+<a href="https://www.codecogs.com/eqnedit.php?latex=\forall&space;\:&space;x,y,&space;\;&space;p(y,e|x)&space;=&space;p_\theta(y|e)&space;\prod_{j=1}^d&space;p_{\alpha_j}(e^j|x^j)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\forall&space;\:&space;x,y,&space;\;&space;p(y,e|x)&space;=&space;p_\theta(y|e)&space;\prod_{j=1}^d&space;p_{\alpha_j}(e^j|x^j)" title="\forall \: x,y, \; p(y,e|x) = p_\theta(y|e) \prod_{j=1}^d p_{\alpha_j}(e^j|x^j)" /></a>
+
+As a consequence, we will draw random candidates <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;e" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;e" title="e" /></a> approximately at the mode of the distribution <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;p(y,\cdot|x)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;p(y,\cdot|x)" title="p(y,\cdot|x)" /></a> using an SEM algorithm (see References section).
+
+
+
+## Gibbs sampling
+
+To update, at each random draw, the parameters <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;\theta" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;\theta" title="\theta" /></a> and <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;\alpha" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;\alpha" title="\alpha" /></a> and propose a new discretization <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;e" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;e" title="e" /></a>, we use the following equation:
+<a href="https://www.codecogs.com/eqnedit.php?latex=p(e^j|x^j,y,e^{\{-j\}})&space;\propto&space;p_\theta(y|e)&space;p_{\alpha_j}(e^j|x^j)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?p(e^j|x^j,y,e^{\{-j\}})&space;\propto&space;p_\theta(y|e)&space;p_{\alpha_j}(e^j|x^j)" title="p(e^j|x^j,y,e^{\{-j\}}) \propto p_\theta(y|e) p_{\alpha_j}(e^j|x^j)" /></a>
+Note that we draw <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;e^j" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;e^j" title="e^j" /></a> knowing all other variables, especially <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;e^{-j}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;e^{-j}" title="e^{-j}" /></a> so that we introduced a Gibbs sampler (see References section).
+
+
+
+
+# The `glmdisc` package
+
+## The `glmdisc` class
+
+The `glmdisc` class implements the algorithm described in the previous section. Its parameters are described first, then its internals are briefly discussed. We finally focus on its ouptuts.
+
+
+
+### Parameters
+
+The number of iterations in the SEM algorithm is controlled through the `iter` parameter. It can be useful to first run the `glmdisc` function with a low (10-50) `iter` parameter so you can have a better idea of how much time your code will run.
+
+The `validation` and `test` boolean parameters control if the provided dataset should be divided into training, validation and/or test sets. The validation set aims at evaluating the quality of the model fit at each iteration while the test set provides the quality measure of the final chosen model.
+
+The `criterion` parameters lets the user choose between standard model selection statistics like `aic` and `bic` and the `gini` index performance measure (proportional to the more traditional AUC measure). Note that if `validation=TRUE`, there is no need to penalize the log-likelihood and `aic` and `bic` become equivalent. On the contrary if `criterion="gini"` and `validation=FALSE` then the algorithm may overfit the training data.
+
+The `m_start` parameter controls the maximum number of categories of <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;E^j" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;E^j" title="E^j" /></a> for <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;X^j" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;X^j" title="X^j" /></a> continuous. The SEM algorithm will start with random <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;E^j" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;E^j" title="E^j" /></a> taking values in <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;\{1,m_{\text{start}}\}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;\{1,m_{\text{start}}\}" title="\{1,m_{\text{start}}\}" /></a>. For qualitative features <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;X^j" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;X^j" title="X^j" /></a>, <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;E^j" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;E^j" title="E^j" /></a> is initialized with as many values as <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;X^j" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;X^j" title="X^j" /></a> so that `m_start` has no effect.
+
+Empirical studies show that with a reasonably small training dataset (< 100 000 rows) and a small `m_start` parameter (< 20), approximately 500 to 1500 iterations are largely sufficient to obtain a satisfactory model <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;p_\theta(y|e)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;p_\theta(y|e)" title="p_\theta(y|e)" /></a>.
+
+
+
+
+### The `fit` function
+
+The `fit` function of the `glmdisc` class is used to run the algorithm over the data provided to it. Subsequently, its parameters are: `predictors_cont` and `predictors_qual` which represent respectively the continuous features to be discretized and the categorical features which values are to be regrouped. They must be of type numpy array, filled with numeric and strings respectively. The last parameter is the class `labels`, of type numpy array as well, in binary form (0/1).
+
+
+
+
+### The `bestFormula` function
+
+The `bestFormula` function prints out in the console: the cut-points found for continuous features, the regroupments made for categorical features' values. It also returns it in a list.
+
+
+
+### The `performance` function
+
+The `performance` function returns the best performance found by the MCMC so far (depending on your `criterion` argument).
+
+
+### The `discreteData` function
+
+The `discreteData` function returns the discretized / regrouped version of the `predictors_cont` and `predictors_qual` arguments using the best discretization scheme found so far.
+
+
+
+### The `contData` function
+
+The `discreteData` function returns the `predictors_cont`, `predictors_qual` and `labels` arguments in a list.
+
+
+### The `discretize` function
+
+The `discretize` function discretizes a new input dataset in the `predictors_cont`, `predictors_qual` format using the best discretization scheme found so far. The result is a numpy array of the size of the original data.
+
+
+### The `discretizeDummy` function
+
+The `discretizeDummy` function discretizes a new input dataset in the `predictors_cont`, `predictors_qual` format using the best discretization scheme found so far. The result is a dummy (0/1) numpy array  corresponding to the One-Hot Encoding of the result provided by the `discretize` function.
+
+
+
+### The `predict` function
+
+The `predict` function discretizes a new input dataset in the `predictors_cont`, `predictors_qual` format using the best discretization scheme found so far through the `discretizeDummy` function and then applies the corresponding best Logistic Regression model <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;p_\theta(y|e)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;p_\theta(y|e)" title="p_\theta(y|e)" /></a> found so far.
+
+
+To see the package in action, please refer to the accompanying Jupyter Notebook.
+
+
 
 ## Authors
 
@@ -143,6 +319,33 @@ Ramírez‐Gallego, S., García, S., Mouriño‐Talín, H., Martínez‐Rego, D.
 
 
 
+## Future development: integration of interaction discovery
+
+Very often, predictive features $X$ "interact" with each other with respect to the response feature. This is classical in the context of Credit Scoring or biostatistics (only the simultaneous presence of several features - genes, SNP, etc. is predictive of a disease).
+
+With the growing number of potential predictors and the time required to manually analyze if an interaction should be added or not, there is a strong need for automatic procedures that screen potential interaction variables. This will be the subject of future work.
+
+
+
+
+## Future development: possibility of changing model assumptions
+
+In the third section, we described two fundamental modelling hypotheses that were made:
+>- The real probability density function $p(Y|X)$ can be approximated by a logistic regression $p_\theta(Y|E)$ on the discretized data $E$.
+>- The nature of the relationship of $E^j$ to $X^j$ is:
+>- A polytomous logistic regression if $X^j$ is continuous;
+>- A contengency table if $X^j$ is qualitative.
+
+These hypotheses are "building blocks" that could be changed at the modeller's will: discretization could optimize other models.
+
+
+
+
+
+
+
+- [ ] To delete when done with
+
 
 ```{r, echo=TRUE, results='asis'}
 x = matrix(runif(1000), nrow = 1000, ncol = 1)
@@ -157,10 +360,6 @@ pred_lin_logit <- predict(modele_lin,as.data.frame(x))
 knitr::kable(head(data.frame(True_prob = p,Pred_lin = pred_lin)))
 ```
 
-
-Of course, providing the `glm` function with a `formula` object containing $X^5$ would solve the problem. This can't be done in practice for two reasons: first, it is too time-consuming to examine all features and candidate polynomials; second, we lose the interpretability of the logistic decision function which was of primary interest.
-
-Consequently, we wish to discretize the input variable $X$ into a categorical feature which will "minimize" the error with respect to the "true" underlying relation:
 
 ```{r, echo=TRUE, results='asis'}
 x_disc <- factor(cut(x,c(-Inf,0.5,0.7,0.8,0.9,+Inf)),labels = c(1,2,3,4,5))
@@ -179,15 +378,12 @@ lines(x,pred_disc_logit,type="p",col="blue")
 
 ```
 
-### Too many values per categorical feature
 
-When provided with categorical features, the logistic regression model fits a coefficient for all its values (except one which is taken as a reference). A common problem arises when there are too many values as each value will be taken by a small number of observations $x_i^j$ which makes the estimation of a logistic regression coefficient unstable:
 
 ```{r, echo=TRUE, results='asis'}
 x_disc_bad_idea <- factor(cut(x,c(-Inf,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,+Inf)),labels = c(1,2,3,4,5,6,7,8,9,10))
 ```
 
-If we divide the training set in 10 and estimate the variance of each coefficient, we get:
 
 ```{r, echo=FALSE, results='asis'}
 liste_coef <- list()
@@ -221,94 +417,20 @@ segments(as.numeric(row.names(stats_coef)), stats_coef[,1]-stats_coef[,2],as.num
 lines(row.names(stats_coef),rep(0,length(row.names(stats_coef))),col="red")
 ```
 
-All intervals crossing $0$ are non-significant! We should group factor values to get a stable estimation and (hopefully) significant coefficient values.
 
 
-# Discretization and grouping: theoretical background
 
-## Notations
 
-Let $E=(E^j)_1^d$ be the latent discretized transform of $X$, i.e. taking values in $\{0,\ldots,m_j\}$ where the number of values of each covariate $m_j$ is also latent.
 
-The fitted logistic regression model is now:
-$$\ln \left( \frac{p_\theta(Y=1|e)}{p_\theta(Y=0|e)} \right) = \theta_0 + \sum_{j=1}^d \sum_{k=1}^{m_j} \theta^j_k*\mathbb{1}_{e^j=k}$$
-Clearly, the number of parameters has grown which allows for flexible approximation of the true underlying model $p(Y|E)$.
 
-## Best discretization?
 
-Our goal is to obtain the model $p_\theta(Y|e)$ with best predictive power. As $E$ and $\theta$ are both optimized, a formal goodness-of-fit criterion could be:
-$$ (\hat{\theta},\hat{\bar{e}}) = \arg \max_{\theta,\bar{e}} \text{AIC}(p_\theta(\bar{y}|\bar{e})) $$
-where AIC stands for Akaike Information Criterion.
 
-## Combinatorics
 
-The problem seems well-posed: if we were able to generate all discretization schemes transforming $X$ to $E$, learn $p_\theta(y|e)$ for each of them and compare their AIC values, the problem would be solved.
 
-Unfortunately, there are way too many candidates to follow this procedure. Suppose we want to construct $k$ intervals of $E^j$ given $n$ distinct $(x^j_i)_1^n$. There is $n \choose k$ models. The true value of $k$ is unknown, so it must be looped over. Finally, as logistic regression is a multivariate model, the discretization of $E^j$ can influence the discretization of $E^k$, $k \neq j$. 
 
-As a consequence, existing approaches to discretization (in particular discretization of continuous attributes) rely on strong assumptions to simplify the search of good candidates as can be seen in the review of Ramírez‐Gallego, S. et al. (2016) - see References section.
 
-# Discretization and grouping: estimation
 
-## Likelihood estimation
 
-$E$ can be introduced in $p(Y|X)$:
-$$\forall \: x,y, \; p(y|x) = \sum_e p(y|x,e)p(e|x)$$
-
-First, we assume that all information about $Y$ in $X$ is already contained in $E$ so that:
-$$\forall \: x,y,e, \; p(y|x,e)=p(y|e)$$
-Second, we assume the conditional independence of $E^j$ given $X^j$, i.e. knowing $X^j$, the discretization $E^j$ is independent of the other features $X^k$ and $E^k$ for all $k \neq j$:
-$$\forall \:x, k\neq j, \; E^j | x^j \perp E^k | x^k$$
-The first equation becomes:
-$$\forall \: x,y, \; p(y|x) = \sum_e p(y|e) \prod_{j=1}^d p(e^j|x^j)$$
-As said earlier, we consider only logistic regression models on discretized data $p_\theta(y|e)$. Additionnally, it seems like we have to make further assumptions on the nature of the relationship of $e^j$ to $x^j$. We chose to use polytomous logistic regressions for continuous $X^j$ and contengency tables for qualitative $X^j$. This is an arbitrary choice and future versions will include the possibility of plugging your own model.
-
-The first equation becomes:
-$$\forall \: x,y, \; p(y|x) = \sum_e p_\theta(y|e) \prod_{j=1}^d p_{\alpha_j}(e^j|x^j)$$
-
-## The SEM algorithm
-
-It is still hard to optimize over $p(y|x;\theta,\alpha)$ as the number of candidate discretizations is gigantic as said earlier.
-
-However, calculating $p(y,e|x)$ is easy:
-$$\forall \: x,y, \; p(y,e|x) = p_\theta(y|e) \prod_{j=1}^d p_{\alpha_j}(e^j|x^j)$$
-
-As a consequence, we will draw random candidates $e$ approximately at the mode of the distribution $p(y,\cdot|x)$ using an SEM algorithm (see References section).
-
-## Gibbs sampling
-
-To update, at each random draw, the parameters $\theta$ and $\alpha$ and propose a new discretization $e$, we use the following equation:
-$$p(e^j|x^j,y,e^{\{-j\}}) \propto p_\theta(y|e) p_{\alpha_j}(e^j|x^j)$$
-Note that we draw $e^j$ knowing all other variables, especially $e^{-j}$ so that we introduced a Gibbs sampler (see References section).
-
-# The `glmdisc` package
-
-## The `glmdisc` function
-
-The `glmdisc` function implements the algorithm discribed in the previous section. Its parameters are described first, then its internals are briefly discussed. We finally focus on its ouptuts.
-
-### Parameters
-
-The number of iterations in the SEM algorithm is controlled through the `iter` parameter. It can be useful to first run the `glmdisc` function with a low (10-50) `iter` parameter so you can have a better idea of how much time your code will run.
-
-The `validation` and `test` boolean parameters control if the provided dataset should be divided into training, validation and/or test sets. The validation set aims at evaluating the quality of the model fit at each iteration while the test set provides the quality measure of the final chosen model.
-
-The `criterion` parameters lets the user choose between standard model selection statistics like `aic` and `bic` and the `gini` index performance measure (proportional to the more traditional AUC measure). Note that if `validation=TRUE`, there is no need to penalize the log-likelihood and `aic` and `bic` become equivalent. On the contrary if `criterion="gini"` and `validation=FALSE` then the algorithm may overfit the training data.
-
-The `m_start` parameter controls the maximum number of categories of $E^j$ for $X^j$ continuous. The SEM algorithm will start with random $E^j$ taking values in $\{1,m_{\text{start}}\}$. For qualitative features $X^j$, $E^j$ is initialized with as many values as $X^j$ so that `m_start` has no effect.
-
-The `reg_type` parameter controls the model used to fit $E^j$ to continuous $X^j$. The default behavior (`reg_type=poly`) uses `multinom` from the `nnet` package which is a polytomous logistic regression (see References section). The other `reg_type` value is `polr` from the `MASS` package which is an ordered logistic regression (simpler to estimate but less flexible as it fits way fewer parameters).
-
-Empirical studies show that with a reasonably small training dataset ($\leq 100 000$ rows) and a small `m_start` parameter ($\leq 20$), approximately $500$ to $1500$ iterations are largely sufficient to obtain a satisfactory model $p_\theta(y|e)$.
-
-### Internals
-
-First, the discretized version $E$ of $X$ is initialized at random using the user-provided maximum number of values for quantitative values through the `m_start` parameter.
-
-Then we iterate `times`:
-First, the model $p_\theta(y|e)$, where $e$ denotes the current value of $E$, is adjusted. Then, for each feature $X^j$, the model $p_{\alpha_j}(e|x)$ is adjusted (depending on the type of $X^j$ it can be a polytomous logistic regression or a contengency table). Finally, we draw a new candidate $e^j$ with probability $p_\theta(y|e)p_{\alpha_j}(e^j|x^j)$.
-
-The performance metric chosen through the `criterion` parameter determines the best candidate $e$.
 
 ### Results
 
@@ -334,64 +456,6 @@ library(glmdisc)
 discretization <- glmdisc(x,y,iter=50,m_start=5,test=FALSE,validation=FALSE,criterion="aic",interact=FALSE)
 ```
 
-### The `parameters` slot
-
-The `parameters` slot refers back to the user-provided parameters given to the `glmdisc` function. Consequently, users can compare results of different `glmdisc` with respect to their parameters.
-
-```{r, echo=TRUE}
-discretization@parameters
-```
-
-### The `best.disc` slot
-
-The `best.disc` slot contains all that is needed to reproduce the best discretization scheme obtained by `glmdisc` function: the first element is the best logistic regression model obtained $p_\theta(y|e)$; the second element is its associated "link" function, i.e. either the `multinom` or `polr` functions fit to each continuous features and the contengency tables fit to each quantitative features.
-```{r, echo=TRUE}
-discretization@best.disc[[1]]
-
-# The first link function is:
-discretization@best.disc[[2]][[1]]
-```
-
-### The `performance` slot
-
-The `performance` slot lists both the achieved performance defined by the parameters `criterion`, `test` and `validation` and this performance metric over all the iterations.
-
-`discretization` was fit with no test nor validation and we used the AIC criterion. The best AIC achieved is therefore:
-```{r, echo=TRUE}
-discretization@performance[[1]]
-```
-
-The first 5 AIC values obtained on the training set over the iterations are:
-```{r, echo=TRUE}
-discretization@performance[[2]][1:5]
-```
-
-### The `disc.data` slot
-
-The `disc.data` slot contains the discretized data obtained by applying the best discretization scheme found on the test set if `test=TRUE` or the validation set if `validation=TRUE` or the training set.
-
-In our example, `discretization` has `validation=FALSE` and `test=FALSE` so that we get the discretized training set:
-```{r, echo=TRUE, eval=FALSE}
-discretization@disc.data
-```
-
-```{r, echo=FALSE}
-knitr::kable(head(discretization@disc.data))
-```
-
-### The `cont.data` slot
-
-The `cont.data` slot contains the original "continuous" counterpart of the `disc.data` slot.
-
-In our example, `discretization` has `validation=FALSE` and `test=FALSE` so that we get the "raw" training set:
-```{r, echo=TRUE,eval=FALSE}
-discretization@cont.data
-```
-
-```{r, echo=FALSE}
-knitr::kable(head(discretization@cont.data))
-```
-
 ### How well did we do?
 
 To compare the estimated and the true discretization schemes, we can represent them with respect to the input "raw" data `x`:
@@ -400,81 +464,3 @@ To compare the estimated and the true discretization schemes, we can represent t
 plot(x[,1],xd[,1])
 plot(discretization@cont.data[,1],discretization@disc.data[,1])
 ```
-
-## "Classical" methods
-
-A few classical R methods have been adapted to the `glmdisc` S4 object.
-
-The `plot` function is the standard `plot.glm` method applied to the best discretization scheme found by the `glmdisc` function:
-```{r, echo=TRUE}
-# plot(discretization)
-```
-
-The `print` function is the standard `print.summary.glm` method applied to the best discretization scheme found by the `glmdisc` function:
-```{r, echo=TRUE}
-print(discretization)
-```
-
-Its S4 equivalent `show` is also available: 
-```{r, echo=TRUE}
-show(discretization)
-```
-
-## The `discretize` method
-
-The `discretize` method allows the user to discretize a new "raw" input set by applying the best discretization scheme found by the `glmdisc` function in a provided `glmdisc` object.
-```{r, echo=TRUE, results='asis'}
-x_new <- discretize(discretization,x)
-```
-
-```{r, echo=FALSE, warning=FALSE}
-knitr::kable(head(x_new))
-```
-## The `predict` method
-
-The `discretize` method allows the user to predict the response of a new "raw" input set by first discretizing it using the previously described `discretize` method and a previously trained `glmdisc` object. It then predicts using the standard `predict.glm` method and the best discretization scheme found by the `glmdisc` function.
-```{r, echo=TRUE}
-pred_new <- predict(discretization,x)
-```
-
-```{r, echo=FALSE, warning=FALSE}
-knitr::kable(head(pred_new))
-```
-
-# Future developments
-
-## Enhancing the `discretization` package
-
-The `discretization` package available from CRAN implements some existing supervised univariate discretization methods (applicable only to continuous inputs) : ChiMerge (`chiM`), Chi2 (`chi2`), Extended Chi2 (`extendChi2`), Modified Chi2 (`modChi2`), MDLP (`mdlp`), CAIM, CACC and AMEVA (`disc.Topdown`).
-
-To compare the result of such methods to the one we propose, the package `discretization` will be enhanced to support missing values (by putting them in a single class for example) and quantitative features (through a Chi2 grouping method for example).
-
-## Integration of interaction discovery
-
-Very often, predictive features $X$ "interact" with each other with respect to the response feature. This is classical in the context of Credit Scoring or biostatistics (only the simultaneous presence of several features - genes, SNP, etc. is predictive of a disease).
-
-With the growing number of potential predictors and the time required to manually analyze if an interaction should be added or not, there is a strong need for automatic procedures that screen potential interaction variables. This will be the subject of future work.
-
-## Possibility of changing model assumptions
-
-In the third section, we described two fundamental modelling hypotheses that were made:
->- The real probability density function $p(Y|X)$ can be approximated by a logistic regression $p_\theta(Y|E)$ on the discretized data $E$.
->- The nature of the relationship of $E^j$ to $X^j$ is:
->- A polytomous logistic regression if $X^j$ is continuous;
->- A contengency table if $X^j$ is qualitative.
-
-These hypotheses are "building blocks" that could be changed at the modeller's will: discretization could optimize other models.
-
-## Make it faster
-
-The current implementation is heavily based on R code. A lot of logistic regression are fit, either through `multinom`, `polr` or `glm` calls, which can probably be sped up by an intelligent initialization of their parameters and a limitation or their number of iterations.
-
-We also loop of qualitative features and their values, which is known to be slow in R. A C++ version of a Gibbs sampler (which is used here) described by Hadley Wickham in [Advanced R](http://adv-r.had.co.nz/Rcpp.html#rcpp-case-studies) shows a potential speed up by 40.
-
-# References
-
-Celeux, G., Chauveau, D., Diebolt, J. (1995), On Stochastic Versions of the EM Algorithm. [Research Report] RR-2514, INRIA. 1995. <inria-00074164>
-
-Agresti, A. (2002) **Categorical Data**. Second edition. Wiley.
-
-Ramírez‐Gallego, S., García, S., Mouriño‐Talín, H., Martínez‐Rego, D., Bolón‐Canedo, V., Alonso‐Betanzos, A. and Herrera, F. (2016). Data discretization: taxonomy and big data challenge. *Wiley Interdisciplinary Reviews: Data Mining and Knowledge Discovery*, 6(1), 5-21.
