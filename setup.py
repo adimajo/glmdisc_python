@@ -10,12 +10,13 @@ from os import path
 here = path.abspath(path.dirname(__file__))
 
 # Get the long description from the README file
-try:
-    from pypandoc import convert
-    read_md = lambda f: convert(f, 'rst')
-except ImportError:
-    print("warning: pypandoc module not found, could not convert Markdown to RST")
-    read_md = lambda f: open(f, 'r', encoding='utf-8').read()
+#try:
+#    from pypandoc import convert
+#    read_md = lambda f: convert(f, 'rst')
+#except ImportError:
+#    print("warning: pypandoc module not found, could not convert Markdown to RST")
+#    read_md = lambda f: open(f, 'r', encoding='utf-8').read()
+read_md = lambda f: open(f, 'r', encoding='utf-8').read()
 
 # Arguments marked as "Required" below must be included for upload to PyPI.
 # Fields marked as "Optional" may be commented out.
@@ -40,7 +41,7 @@ setup(
     # For a discussion on single-sourcing the version across setup.py and the
     # project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
-    version='0.0.3',  # Required
+    version='0.0.4',  # Required
 
     # This is a one-line description or tagline of what your project does. This
     # corresponds to the "Summary" metadata field:
@@ -55,7 +56,8 @@ setup(
     #
     # This field corresponds to the "Description" metadata field:
     # https://packaging.python.org/specifications/core-metadata/#description-optional
-    long_description=read_md('README.md'),  # Optional
+    long_description=read_md('README.md'),
+    long_description_content_type="text/markdown", # Optional
 
     # This should be a valid link to your project's main homepage.
     #
@@ -122,7 +124,8 @@ setup(
     #
     # For an analysis of "install_requires" vs pip's requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
-    install_requires=['sklearn','numpy','scipy','math','warnings','collections'],  # Optional
+#    install_requires=['sklearn','numpy','scipy','math','warnings','collections'],  # Optional
+    install_requires=['sklearn','numpy','scipy','pandas'],  # Optional
 
     # List additional groups of dependencies here (e.g. development
     # dependencies). Users will be able to install these using the "extras"
