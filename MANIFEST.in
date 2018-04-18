@@ -4,3 +4,12 @@ include README.md
 
 # Include the data files
 recursive-include data *
+
+# Include the package
+recursive-include glmdisc *
+
+# Include the docs
+recursive-include docs *
+
+# Include the tests
+recursive-include tests *
