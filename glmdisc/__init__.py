@@ -24,6 +24,7 @@ def vectorized(prob_matrix, items):
     return items[k]
 
 
+
 class glmdisc:
     
     """
@@ -531,6 +532,12 @@ class glmdisc:
 #            plt.show()
             
             
+        
+    def search_and_destroy(self,predictors_qual):
+        
+        self.affectations
+        
+        self.predictors_qual
         
         
 
