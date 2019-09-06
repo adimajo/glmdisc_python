@@ -22,7 +22,7 @@ read_md = lambda f: open(f, 'r', encoding='utf-8').read()
 # Fields marked as "Optional" may be commented out.
 
 setup(
-    
+
     # This is the name of your project. The first time you publish this
     # package, this name will be registered for you. It will determine how
     # users can install this project, e.g.:
@@ -42,7 +42,7 @@ setup(
     # For a discussion on single-sourcing the version across setup.py and the
     # project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
-    version='0.0.8',  # Required
+    version='0.0.9',  # Required
 
     # This is a one-line description or tagline of what your project does. This
     # corresponds to the "Summary" metadata field:
@@ -88,7 +88,7 @@ setup(
         # Indicate who your project is intended for
         'Intended Audience :: Science/Research',
         'Topic :: Scientific/Engineering :: Artificial Intelligence',
-     
+
         # Pick your license as you wish
         'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
 
@@ -123,9 +123,10 @@ setup(
     #
     # For an analysis of "install_requires" vs pip's requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
-#    install_requires=['sklearn','numpy','scipy','math','warnings','collections'],  # Optional
-    install_requires=['sklearn','numpy','scipy','pandas','pygam'],  # Optional
-    #packages=['glmdisc']
+    #    install_requires=['sklearn','numpy','scipy','math','warnings','collections'],  # Optional
+    install_requires=['scikit-learn>=0.21.2', 'numpy>=1.16.4', 'scipy>=1.3.1',
+                      'pandas>=0.25.1', 'pygam>=0.8.0'],  # Optional
+    # packages=['glmdisc']
 
     # List additional groups of dependencies here (e.g. development
     # dependencies). Users will be able to install these using the "extras"
