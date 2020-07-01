@@ -81,8 +81,8 @@ def plot(self, predictors_cont_number="all", predictors_qual_number="all",
                 np.isnan(self.predictors_cont).sum(axis=1).astype(bool))
 
         # Fit du GAM sur tout le monde
-        gam = LogisticGAM(dtype=['numerical' for j in range(d1)] +
-                                ['categorical' for d in range(d2)]).fit(
+        gam = LogisticGAM(dtype=['numerical' for _ in range(d1)] +
+                                ['categorical' for _ in range(d2)]).fit(
                                 pd.concat([pd.DataFrame(
                                 self.predictors_cont[
                                 lignes_completes, :]).apply(lambda x:

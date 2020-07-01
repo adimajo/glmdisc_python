@@ -38,16 +38,12 @@ def fit(self, predictors_cont, predictors_qual, labels):
         raise ValueError(('You must provide either qualitative or quantitative'
                          'features'))
 
-    # Tester la présence de prédicteurs continus
-    if predictors_cont is not None:
-        # Tester la même longueur que labels
-        if predictors_cont.shape[0] != labels.shape[0]:
+    # Tester la présence de prédicteurs continus et de même longueur que labels
+    if predictors_cont is not None and predictors_cont.shape[0] != labels.shape[0]:
             raise ValueError('Predictors and labels must be of same size')
 
-    # Tester la présence de prédicteurs catégoriels
-    if predictors_qual is not None:
-        # Tester la même longueur que labels
-        if predictors_qual.shape[0] != labels.shape[0]:
+    # Tester la présence de prédicteurs catégoriels et de même longueur que labels
+    if predictors_qual is not None and predictors_qual.shape[0] != labels.shape[0]:
             raise ValueError('Predictors and labels must be of same size')
 
     self.predictors_cont = predictors_cont
