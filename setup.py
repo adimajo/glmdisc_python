@@ -166,8 +166,8 @@ setup(
         "six==1.15.0; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'",
         "threadpoolctl==2.1.0; python_version >= '3.5'",
     ],
-    test_suite="nose2.collector.collector",
-    tests_require=["nose2"],
+    test_suite="pytest-runner",
+    tests_require=["pytest"],
     # If there are data files included in your packages that need to be
     # installed, specify them here.
     #

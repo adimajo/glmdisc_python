@@ -24,14 +24,15 @@ import pandas as pd
 import sklearn as sk
 import sklearn.preprocessing
 import sklearn.linear_model
-import warnings
+import loguru
 import matplotlib.pyplot as plt
 
 from scipy import stats
 from collections import Counter
 from math import log
 from pygam import LogisticGAM
-import random
+
+from loguru import logger
 
 
 def vectorized_multinouilli(prob_matrix, items):
@@ -214,10 +215,10 @@ class Glmdisc:
             raise ValueError('Please set 2 <= m_start <= 50')
 
         if not validation and criterion == 'gini':
-            warnings.warn('Using Gini index on training set might yield an overfitted model')
+            logger.warning('Using Gini index on training set might yield an overfitted model')
 
         if validation and criterion in ['aic', 'bic']:
-            warnings.warn('No need to penalize the log-likelihood when a validation set is used. ',
+            logger.warning('No need to penalize the log-likelihood when a validation set is used. ',
                           'Using log-likelihood instead.')
 
         self.test = test

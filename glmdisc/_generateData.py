@@ -3,8 +3,12 @@
 """
 generate_data method for class glmdisc.
 """
+import random
+import numpy as np
+import pandas as pd
 
 
+@staticmethod
 def generate_data(n, d, seed):
     """
     Generates some toy continuous data that gets discretized, and a label

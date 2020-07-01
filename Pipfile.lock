@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "cc9f2b79fcf7f5f5a815df5ffae378e898d053158b5b418a6f22f78ed7d942e7"
+            "sha256": "bb24df88cf93143d56bbc9c102748067f22d153697b1877e65ecd75f3eb6ea1f"
         },
         "pipfile-spec": 6,
         "requires": {},
@@ -57,6 +57,14 @@
             ],
             "markers": "python_version >= '3.6'",
             "version": "==1.2.0"
+        },
+        "loguru": {
+            "hashes": [
+                "sha256:70201d5fce26da89b7a5f168caa2bb674e06b969829f56737db1d6472e53e7c3",
+                "sha256:e5d362a43cd2fc2da63551d79a6830619c4d5b3a8b976515748026f92f351b61"
+            ],
+            "index": "pypi",
+            "version": "==0.5.1"
         },
         "matplotlib": {
             "hashes": [
