@@ -83,7 +83,7 @@ setup(
         #   3 - Alpha
         #   4 - Beta
         #   5 - Production/Stable
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 4 - Beta',
 
         # Indicate who your project is intended for
         'Intended Audience :: Science/Research',
@@ -116,18 +116,20 @@ setup(
     # called `my_module.py` to exist:
     #
     packages=find_packages(exclude=['contrib', 'docs', 'tests']),  # Required
-
     # This field lists other packages that your project depends on to run.
     # Any package you put here will be installed by pip when your project is
     # installed, so they must be valid existing projects.
     #
     # For an analysis of "install_requires" vs pip's requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
-    #    install_requires=['sklearn','numpy','scipy','math','warnings','collections'],  # Optional
-    install_requires=['scikit-learn>=0.21.2', 'numpy>=1.16.4', 'scipy>=1.3.1',
-                      'pandas>=0.25.1', 'pygam>=0.8.0'],  # Optional
-    # packages=['glmdisc']
-
+    install_requires=['scikit-learn>=0.21.2',
+                      'numpy>=1.16.4',
+                      'scipy>=1.3.1',
+                      'pandas>=0.25.1',
+                      'pygam>=0.8.0',
+                      'matplotlib>=3.2.2'],
+    test_suite='nose2.collector.collector',
+    tests_require=['nose2'],
     # List additional groups of dependencies here (e.g. development
     # dependencies). Users will be able to install these using the "extras"
     # syntax, for example:

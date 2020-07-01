@@ -1,24 +1,26 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Thu Sep  5 16:22:48 2019
-
-@author: adrien
+plot method for class glmdisc
 """
 
 
 def plot(self, predictors_cont_number="all", predictors_qual_number="all",
          plot_type="disc"):
-    """Plots the stepwise function associating the continuous features to their
+    """
+    Plots the stepwise function associating the continuous features to their
     discretization, the groupings made and the interactions.
 
-    Keyword arguments:
-    predictors_cont_number -- Which continuous variable(s) should be plotted
-                            (between 1 and the number of columns in
-                            predictors_cont).
-    predictors_qual_number -- Which categorical variable(s) should be plotted
-                            (between 1 and the number of columns in
-                            predictors_qual).
+    Parameters
+    ----------
+    predictors_cont_number : str or int
+        Which continuous variable(s) should be plotted
+        (between 1 and the number of columns in
+        predictors_cont).
+    predictors_qual_number : str or int
+        Which categorical variable(s) should be plotted
+        (between 1 and the number of columns in
+        predictors_qual).
     """
     emap = self.discretize(self.predictors_cont,
                            self.predictors_qual).astype(str)
@@ -50,26 +52,26 @@ def plot(self, predictors_cont_number="all", predictors_qual_number="all",
             if (type(predictors_cont_number) == int and
                     predictors_cont_number > 0):
                 plt.plot(self.predictors_cont[:,
-                        predictors_cont_number - 1].reshape(-1, 1),
-                        emap.astype(str)[:, predictors_cont_number - 1], 'ro')
+                         predictors_cont_number - 1].reshape(-1, 1),
+                         emap.astype(str)[:, predictors_cont_number - 1], 'ro')
                 plt.show()
             else:
                 warnings.warn(("A single int (more than 0 and less than the"
-                                "number of columns in predictors_cont) must be"
-                                "provided for predictors_cont_number"))
+                               "number of columns in predictors_cont) must be"
+                               "provided for predictors_cont_number"))
 
         if not predictors_qual_number == "all":
             if (type(predictors_qual_number) == int and
                     predictors_qual_number > 0):
                 plt.plot(self.predictors_qual[:,
-                        predictors_qual_number - 1].reshape(-1, 1),
-                        emap.astype(str)[:, predictors_qual_number - 1 + d1],
-                        'ro')
+                         predictors_qual_number - 1].reshape(-1, 1),
+                         emap.astype(str)[:, predictors_qual_number - 1 + d1],
+                         'ro')
                 plt.show()
             else:
                 warnings.warn(("A single int (more than 0 and less than the"
-                                "number of columns in predictors_qual) must be"
-                                "provided for predictors_qual_number"))
+                               "number of columns in predictors_qual) must be"
+                               "provided for predictors_qual_number"))
 
     elif plot_type == "logodd":
 

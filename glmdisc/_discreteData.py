@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Thu Sep  5 16:18:37 2019
-
-@author: adrien
+discreteData method for the glmdisc class.
 """
 
 
-def discreteData(self):
-    """Returns the best discrete data found by the MCMC."""
-    return 0
+def discrete_data(self):
+    """
+    Returns the best discrete data found by the MCMC.
+    """
+    return discretizeDummy(self, self.predictors_cont[self.splitting[-1], ],
+                           self.predictors_qual[self.splitting[-1], ])

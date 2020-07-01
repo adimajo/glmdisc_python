@@ -1,14 +1,24 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Thu Sep  5 16:17:34 2019
-
-@author: adrien
+best_formula method for glmdisc class.
 """
 
 
-def bestFormula(self):
-    """Returns the best formula found by the MCMC."""
+def best_formula(self):
+    """
+    Returns the best quantization found by the MCMC and prints it.
+
+    Parameters
+    ----------
+    self
+
+    Returns
+    -------
+    best_disc : list
+        A list of cutpoints (continuous features) or groupings
+        (categorical features).
+    """
     emap_best = self.discretize(self.predictors_cont, self.predictors_qual)
 
     # Traitement des variables continues

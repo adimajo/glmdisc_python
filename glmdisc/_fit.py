@@ -1,26 +1,31 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Thu Sep  5 16:16:40 2019
-
-@author: adrien
+fit method for the glmdisc class.
 """
 
 
 def fit(self, predictors_cont, predictors_qual, labels):
+    """
+    Fits the glmdisc object.
 
-    """Fits the glmdisc object.
+    .. todo:: On regarde si des modalités sont présentes dans validation et pas dans train
 
-    Keyword arguments:
-    predictors_cont -- Continuous predictors to be discretized in a numpy
-                        "numeric" array. Can be provided either here or with
-                        the __init__ method.
-    predictors_qual -- Categorical features which levels are to be merged
-                        (also in a numpy "string" array). Can be provided
-                        either here or with the __init__ method.
-    labels          -- Boolean (0/1) labels of the observations. Must be of
-                        the same length as predictors_qual and predictors_cont
-                        (numpy "numeric" array).
+
+    Parameters
+    ----------
+    predictors_cont : numpy.array
+        Continuous predictors to be discretized in a numpy
+        "numeric" array. Can be provided either here or with
+        the __init__ method.
+    predictors_qual : numpy.array
+        Categorical features which levels are to be merged
+        (also in a numpy "string" array). Can be provided
+        either here or with the __init__ method.
+    labels : numpy.array
+        Boolean (0/1) labels of the observations. Must be of
+        the same length as predictors_qual and predictors_cont
+        (numpy "numeric" array).
     """
 
     # Tester la présence de labels
@@ -140,14 +145,18 @@ def fit(self, predictors_cont, predictors_qual, labels):
                                                                n,
                                                                replace=False),
                                               [int(.6*n), int(.8*n)])
+        self.splitting = [train, validate, test_rows]
     elif self.validation:
         train, validate = np.split(np.random.choice(n, n, replace=False),
                                    int(.6*n))
+        self.splitting = [train, validate]
     elif self.test:
         train, test_rows = np.split(np.random.choice(n, n, replace=False),
                                     int(.6*n))
+        self.splitting = [train, test_rows]
     else:
         train = np.random.choice(n, n, replace=False)
+        self.splitting = [train]
 
     # Itérations MCMC
     for i in range(self.iter):
@@ -177,7 +186,7 @@ def fit(self, predictors_cont, predictors_qual, labels):
 
         # Calcul du critère
         if self.criterion in ['aic', 'bic']:
-            loglik = -sk.metrics.log_loss(self.labels,
+            loglik = -sk.metrics.log_loss(self.labels[train],
                                           model_emap.predict_proba(
                                             X=current_encoder_emap.transform(
                                                   emap[train, :].astype(str))),
@@ -213,6 +222,7 @@ def fit(self, predictors_cont, predictors_qual, labels):
             self.best_link = link
             current_best = i
             self.best_encoder_emap = current_encoder_emap
+            self.performance = self.criterion_iter[current_best]
 
         for j in range(d1 + d2):
             m[j] = np.unique(edisc[:, j])
@@ -297,12 +307,3 @@ def fit(self, predictors_cont, predictors_qual, labels):
                 t = t / (t.sum(axis=1)[:, None])
 
                 edisc[:, j] = vectorized_multinouilli(t, m[j])
-
-        # On regarde si des modalités sont présentes dans validation
-        # et pas dans train
-
-    # Fin des itérations MCMC
-
-    # Meilleur(s) modèle(s) et équation de régression logistique
-
-    # Evaluation de la performance

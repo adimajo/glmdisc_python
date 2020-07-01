@@ -1,7 +1,11 @@
-glmdisc module
-==============
+glmdisc class
+=============
 
-.. automodule:: glmdisc
-    :members:
-    :undoc-members:
-    :show-inheritance:
+.. toctree::
+   :maxdepth: 3
+   :caption: Contents:
+
+.. autoclass:: glmdisc.glmdisc
+   :members:
+   :inherited-members:
+   :show-inheritance:

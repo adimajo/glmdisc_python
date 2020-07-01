@@ -20,13 +20,13 @@ sys.path.insert(0, os.path.abspath('../../glmdisc'))
 # -- Project information -----------------------------------------------------
 
 project = 'glmdisc'
-copyright = '2018, Adrien Ehrhardt'
+copyright = '2020, Adrien Ehrhardt'
 author = 'Adrien Ehrhardt'
 
 # The short X.Y version
-version = ''
+version = '0.0.9'
 # The full version, including alpha/beta/rc tags
-release = '0.0.3'
+release = '0.0.9'
 
 
 # -- General configuration ---------------------------------------------------
@@ -35,11 +35,25 @@ release = '0.0.3'
 #
 # needs_sphinx = '1.0'
 
+autodoc_default_options = {
+        "member": True,
+        "inherited-members": True,
+        "show-inheritance": True}
+
+autosummary_generate = True
+
+napoleon_numpy_docstring = False
+
+napoleaon_use_rtype = False
+
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    'sphinx_rtd_theme',
+    'numpydoc',
     'sphinx.ext.autodoc',
+    'sphinx.ext.napoleon',
     'sphinx.ext.doctest',
     'sphinx.ext.intersphinx',
     'sphinx.ext.todo',
@@ -49,6 +63,14 @@ extensions = [
     'sphinx.ext.viewcode',
     'sphinx.ext.githubpages',
 ]
+
+intersphinx_mapping = {
+        'python': ('https://docs.python.org/{.major}'.format(sys.version_info), None,),
+        'numpy': ('https://docs.scipy.org/doc/numpy/', None),
+        'scipy': ('https://docs.scipy.org/doc/scipy/reference', None),
+        'matplotlib': ('https://matplotlib.org/', None),
+        'pandas': ('https://pandas.pydata.org/pandas-docs/stable/', None),
+        'joblib': ('https://joblib.readthedocs.io/en/latest', None)}
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -83,8 +105,21 @@ pygments_style = 'sphinx'
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'alabaster'
-
+html_theme = "sphinx_rtd_theme"
+html_theme_options = {
+    'logo_only': False,
+    'display_version': True,
+    'prev_next_buttons_location': 'bottom',
+    'style_external_links': False,
+    'vcs_pageview_mode': '',
+    'style_nav_header_background': 'white',
+    # Toc options
+    'collapse_navigation': True,
+    'sticky_navigation': True,
+    'navigation_depth': 4,
+    'includehidden': True,
+    'titles_only': False
+}
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
@@ -104,7 +139,7 @@ html_static_path = ['_static']
 # default: ``['localtoc.html', 'relations.html', 'sourcelink.html',
 # 'searchbox.html']``.
 #
-# html_sidebars = {}
+#html_sidebars = {}
 
 
 # -- Options for HTMLHelp output ---------------------------------------------
