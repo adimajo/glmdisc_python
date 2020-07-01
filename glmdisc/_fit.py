@@ -7,22 +7,23 @@ fit method for the glmdisc class.
 
 def fit(self, predictors_cont, predictors_qual, labels):
     """
-    Fits the glmdisc object.
+    Fits the Glmdisc object.
 
     .. todo:: On regarde si des modalités sont présentes dans validation et pas dans train
 
+    .. todo:: Refactor due to complexity
 
-    Parameters
-    ----------
-    predictors_cont : numpy.array
+    .. todo:: Add glmdisc-NN
+
+    :param numpy.array predictors_cont:
         Continuous predictors to be discretized in a numpy
         "numeric" array. Can be provided either here or with
         the __init__ method.
-    predictors_qual : numpy.array
+    :param numpy.array predictors_qual:
         Categorical features which levels are to be merged
         (also in a numpy "string" array). Can be provided
         either here or with the __init__ method.
-    labels : numpy.array
+    :param numpy.array labels:
         Boolean (0/1) labels of the observations. Must be of
         the same length as predictors_qual and predictors_cont
         (numpy "numeric" array).

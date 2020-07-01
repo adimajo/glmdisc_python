@@ -9,15 +9,11 @@ def best_formula(self):
     """
     Returns the best quantization found by the MCMC and prints it.
 
-    Parameters
-    ----------
-    self
-
-    Returns
-    -------
-    best_disc : list
+    :returns:
         A list of cutpoints (continuous features) or groupings
         (categorical features).
+
+    :rtype: list
     """
     emap_best = self.discretize(self.predictors_cont, self.predictors_qual)
 

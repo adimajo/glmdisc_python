@@ -11,16 +11,17 @@ def plot(self, predictors_cont_number="all", predictors_qual_number="all",
     Plots the stepwise function associating the continuous features to their
     discretization, the groupings made and the interactions.
 
-    Parameters
-    ----------
-    predictors_cont_number : str or int
+    :param predictors_cont_number:
         Which continuous variable(s) should be plotted
         (between 1 and the number of columns in
         predictors_cont).
-    predictors_qual_number : str or int
+    :type predictors_cont_number: str or int
+
+    :param predictors_qual_number:
         Which categorical variable(s) should be plotted
         (between 1 and the number of columns in
         predictors_qual).
+    :type predictors_qual_number: str or int
     """
     emap = self.discretize(self.predictors_cont,
                            self.predictors_qual).astype(str)

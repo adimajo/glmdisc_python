@@ -4,15 +4,17 @@
    contain the root `toctree` directive.
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 2
    :caption: Contents:
 
-Welcome to glmdisc's documentation!
+Welcome to :mod:`glmdisc`'s documentation!
 ===================================
 The glmdisc module is currently only populated by a class that implements both the Stochastic-Expectation-Maximization approach and the neural network approach of ``feature quantization'' as proposed in Ehrhardt (2019).
 
-The glmdisc class
-=================
+.. currentmodule:: glmdisc
+
+.. autosummary::
+   :toctree: _autosummary
 
    glmdisc
 

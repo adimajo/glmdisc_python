@@ -5,18 +5,16 @@ discretizeDummy module for the glmdisc class.
 """
 
 
-def discretizeDummy(self, predictors_cont, predictors_qual):
+def discretize_dummy(self, predictors_cont, predictors_qual):
     """
     Discretizes new continuous and categorical features using a previously
     fitted glmdisc object as Dummy Variables usable with the best_reglog object.
 
-    Parameters
-    ----------
-    predictors_cont : numpy.array
+    :param numpy.array predictors_cont:
         Continuous predictors to be discretized in a numpy
         "numeric" array. Can be provided either here or with
         the __init__ method.
-    predictors_qual : numpy.array
+    :param numpy.array predictors_qual:
         Categorical features which levels are to be merged
         (also in a numpy "string" array). Can be provided
         either here or with the __init__ method.
