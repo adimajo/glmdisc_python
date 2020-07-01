@@ -9,6 +9,7 @@ from pygam import LogisticGAM
 import numpy as np
 from loguru import logger
 
+
 def plot(self,
          predictors_cont_number="all",
          predictors_qual_number="all",
@@ -56,8 +57,7 @@ def plot(self,
                 plt.show()
 
         if not predictors_cont_number == "all":
-            if (type(predictors_cont_number) == int and
-                    predictors_cont_number > 0):
+            if type(predictors_cont_number) == int and predictors_cont_number > 0:
                 plt.plot(self.predictors_cont[:,
                          predictors_cont_number - 1].reshape(-1, 1),
                          emap.astype(str)[:, predictors_cont_number - 1], 'ro')
@@ -68,8 +68,7 @@ def plot(self,
                                "provided for predictors_cont_number")
 
         if not predictors_qual_number == "all":
-            if (type(predictors_qual_number) == int and
-                    predictors_qual_number > 0):
+            if type(predictors_qual_number) == int and predictors_qual_number > 0:
                 plt.plot(self.predictors_qual[:,
                          predictors_qual_number - 1].reshape(-1, 1),
                          emap.astype(str)[:, predictors_qual_number - 1 + d1],
@@ -89,11 +88,10 @@ def plot(self,
         # Fit du GAM sur tout le monde
         gam = LogisticGAM(dtype=['numerical' for _ in range(d1)] +
                                 ['categorical' for _ in range(d2)]).fit(
-                                pd.concat([pd.DataFrame(
-                                self.predictors_cont[
-                                lignes_completes, :]).apply(lambda x:
-                                    x.astype('float')),
-                                pd.DataFrame(self.predictors_qual[lignes_completes, :]).apply(lambda x: x.astype('category'))], axis=1), self.labels[lignes_completes])
+                                pd.concat([pd.DataFrame(self.predictors_cont[lignes_completes, :]).apply(
+                                    lambda x: x.astype('float')),
+                                    pd.DataFrame(self.predictors_qual[lignes_completes, :]).apply(
+                                        lambda x: x.astype('category'))], axis=1), self.labels[lignes_completes])
 
         # Quel que soit les valeurs de predictors_cont_number et
         # predictors_qual_number, on plot tout pour l'instant

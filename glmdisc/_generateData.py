@@ -30,16 +30,16 @@ def generate_data(n, d, seed):
     for i in range(d):
         xd[:, i] = pd.cut(x[:, i], bins=cuts, labels=[0, 1, 2])
 
-    theta = np.array([[1]*d]*(len(cuts)-1))
+    theta = np.array([[1] * d] * (len(cuts) - 1))
     theta[1, :] = 2
     theta[2, :] = -2
 
-    log_odd = np.array([0]*n)
+    log_odd = np.array([0] * n)
     for i in range(n):
         for j in range(d):
             log_odd[i] += theta[int(xd[i, j]), j]
 
-    p = 1/(1+np.exp(-log_odd))
+    p = 1/(1 + np.exp(-log_odd))
     y = np.random.binomial(1, p)
 
     return [x, y]

@@ -21,5 +21,4 @@ def predict(self, predictors_cont, predictors_qual):
         either here or with the :code:`__init__` method.
     """
 
-    return self.best_reglog.predict_proba(
-                self.discretize_dummy(predictors_cont, predictors_qual))
+    return self.best_reglog.predict_proba(self.discretize_dummy(predictors_cont, predictors_qual))

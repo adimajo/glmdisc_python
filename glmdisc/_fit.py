@@ -48,11 +48,11 @@ def fit(self, predictors_cont, predictors_qual, labels):
 
     # Tester la présence de prédicteurs continus et de même longueur que labels
     if predictors_cont is not None and predictors_cont.shape[0] != labels.shape[0]:
-            raise ValueError('Predictors and labels must be of same size')
+        raise ValueError('Predictors and labels must be of same size')
 
     # Tester la présence de prédicteurs catégoriels et de même longueur que labels
     if predictors_qual is not None and predictors_qual.shape[0] != labels.shape[0]:
-            raise ValueError('Predictors and labels must be of same size')
+        raise ValueError('Predictors and labels must be of same size')
 
     self.predictors_cont = predictors_cont
     self.predictors_qual = predictors_qual
@@ -79,10 +79,10 @@ def fit(self, predictors_cont, predictors_qual, labels):
 
     for j in range(d1):
         sum_continu_complete_case[0, j] = continu_complete_case[0, j] * 1
-        for l in range(1, n):
-            sum_continu_complete_case[l, j] = \
-                sum_continu_complete_case[l - 1, j] + \
-                continu_complete_case[l, j] * 1
+        for i in range(1, n):
+            sum_continu_complete_case[i, j] = \
+                sum_continu_complete_case[i - 1, j] + \
+                continu_complete_case[i, j] * 1
 
     # Initialization for following the performance of the discretization
     current_best = 0
@@ -97,16 +97,14 @@ def fit(self, predictors_cont, predictors_qual, labels):
     predictors_trans = np.zeros((n, d2))
 
     for j in range(d2):
-        self.affectations[j + d1] = sk.preprocessing.LabelEncoder().fit(
-                self.predictors_qual[:, j])
-        if (self.m_start > stats.describe(sk.preprocessing.LabelEncoder().fit(
-                self.predictors_qual[:, j]).transform(
-                        self.predictors_qual[:, j])).minmax[1] + 1):
+        self.affectations[j + d1] = sk.preprocessing.LabelEncoder().fit(self.predictors_qual[:, j])
+        if (self.m_start > stats.describe(sk.preprocessing.LabelEncoder().fit(self.predictors_qual[:, j]).transform(
+                self.predictors_qual[:, j])).minmax[1] + 1):
             edisc[:, j + d1] = np.random.choice(list(range(
-                    stats.describe(sk.preprocessing.LabelEncoder().fit(
-                            self.predictors_qual[:, j]).transform(
-                                    self.predictors_qual[:, j])).minmax[1])),
-                                        size=n)
+                stats.describe(sk.preprocessing.LabelEncoder().fit(
+                    self.predictors_qual[:, j]).transform(
+                        self.predictors_qual[:, j])).minmax[1])),
+                            size=n)
         else:
             edisc[:, j + d1] = np.random.choice(list(range(self.m_start)),
                                                 size=n)
@@ -153,11 +151,11 @@ def fit(self, predictors_cont, predictors_qual, labels):
         self.splitting = [train, validate, test_rows]
     elif self.validation:
         train, validate = np.split(np.random.choice(n, n, replace=False),
-                                   int(.6*n))
+                                   int(.6 * n))
         self.splitting = [train, validate]
     elif self.test:
         train, test_rows = np.split(np.random.choice(n, n, replace=False),
-                                    int(.6*n))
+                                    int(.6 * n))
         self.splitting = [train, test_rows]
     else:
         train = np.random.choice(n, n, replace=False)
@@ -177,50 +175,48 @@ def fit(self, predictors_cont, predictors_qual, labels):
                     y=self.labels[train])
         except ValueError:
             model_edisc.fit(X=current_encoder_edisc.transform(
-                    edisc[train, :].astype(str)),
-                    y=self.labels[train])
+                edisc[train, :].astype(str)),
+                y=self.labels[train])
 
         try:
             model_emap.fit(X=current_encoder_emap.transform(
-                    emap[train, :].astype(str)),
-                    y=self.labels[train])
+                emap[train, :].astype(str)),
+                y=self.labels[train])
         except ValueError:
             model_emap.fit(X=current_encoder_emap.transform(
-                    emap[train, :].astype(str)),
-                    y=self.labels[train])
+                emap[train, :].astype(str)),
+                y=self.labels[train])
 
         # Calcul du critère
         if self.criterion in ['aic', 'bic']:
             loglik = -sk.metrics.log_loss(self.labels[train],
                                           model_emap.predict_proba(
-                                            X=current_encoder_emap.transform(
+                                              X=current_encoder_emap.transform(
                                                   emap[train, :].astype(str))),
                                           normalize=False)
             if self.validation:
                 self.criterion_iter.append(loglik)
 
         if self.criterion == 'aic' and not self.validation:
-            self.criterion_iter.append(-(2 * model_emap.coef_.shape[1]
-                                       - 2 * loglik))
+            self.criterion_iter.append(-(2 * model_emap.coef_.shape[1] - 2 * loglik))
 
         if self.criterion == 'bic' and not self.validation:
-            self.criterion_iter.append(-(log(n) * model_emap.coef_.shape[1]
-                                         - 2 * loglik))
+            self.criterion_iter.append(-(log(n) * model_emap.coef_.shape[1] - 2 * loglik))
 
         if self.criterion == 'gini' and self.validation:
             self.criterion_iter.append(sk.metrics.roc_auc_score(
-                    self.labels[validate], model_emap.predict_proba(
-                            X=current_encoder_emap.transform(
-                                    emap[validate, :].astype(str)))))
+                self.labels[validate], model_emap.predict_proba(
+                    X=current_encoder_emap.transform(
+                        emap[validate, :].astype(str)))))
 
         if self.criterion == 'gini' and not self.validation:
             self.criterion_iter.append(sk.metrics.roc_auc_score(
-                    self.labels[train], model_emap.predict_proba(
-                            X=current_encoder_emap.transform(
-                                    emap[train, :].astype(str)))))
+                self.labels[train], model_emap.predict_proba(
+                    X=current_encoder_emap.transform(
+                        emap[train, :].astype(str)))))
 
         # Mise à jour éventuelle du meilleur critère
-        if (self.criterion_iter[i] <= self.criterion_iter[current_best]):
+        if self.criterion_iter[i] <= self.criterion_iter[current_best]:
 
             # Update current best logistic regression
             self.best_reglog = model_emap
@@ -235,17 +231,15 @@ def fit(self, predictors_cont, predictors_qual, labels):
         # On construit la base disjonctive nécessaire au modèle de régression
         # logistique
         base_disjonctive = current_encoder_edisc.transform(
-                X=edisc[train, :].astype(str)).toarray()
+            X=edisc[train, :].astype(str)).toarray()
 
         # On boucle sur les variables pour le tirage de e^j | reste
         for j in np.random.permutation(d1 + d2):
             # On commence par les quantitatives
-            if (j < d1):
+            if j < d1:
                 # On apprend e^j | x^j
-                link[j].fit(y=edisc[train, :]
-                            [continu_complete_case[train, j], j],
-                            X=predictors_cont[train, :]
-                            [continu_complete_case[train, j], j].reshape(-1, 1))
+                link[j].fit(y=edisc[train, :][continu_complete_case[train, j], j],
+                            X=predictors_cont[train, :][continu_complete_case[train, j], j].reshape(-1, 1))
 
                 y_p = np.zeros((n, len(m[j])))
 
@@ -269,7 +263,7 @@ def fit(self, predictors_cont, predictors_qual, labels):
                 emap[np.invert(continu_complete_case[:, j]), j] = m[j][-1]
 
                 # On calcule e^j | reste
-                if (np.invert(continu_complete_case[:, j]).sum() == 0):
+                if np.invert(continu_complete_case[:, j]).sum() == 0:
                     t = t * y_p
                 else:
                     t = t[:, 0:(len(m[j])-1)] * y_p[continu_complete_case[:, j], 0:(len(m[j]) - 1)]
@@ -294,8 +288,8 @@ def fit(self, predictors_cont, predictors_qual, labels):
 
                     y_p[:, k] = model_edisc.predict_proba(np.column_stack(
                             (base_disjonctive[:, 0:(sum(list(map(len, m[0:j]))))],
-                                              modalites,
-                                              base_disjonctive[:,(sum(list(map(len, m[0:(j + 1)])))):(sum(list(map(len, m))))])))[:, 1] * (2 * np.ravel(self.labels) - 1) - np.ravel(self.labels) + 1
+                             modalites,
+                             base_disjonctive[:,(sum(list(map(len, m[0:(j + 1)])))):(sum(list(map(len, m))))])))[:, 1] * (2 * np.ravel(self.labels) - 1) - np.ravel(self.labels) + 1
 
                 t = np.zeros((n, int(len(m[j]))))
 

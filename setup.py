@@ -1,23 +1,18 @@
-"""A setuptools based setup module.
 """
-
+A setuptools based setup module.
+"""
 # Always prefer setuptools over distutils
 from setuptools import setup, find_packages
-
 # To use a consistent encoding
 from codecs import open
 from os import path
 
 here = path.abspath(path.dirname(__file__))
 
-# Get the long description from the README file
-# try:
-#    from pypandoc import convert
-#    read_md = lambda f: convert(f, 'rst')
-# except ImportError:
-#    print("warning: pypandoc module not found, could not convert Markdown to RST")
-#    read_md = lambda f: open(f, 'r', encoding='utf-8').read()
-read_md = lambda f: open(f, "r", encoding="utf-8").read()
+
+def read_md(file):
+    open(file, "r", encoding="utf-8").read()
+
 
 # Arguments marked as "Required" below must be included for upload to PyPI.
 # Fields marked as "Optional" may be commented out.

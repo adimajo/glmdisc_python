@@ -69,14 +69,15 @@ extensions = [
 ]
 
 intersphinx_mapping = {
-        'python': ('https://docs.python.org/{.major}'.format(sys.version_info), None,),
-        'numpy': ('https://docs.scipy.org/doc/numpy/', None),
-        'scipy': ('https://docs.scipy.org/doc/scipy/reference', None),
-        'matplotlib': ('https://matplotlib.org/', None),
-        'pandas': ('https://pandas.pydata.org/pandas-docs/stable/', None),
-        'joblib': ('https://joblib.readthedocs.io/en/latest', None),
-        'sklearn': ('http://scikit-learn.org/stable',
-                    (None, './_intersphinx/sklearn-objects.inv'))}
+    'python': ('https://docs.python.org/{.major}'.format(sys.version_info), None,),
+    'numpy': ('https://docs.scipy.org/doc/numpy/', None),
+    'scipy': ('https://docs.scipy.org/doc/scipy/reference', None),
+    'matplotlib': ('https://matplotlib.org/', None),
+    'pandas': ('https://pandas.pydata.org/pandas-docs/stable/', None),
+    'joblib': ('https://joblib.readthedocs.io/en/latest', None),
+    'sklearn': ('http://scikit-learn.org/stable',
+                (None, './_intersphinx/sklearn-objects.inv'))
+}
 
 
 # Add any paths that contain templates here, relative to this directory.
@@ -145,7 +146,7 @@ html_static_path = []
 # default: ``['localtoc.html', 'relations.html', 'sourcelink.html',
 # 'searchbox.html']``.
 #
-#html_sidebars = {}
+# html_sidebars = {}
 
 
 # -- Options for HTMLHelp output ---------------------------------------------
@@ -224,16 +225,3 @@ epub_copyright = copyright
 
 # A list of files that should not be packed into the epub file.
 epub_exclude_files = ['search.html']
-
-
-# -- Extension configuration -------------------------------------------------
-
-# -- Options for intersphinx extension ---------------------------------------
-
-# Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {'https://docs.python.org/': None}
-
-# -- Options for todo extension ----------------------------------------------
-
-# If true, `todo` and `todoList` produce output, else they produce nothing.
-todo_include_todos = True

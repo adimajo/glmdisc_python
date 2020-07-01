@@ -37,7 +37,7 @@ def best_formula(self):
         best_disc.append([])
         for k in np.unique(emap_best[:, j]):
             best_disc[j].append(
-                    np.nanmin(self.predictors_cont[emap_best[:, j] == k, j]))
+                np.nanmin(self.predictors_cont[emap_best[:, j] == k, j]))
         del best_disc[j][np.where(best_disc[j] == np.nanmin(best_disc[j]))[0][0]]
         print("Cut-points found for continuous variable", j + 1, "are", best_disc[j])
 
@@ -45,6 +45,6 @@ def best_formula(self):
         best_disc.append([])
         for k in np.unique(emap_best[:, j + d1]):
             best_disc[j + d1].append(np.unique(self.predictors_qual[emap_best[:, j + d1] == k, j]))
-        print("Regroupments made for categorical variable", j+1, "are", best_disc[j + d1])
+        print("Regroupments made for categorical variable", j + 1, "are", best_disc[j + d1])
 
     return best_disc

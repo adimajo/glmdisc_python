@@ -52,9 +52,8 @@ def discretize(self, predictors_cont, predictors_qual):
     for j in range(d_1 + d_2):
         if d_1bis[j]:
             emap[np.invert(np.isnan(predictors_cont[:, j])), j] = np.argmax(
-                    self.best_link[j].predict_proba(
-                            predictors_cont[np.invert(
-                                    np.isnan(predictors_cont[:, j])), j].reshape(-1, 1)), axis=1)
+                    self.best_link[j].predict_proba(predictors_cont[np.invert(np.isnan(predictors_cont[:, j])),
+                                                                    j].reshape(-1, 1)), axis=1)
             emap[np.isnan(predictors_cont[:, j]), j] = stats.describe(emap[:, j]).minmax[1] + 1
         elif d_2bis[j]:
             m = max(self.best_link[j].keys(), key=lambda key: key[1])[1]
@@ -62,7 +61,8 @@ def discretize(self, predictors_cont, predictors_qual):
 
             for i in range(n):
                 for k in range(int(m) + 1):
-                    t[i, k] = self.best_link[j][(int((self.affectations[j].transform(np.ravel(predictors_qual[i, j - d_1])))), k)] / n
+                    t[i, k] = self.best_link[j][(int((self.affectations[j].transform(
+                        np.ravel(predictors_qual[i, j - d_1])))), k)] / n
 
             emap[:, j] = np.argmax(t, axis=1)
 

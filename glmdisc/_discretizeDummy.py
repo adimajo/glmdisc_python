@@ -20,5 +20,4 @@ def discretize_dummy(self, predictors_cont, predictors_qual):
         either here or with the __init__ method.
     """
 
-    return self.best_encoder_emap.transform(
-            self.discretize(predictors_cont, predictors_qual).astype(str))
+    return self.best_encoder_emap.transform(self.discretize(predictors_cont, predictors_qual).astype(str))
