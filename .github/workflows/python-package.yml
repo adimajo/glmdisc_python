@@ -39,6 +39,6 @@ jobs:
         pipenv run coverage run -m pytest
     - name: Build and check package
       run: |
-        pipenv-setup sync --dev
+        pipenv run pipenv-setup sync --dev
         python setup.py build sdist bdist_wheel
         twine check dist/*

@@ -104,13 +104,13 @@ def fit(self, predictors_cont, predictors_qual, labels):
                 stats.describe(sk.preprocessing.LabelEncoder().fit(
                     self.predictors_qual[:, j]).transform(
                         self.predictors_qual[:, j])).minmax[1])),
-                            size=n)
+                size=n)
         else:
             edisc[:, j + d1] = np.random.choice(list(range(self.m_start)),
                                                 size=n)
 
         predictors_trans[:, j] = (self.affectations[j + d1].transform(
-                                    self.predictors_qual[:, j])).astype(int)
+            self.predictors_qual[:, j])).astype(int)
 
     emap = np.ndarray.copy(edisc)
 
@@ -147,7 +147,7 @@ def fit(self, predictors_cont, predictors_qual, labels):
         train, validate, test_rows = np.split(np.random.choice(n,
                                                                n,
                                                                replace=False),
-                                              [int(.6*n), int(.8*n)])
+                                              [int(.6 * n), int(.8 * n)])
         self.splitting = [train, validate, test_rows]
     elif self.validation:
         train, validate = np.split(np.random.choice(n, n, replace=False),
@@ -171,8 +171,8 @@ def fit(self, predictors_cont, predictors_qual, labels):
         # Apprentissage p(y|e) et p(y|emap)
         try:
             model_edisc.fit(X=current_encoder_edisc.transform(
-                    edisc[train, :].astype(str)),
-                    y=self.labels[train])
+                edisc[train, :].astype(str)),
+                y=self.labels[train])
         except ValueError:
             model_edisc.fit(X=current_encoder_edisc.transform(
                 edisc[train, :].astype(str)),
@@ -248,15 +248,15 @@ def fit(self, predictors_cont, predictors_qual, labels):
                     modalites = np.zeros((n, len(m[j])))
                     modalites[:, k] = np.ones((n, ))
                     y_p[:, k] = model_edisc.predict_proba(np.column_stack(
-                            (base_disjonctive[:, 0:(sum(list(map(len, m[0:j]))))],
-                                modalites,
-                                base_disjonctive[:, (sum(list(map(len,
-                                                         m[0:(j + 1)])))):(sum(list(map(len, m))))]))
-                            )[:, 1] * (2 * np.ravel(self.labels) - 1) - np.ravel(self.labels) + 1
+                        (base_disjonctive[:, 0:(sum(list(map(len, m[0:j]))))],
+                         modalites,
+                         base_disjonctive[:, (sum(list(map(len,
+                                                           m[0:(j + 1)])))):(sum(list(map(len, m))))]))
+                    )[:, 1] * (2 * np.ravel(self.labels) - 1) - np.ravel(self.labels) + 1
 
                 # On calcule e^j | x^j sur tout le monde
                 t = link[j].predict_proba(
-                        self.predictors_cont[(continu_complete_case[:,j]), j].reshape(-1, 1))
+                    self.predictors_cont[(continu_complete_case[:, j]), j].reshape(-1, 1))
 
                 # On met à jour emap^j
                 emap[(continu_complete_case[:, j]), j] = np.argmax(t, axis=1)
@@ -266,7 +266,7 @@ def fit(self, predictors_cont, predictors_qual, labels):
                 if np.invert(continu_complete_case[:, j]).sum() == 0:
                     t = t * y_p
                 else:
-                    t = t[:, 0:(len(m[j])-1)] * y_p[continu_complete_case[:, j], 0:(len(m[j]) - 1)]
+                    t = t[:, 0:(len(m[j]) - 1)] * y_p[continu_complete_case[:, j], 0:(len(m[j]) - 1)]
 
                 t = t / (t.sum(axis=1)[:, None])
 
@@ -277,7 +277,8 @@ def fit(self, predictors_cont, predictors_qual, labels):
             # Variables qualitatives
             else:
                 # On fait le tableau de contingence e^j | x^j
-                link[j] = Counter([tuple(element) for element in np.column_stack((predictors_trans[train, j - d1], edisc[train, j]))])
+                link[j] = Counter([tuple(element) for element in np.column_stack((predictors_trans[train, j - d1],
+                                                                                  edisc[train, j]))])
 
                 y_p = np.zeros((n, len(m[j])))
 
@@ -287,16 +288,17 @@ def fit(self, predictors_cont, predictors_qual, labels):
                     modalites[:, k] = np.ones((n, ))
 
                     y_p[:, k] = model_edisc.predict_proba(np.column_stack(
-                            (base_disjonctive[:, 0:(sum(list(map(len, m[0:j]))))],
-                             modalites,
-                             base_disjonctive[:,(sum(list(map(len, m[0:(j + 1)])))):(sum(list(map(len, m))))])))[:, 1] * (2 * np.ravel(self.labels) - 1) - np.ravel(self.labels) + 1
+                        (base_disjonctive[:, 0:(sum(list(map(len, m[0:j]))))],
+                         modalites,
+                         base_disjonctive[:, (sum(list(map(len, m[0:(j + 1)])))):(sum(list(map(len, m))))])))[:, 1] * \
+                            (2 * np.ravel(self.labels) - 1) - np.ravel(self.labels) + 1
 
                 t = np.zeros((n, int(len(m[j]))))
 
                 # On calcule e^j | x^j sur tout le monde
-                for l in range(n):
+                for i2 in range(n):
                     for k in range(int(len(m[j]))):
-                        t[l, k] = link[j][(predictors_trans[l, j - d1], k)] / n
+                        t[i2, k] = link[j][(predictors_trans[i2, j - d1], k)] / n
 
                 # On met à jour emap^j
                 emap[:, j] = np.argmax(t, axis=1)

@@ -205,7 +205,7 @@ class Glmdisc:
             logger.warning('Using Gini index on training set might yield an overfitted model')
 
         if validation and criterion in ['aic', 'bic']:
-            logger.warning('No need to penalize the log-likelihood when a validation set is used. ' +
+            logger.warning('No need to penalize the log-likelihood when a validation set is used. '
                            'Using log-likelihood instead.')
 
         self.test = test

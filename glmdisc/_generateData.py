@@ -39,7 +39,7 @@ def generate_data(n, d, seed):
         for j in range(d):
             log_odd[i] += theta[int(xd[i, j]), j]
 
-    p = 1/(1 + np.exp(-log_odd))
+    p = 1 / (1 + np.exp(- log_odd))
     y = np.random.binomial(1, p)
 
     return [x, y]

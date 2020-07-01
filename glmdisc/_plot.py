@@ -63,8 +63,8 @@ def plot(self,
                          emap.astype(str)[:, predictors_cont_number - 1], 'ro')
                 plt.show()
             else:
-                logger.warning("A single int (more than 0 and less than the" +
-                               "number of columns in predictors_cont) must be" +
+                logger.warning("A single int (more than 0 and less than the "
+                               "number of columns in predictors_cont) must be "
                                "provided for predictors_cont_number")
 
         if not predictors_qual_number == "all":
@@ -75,23 +75,22 @@ def plot(self,
                          'ro')
                 plt.show()
             else:
-                logger.warning("A single int (more than 0 and less than the" +
-                               "number of columns in predictors_qual) must be" +
+                logger.warning("A single int (more than 0 and less than the "
+                               "number of columns in predictors_qual) must be "
                                "provided for predictors_qual_number")
 
     elif plot_type == "logodd":
 
         # Gérer les manquants dans le GAM
         lignes_completes = np.invert(
-                np.isnan(self.predictors_cont).sum(axis=1).astype(bool))
+            np.isnan(self.predictors_cont).sum(axis=1).astype(bool))
 
         # Fit du GAM sur tout le monde
-        gam = LogisticGAM(dtype=['numerical' for _ in range(d1)] +
-                                ['categorical' for _ in range(d2)]).fit(
-                                pd.concat([pd.DataFrame(self.predictors_cont[lignes_completes, :]).apply(
-                                    lambda x: x.astype('float')),
-                                    pd.DataFrame(self.predictors_qual[lignes_completes, :]).apply(
-                                        lambda x: x.astype('category'))], axis=1), self.labels[lignes_completes])
+        gam = LogisticGAM(dtype=['numerical' for _ in range(d1)] + ['categorical' for _ in range(d2)]).fit(
+            pd.concat([pd.DataFrame(self.predictors_cont[lignes_completes, :]).apply(
+                lambda x: x.astype('float')),
+                pd.DataFrame(self.predictors_qual[lignes_completes, :]).apply(
+                    lambda x: x.astype('category'))], axis=1), self.labels[lignes_completes])
 
         # Quel que soit les valeurs de predictors_cont_number et
         # predictors_qual_number, on plot tout pour l'instant
@@ -99,7 +98,7 @@ def plot(self,
         plt.rcParams['figure.figsize'] = (28, 8)
         fig, axs = plt.subplots(1, d1+d2)
         for i, ax in enumerate(axs):
-            pdep, confi = gam.partial_dependence(XX, feature=i+1, width=.95)
+            pdep, confi = gam.partial_dependence(XX, feature=i + 1, width=.95)
             ax.plot(XX[:, i], pdep)
             ax.plot(XX[:, i], confi[0][:, 0], c='grey', ls='--')
             ax.plot(XX[:, i], confi[0][:, 1], c='grey', ls='--')
