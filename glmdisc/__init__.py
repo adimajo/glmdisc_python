@@ -18,20 +18,7 @@ post-learning graphical tools.
     Glmdisc.predict
     Glmdisc.generate_data
 """
-
 import numpy as np
-import pandas as pd
-import sklearn as sk
-import sklearn.preprocessing
-import sklearn.linear_model
-import loguru
-import matplotlib.pyplot as plt
-
-from scipy import stats
-from collections import Counter
-from math import log
-from pygam import LogisticGAM
-
 from loguru import logger
 
 

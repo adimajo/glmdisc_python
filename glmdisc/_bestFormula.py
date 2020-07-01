@@ -3,6 +3,7 @@
 """
 best_formula method for glmdisc class.
 """
+import numpy as np
 
 
 def best_formula(self):

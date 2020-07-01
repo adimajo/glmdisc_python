@@ -3,6 +3,7 @@
 """
 discrete_data method for the glmdisc class.
 """
+from _discretizeDummy import discretize_dummy
 
 
 def discrete_data(self):

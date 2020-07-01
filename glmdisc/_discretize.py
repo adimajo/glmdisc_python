@@ -3,6 +3,10 @@
 """
 discretize method for glmdisc class.
 """
+from collections import Counter
+import sklearn as sk
+from scipy import stats
+import numpy as np
 
 
 def discretize(self, predictors_cont, predictors_qual):
@@ -38,8 +42,10 @@ def discretize(self, predictors_cont, predictors_qual):
     d_1bis = [isinstance(x, sk.linear_model.logistic.LogisticRegression) for x in self.best_link]
     d_2bis = [isinstance(x, Counter) for x in self.best_link]
 
-    if d_1 != sum(d_1bis): raise ValueError('Shape of predictors1 does not match provided link function')
-    if d_2 != sum(d_2bis): raise ValueError('Shape of predictors2 does not match provided link function')
+    if d_1 != sum(d_1bis):
+        raise ValueError('Shape of predictors1 does not match provided link function')
+    if d_2 != sum(d_2bis):
+        raise ValueError('Shape of predictors2 does not match provided link function')
 
     emap = np.array([0] * n * (d_1 + d_2)).reshape(n, d_1 + d_2)
 
@@ -54,12 +60,13 @@ def discretize(self, predictors_cont, predictors_qual):
             m = max(self.best_link[j].keys(), key=lambda key: key[1])[1]
             t = np.zeros((n, int(m) + 1))
 
-            for l in range(n):
+            for i in range(n):
                 for k in range(int(m) + 1):
-                    t[l, k] = self.best_link[j][(int((self.affectations[j].transform(np.ravel(predictors_qual[l, j - d_1])))), k)] / n
+                    t[i, k] = self.best_link[j][(int((self.affectations[j].transform(np.ravel(predictors_qual[i, j - d_1])))), k)] / n
 
             emap[:, j] = np.argmax(t, axis=1)
 
-        else: raise ValueError('Not quantitative nor qualitative?')
+        else:
+            raise ValueError('Not quantitative nor qualitative?')
 
     return emap

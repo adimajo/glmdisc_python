@@ -3,9 +3,15 @@
 """
 plot method for class glmdisc
 """
+import pandas as pd
+import matplotlib.pyplot as plt
+from pygam import LogisticGAM
+import numpy as np
+from loguru import logger
 
-
-def plot(self, predictors_cont_number="all", predictors_qual_number="all",
+def plot(self,
+         predictors_cont_number="all",
+         predictors_qual_number="all",
          plot_type="disc"):
     """
     Plots the stepwise function associating the continuous features to their
@@ -57,9 +63,9 @@ def plot(self, predictors_cont_number="all", predictors_qual_number="all",
                          emap.astype(str)[:, predictors_cont_number - 1], 'ro')
                 plt.show()
             else:
-                warnings.warn(("A single int (more than 0 and less than the"
-                               "number of columns in predictors_cont) must be"
-                               "provided for predictors_cont_number"))
+                logger.warning("A single int (more than 0 and less than the" +
+                               "number of columns in predictors_cont) must be" +
+                               "provided for predictors_cont_number")
 
         if not predictors_qual_number == "all":
             if (type(predictors_qual_number) == int and
@@ -70,9 +76,9 @@ def plot(self, predictors_cont_number="all", predictors_qual_number="all",
                          'ro')
                 plt.show()
             else:
-                warnings.warn(("A single int (more than 0 and less than the"
-                               "number of columns in predictors_qual) must be"
-                               "provided for predictors_qual_number"))
+                logger.warning("A single int (more than 0 and less than the" +
+                               "number of columns in predictors_qual) must be" +
+                               "provided for predictors_qual_number")
 
     elif plot_type == "logodd":
 

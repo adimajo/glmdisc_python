@@ -3,6 +3,14 @@
 """
 fit method for the glmdisc class.
 """
+import numpy as np
+import sklearn as sk
+import sklearn.preprocessing
+import sklearn.linear_model
+from scipy import stats
+from collections import Counter
+from math import log
+from glmdisc import vectorized_multinouilli
 
 
 def fit(self, predictors_cont, predictors_qual, labels):
