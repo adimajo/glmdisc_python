@@ -13,30 +13,10 @@ from math import log
 from glmdisc import vectorized_multinouilli
 
 
-def fit(self, predictors_cont, predictors_qual, labels):
-    """
-    Fits the Glmdisc object.
-
-    .. todo:: On regarde si des modalités sont présentes dans validation et pas dans train
-
-    .. todo:: Refactor due to complexity
-
-    .. todo:: Add glmdisc-NN
-
-    :param numpy.array predictors_cont:
-        Continuous predictors to be discretized in a numpy
-        "numeric" array. Can be provided either here or with
-        the __init__ method.
-    :param numpy.array predictors_qual:
-        Categorical features which levels are to be merged
-        (also in a numpy "string" array). Can be provided
-        either here or with the __init__ method.
-    :param numpy.array labels:
-        Boolean (0/1) labels of the observations. Must be of
-        the same length as predictors_qual and predictors_cont
-        (numpy "numeric" array).
+def _check_args(predictors_cont, predictors_qual, labels):
     """
 
+    """
     # Tester la présence de labels
     if not type(labels) is np.ndarray:
         raise ValueError('glmdisc only supports numpy.ndarray inputs')
@@ -54,12 +34,8 @@ def fit(self, predictors_cont, predictors_qual, labels):
     if predictors_qual is not None and predictors_qual.shape[0] != labels.shape[0]:
         raise ValueError('Predictors and labels must be of same size')
 
-    self.predictors_cont = predictors_cont
-    self.predictors_qual = predictors_qual
-    self.labels = labels
 
-    # Calcul des variables locales utilisées dans la suite
-
+def _calculate_shape(self):
     # Calculate shape of predictors (re-used multiple times)
     n = self.labels.shape[0]
     try:
@@ -75,19 +51,39 @@ def fit(self, predictors_cont, predictors_qual, labels):
     # Gérer les manquants des variables continues, dans un premier temps
     # comme une modalité à part
     continu_complete_case = np.invert(np.isnan(self.predictors_cont))
-    sum_continu_complete_case = np.zeros((n, d1))
+    return n, d1, d2, continu_complete_case
 
-    for j in range(d1):
-        sum_continu_complete_case[0, j] = continu_complete_case[0, j] * 1
-        for i in range(1, n):
-            sum_continu_complete_case[i, j] = \
-                sum_continu_complete_case[i - 1, j] + \
-                continu_complete_case[i, j] * 1
 
-    # Initialization for following the performance of the discretization
-    current_best = 0
+def _calculate_criterion(self, emap, model_emap, current_encoder_emap, n):
+    if self.criterion in ['aic', 'bic']:
+        loglik = -sk.metrics.log_loss(self.labels[self.train],
+                                      model_emap.predict_proba(
+                                          X=current_encoder_emap.transform(
+                                              emap[self.train, :].astype(str))),
+                                      normalize=False)
+        if self.validation:
+            return loglik
 
-    # Initial random "discretization"
+    if self.criterion == 'aic' and not self.validation:
+        return -(2 * model_emap.coef_.shape[1] - 2 * loglik)
+
+    if self.criterion == 'bic' and not self.validation:
+        return -(log(n) * model_emap.coef_.shape[1] - 2 * loglik)
+
+    if self.criterion == 'gini' and self.validation:
+        return sk.metrics.roc_auc_score(
+            self.labels[self.validate], model_emap.predict_proba(
+                X=current_encoder_emap.transform(
+                    emap[self.validate, :].astype(str))))
+
+    if self.criterion == 'gini' and not self.validation:
+        return sk.metrics.roc_auc_score(
+            self.labels[self.train], model_emap.predict_proba(
+                X=current_encoder_emap.transform(
+                    emap[self.train, :].astype(str))))
+
+
+def _init_disc(self, n, d1, d2, continu_complete_case):
     self.affectations = [None] * (d1 + d2)
     edisc = np.random.choice(list(range(self.m_start)), size=(n, d1 + d2))
 
@@ -111,6 +107,74 @@ def fit(self, predictors_cont, predictors_qual, labels):
 
         predictors_trans[:, j] = (self.affectations[j + d1].transform(
             self.predictors_qual[:, j])).astype(int)
+    return edisc, predictors_trans
+
+
+def _split(self, n):
+    if self.validation and self.test:
+        self.train, self.validate, self.test_rows = np.split(np.random.choice(n,
+                                                               n,
+                                                               replace=False),
+                                                             [int(.6 * n), int(.8 * n)])
+    elif self.validation:
+        self.train, self.validate = np.split(np.random.choice(n, n, replace=False),
+                                             int(.6 * n))
+        self.test_rows = None
+    elif self.test:
+        self.train, self.test_rows = np.split(np.random.choice(n, n, replace=False),
+                                              int(.6 * n))
+        self.validate = None
+    else:
+        self.train = np.random.choice(n, n, replace=False)
+        self.validate = None
+        self.test_rows = None
+
+
+def fit(self, predictors_cont, predictors_qual, labels):
+    """
+    Fits the Glmdisc object.
+
+    .. todo:: On regarde si des modalités sont présentes dans validation et pas dans train
+
+    .. todo:: Refactor due to complexity
+
+    .. todo:: Add glmdisc-NN
+
+    :param numpy.array predictors_cont:
+        Continuous predictors to be discretized in a numpy
+        "numeric" array. Can be provided either here or with
+        the __init__ method.
+    :param numpy.array predictors_qual:
+        Categorical features which levels are to be merged
+        (also in a numpy "string" array). Can be provided
+        either here or with the __init__ method.
+    :param numpy.array labels:
+        Boolean (0/1) labels of the observations. Must be of
+        the same length as predictors_qual and predictors_cont
+        (numpy "numeric" array).
+    """
+    _check_args(predictors_cont, predictors_qual, labels)
+
+    self.predictors_cont = predictors_cont
+    self.predictors_qual = predictors_qual
+    self.labels = labels
+
+    # Calcul des variables locales utilisées dans la suite
+    n, d1, d2, continu_complete_case = self._calculate_shape()
+    # sum_continu_complete_case = np.zeros((n, d1))
+    #
+    # for j in range(d1):
+    #     sum_continu_complete_case[0, j] = continu_complete_case[0, j] * 1
+    #     for i in range(1, n):
+    #         sum_continu_complete_case[i, j] = \
+    #             sum_continu_complete_case[i - 1, j] + \
+    #             continu_complete_case[i, j] * 1
+
+    # Initialization for following the performance of the discretization
+    current_best = 0
+
+    # Initial random "discretization"
+    edisc, predictors_trans = self._init_disc(n, d1, d2, continu_complete_case)
 
     emap = np.ndarray.copy(edisc)
 
@@ -143,23 +207,7 @@ def fit(self, predictors_cont, predictors_qual, labels):
                                                      warm_start=False)
 
     # Random splitting
-    if self.validation and self.test:
-        train, validate, test_rows = np.split(np.random.choice(n,
-                                                               n,
-                                                               replace=False),
-                                              [int(.6 * n), int(.8 * n)])
-        self.splitting = [train, validate, test_rows]
-    elif self.validation:
-        train, validate = np.split(np.random.choice(n, n, replace=False),
-                                   int(.6 * n))
-        self.splitting = [train, validate]
-    elif self.test:
-        train, test_rows = np.split(np.random.choice(n, n, replace=False),
-                                    int(.6 * n))
-        self.splitting = [train, test_rows]
-    else:
-        train = np.random.choice(n, n, replace=False)
-        self.splitting = [train]
+    self._split(n)
 
     # Itérations MCMC
     for i in range(self.iter):
@@ -171,53 +219,30 @@ def fit(self, predictors_cont, predictors_qual, labels):
         # Apprentissage p(y|e) et p(y|emap)
         try:
             model_edisc.fit(X=current_encoder_edisc.transform(
-                edisc[train, :].astype(str)),
-                y=self.labels[train])
+                edisc[self.train, :].astype(str)),
+                y=self.labels[self.train])
         except ValueError:
             model_edisc.fit(X=current_encoder_edisc.transform(
-                edisc[train, :].astype(str)),
-                y=self.labels[train])
+                edisc[self.train, :].astype(str)),
+                y=self.labels[self.train])
 
         try:
             model_emap.fit(X=current_encoder_emap.transform(
-                emap[train, :].astype(str)),
-                y=self.labels[train])
+                emap[self.train, :].astype(str)),
+                y=self.labels[self.train])
         except ValueError:
             model_emap.fit(X=current_encoder_emap.transform(
-                emap[train, :].astype(str)),
-                y=self.labels[train])
+                emap[self.train, :].astype(str)),
+                y=self.labels[self.train])
 
         # Calcul du critère
-        if self.criterion in ['aic', 'bic']:
-            loglik = -sk.metrics.log_loss(self.labels[train],
-                                          model_emap.predict_proba(
-                                              X=current_encoder_emap.transform(
-                                                  emap[train, :].astype(str))),
-                                          normalize=False)
-            if self.validation:
-                self.criterion_iter.append(loglik)
-
-        if self.criterion == 'aic' and not self.validation:
-            self.criterion_iter.append(-(2 * model_emap.coef_.shape[1] - 2 * loglik))
-
-        if self.criterion == 'bic' and not self.validation:
-            self.criterion_iter.append(-(log(n) * model_emap.coef_.shape[1] - 2 * loglik))
-
-        if self.criterion == 'gini' and self.validation:
-            self.criterion_iter.append(sk.metrics.roc_auc_score(
-                self.labels[validate], model_emap.predict_proba(
-                    X=current_encoder_emap.transform(
-                        emap[validate, :].astype(str)))))
-
-        if self.criterion == 'gini' and not self.validation:
-            self.criterion_iter.append(sk.metrics.roc_auc_score(
-                self.labels[train], model_emap.predict_proba(
-                    X=current_encoder_emap.transform(
-                        emap[train, :].astype(str)))))
+        self.criterion_iter.append(self._calculate_criterion(emap,
+                                                             model_emap,
+                                                             current_encoder_emap,
+                                                             n))
 
         # Mise à jour éventuelle du meilleur critère
         if self.criterion_iter[i] <= self.criterion_iter[current_best]:
-
             # Update current best logistic regression
             self.best_reglog = model_emap
             self.best_link = link
@@ -231,15 +256,15 @@ def fit(self, predictors_cont, predictors_qual, labels):
         # On construit la base disjonctive nécessaire au modèle de régression
         # logistique
         base_disjonctive = current_encoder_edisc.transform(
-            X=edisc[train, :].astype(str)).toarray()
+            X=edisc[self.train, :].astype(str)).toarray()
 
         # On boucle sur les variables pour le tirage de e^j | reste
         for j in np.random.permutation(d1 + d2):
             # On commence par les quantitatives
             if j < d1:
                 # On apprend e^j | x^j
-                link[j].fit(y=edisc[train, :][continu_complete_case[train, j], j],
-                            X=predictors_cont[train, :][continu_complete_case[train, j], j].reshape(-1, 1))
+                link[j].fit(y=edisc[self.train, :][continu_complete_case[self.train, j], j],
+                            X=predictors_cont[self.train, :][continu_complete_case[self.train, j], j].reshape(-1, 1))
 
                 y_p = np.zeros((n, len(m[j])))
 
@@ -277,8 +302,8 @@ def fit(self, predictors_cont, predictors_qual, labels):
             # Variables qualitatives
             else:
                 # On fait le tableau de contingence e^j | x^j
-                link[j] = Counter([tuple(element) for element in np.column_stack((predictors_trans[train, j - d1],
-                                                                                  edisc[train, j]))])
+                link[j] = Counter([tuple(element) for element in np.column_stack((predictors_trans[self.train, j - d1],
+                                                                                  edisc[self.train, j]))])
 
                 y_p = np.zeros((n, len(m[j])))
 

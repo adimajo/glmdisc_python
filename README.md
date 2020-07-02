@@ -1,6 +1,10 @@
-# Supervised multivariate discretization and factor levels merging for logistic regression
+# Feature quantization for parsimonious and interpretable models
 
 Credit institutions are interested in the refunding probability of a loan given the applicant’s characteristics in order to assess the worthiness of the credit. For regulatory and interpretability reasons, the logistic regression is still widely used to learn this probability from the data. Although logistic regression handles naturally both quantitative and qualitative data, three pre-processing steps are usually performed: firstly, continuous features are discretized by assigning factor levels to pre-determined intervals; secondly, qualitative features, if they take numerous values, are grouped; thirdly, interactions (products between two different predictors) are sparsely introduced. By reinterpreting discretized (resp. grouped) features as latent variables, we are able, through the use of a Stochastic Expectation-Maximization (SEM) algorithm and a Gibbs sampler to find the best discretization (resp. grouping) scheme w.r.t. the logistic regression loss. For detecting interacting features, the same scheme is used by replacing the Gibbs sampler by a Metropolis-Hastings algorithm. The good performances of this approach are illustrated on simulated and real data from Credit Agricole Consumer Finance.
+
+This repository is the implementation of [Ehrhardt, Adrien, et al. "Feature quantization for parsimonious and interpretable predictive models." arXiv preprint arXiv:1903.08920 (2019)](https://arxiv.org/abs/1903.08920).
+
+NOTE: for now, only "glmdisc-SEM" is available.
 
 ## Getting started
 
@@ -9,8 +13,6 @@ These instructions will get you a copy of the project up and running on your loc
 ### Prerequisites
 
 This code is supported on Python 3.
-
-As specified by the setup file, this package requires you to have packages sklearn, numpy, scipy, math, warnings and collections. For instructions on how to install these, please refer to their respective documentation.
 
 ### Installing the package
 
@@ -55,11 +57,9 @@ where *username*, *password*, *server* and *port* should be replaced by your own
 
 **What follows is a quick introduction to the problem of discretization and how this package answers the question.**
 
-**If you wish to see the package in action, please refer to the accompanying Jupyter Notebook.**
+<!--**If you wish to see the package in action, please refer to the accompanying Jupyter Notebook.**-->
 
-**If you seek specific assistance regarding the package or one of its function, please refer to the ReadTheDocs.**
-
-
+<!--**If you seek specific assistance regarding the package or one of its function, please refer to the ReadTheDocs.**-->
 
 ## Use case example
 
@@ -74,7 +74,7 @@ In practice, the statistical modeler has historical data about each customer's c
 
 ## Notations
 
-In the rest of the vignette, the random vector <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;$X=(X_j)_1^d$" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;$X=(X_j)_1^d$" title="$X=(X_j)_1^d$" /></a>  will designate the predictive features, i.e. the characteristics of a client. The random variable <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;Y&space;\in&space;\{0,1\}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;Y&space;\in&space;\{0,1\}" title="Y \in \{0,1\}" /></a>  will designate the label, i.e. if the client has defaulted (<a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;Y=1" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;Y=1" title="Y=1" /></a>) or not (<a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;Y=0" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;Y=0" title="Y=0" /></a>).
+In the rest of the vignette, the random vector <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;X=(X_j)_1^d" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;X=(X_j)_1^d" title="X=(X_j)_1^d" /></a>  will designate the predictive features, i.e. the characteristics of a client. The random variable <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;Y&space;\in&space;\{0,1\}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;Y&space;\in&space;\{0,1\}" title="Y \in \{0,1\}" /></a>  will designate the label, i.e. if the client has defaulted (<a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;Y=1" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;Y=1" title="Y=1" /></a>) or not (<a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;Y=0" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;Y=0" title="Y=0" /></a>).
 
 We are provided with an i.i.d. sample <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;(\mathbf{x},\mathbf{y})&space;=&space;(x_i,y_i)_1^n" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;(\mathbf{x},\mathbf{y})&space;=&space;(x_i,y_i)_1^n" title="(\mathbf{x},\mathbf{y}) = (x_i,y_i)_1^n" /></a> consisting in <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;n" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;n" title="n" /></a> observations of <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;X" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;X" title="X" /></a> and <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;Y" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;Y" title="Y" /></a>.
 
@@ -94,7 +94,7 @@ Fitting a logistic regression model on "raw" data presents several problems, amo
 
 ### Feature selection
 
-First, among all collected information on individuals, some are irrelevant for predicting <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;Y" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;Y" title="Y" /></a>. Their coefficient <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;\theta_j" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;\theta_j" title="\theta_j" /></a> should be 0  which might (eventually) be the case asymptotically (i.e. <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;$n&space;\rightarrow&space;\infty$" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;$n&space;\rightarrow&space;\infty$" title="$n \rightarrow \infty$" /></a>).
+First, among all collected information on individuals, some are irrelevant for predicting <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;Y" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;Y" title="Y" /></a>. Their coefficient <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;\theta_j" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;\theta_j" title="\theta_j" /></a> should be 0  which might (eventually) be the case asymptotically (i.e. <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;n&space;\rightarrow&space;\infty" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;n&space;\rightarrow&space;\infty" title="n \rightarrow \infty" /></a>).
 
 Second, some collected information are highly correlated and affect each other's coefficient estimation.
 
