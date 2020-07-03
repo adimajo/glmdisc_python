@@ -1,7 +1,6 @@
 [![PyPI version](https://badge.fury.io/py/glmdisc.svg)](https://badge.fury.io/py/glmdisc)
 [![PyPi Downloads](https://img.shields.io/pypi/dm/glmdisc)](https://img.shields.io/pypi/dm/glmdisc)
-![](https://github.com/adimajo/glmdisc-python/workflows/Python%20package/badge.svg)
-
+![Python package](https://github.com/adimajo/glmdisc_python/workflows/Python%20package/badge.svg)
 
 # Feature quantization for parsimonious and interpretable models
 
