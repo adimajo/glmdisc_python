@@ -50,7 +50,10 @@ def _calculate_shape(self):
 
     # Gérer les manquants des variables continues, dans un premier temps
     # comme une modalité à part
-    continu_complete_case = np.invert(np.isnan(self.predictors_cont))
+    if self.predictors_cont is not None:
+        continu_complete_case = np.invert(np.isnan(self.predictors_cont))
+    else:
+        continu_complete_case = None
     return n, d1, d2, continu_complete_case
 
 
@@ -256,7 +259,7 @@ def fit(self, predictors_cont, predictors_qual, labels):
         # On construit la base disjonctive nécessaire au modèle de régression
         # logistique
         base_disjonctive = current_encoder_edisc.transform(
-            X=edisc[self.train, :].astype(str)).toarray()
+            X=edisc.astype(str)).toarray()
 
         # On boucle sur les variables pour le tirage de e^j | reste
         for j in np.random.permutation(d1 + d2):
@@ -282,6 +285,15 @@ def fit(self, predictors_cont, predictors_qual, labels):
                 # On calcule e^j | x^j sur tout le monde
                 t = link[j].predict_proba(
                     self.predictors_cont[(continu_complete_case[:, j]), j].reshape(-1, 1))
+
+                # On gère le cas où une ou plusieurs modalités ont disparu de train
+                if t.shape[1] < y_p.shape[1]:
+                    modalites_manquantes = np.in1d(m[j],
+                                                   np.unique(edisc[self.train, :][continu_complete_case[self.train, j],
+                                                                                  j]))
+                    t2 = np.zeros((sum(continu_complete_case[:, j]), len(m[j])))
+                    t2[:, modalites_manquantes] = t
+                    t = t2.copy()
 
                 # On met à jour emap^j
                 emap[(continu_complete_case[:, j]), j] = np.argmax(t, axis=1)
@@ -334,3 +346,14 @@ def fit(self, predictors_cont, predictors_qual, labels):
                 t = t / (t.sum(axis=1)[:, None])
 
                 edisc[:, j] = vectorized_multinouilli(t, m[j])
+
+
+if __name__ == "__main__":
+    import glmdisc
+    n = 100
+    d = 2
+    x, y, theta = glmdisc.Glmdisc.generate_data(n, d)
+    model = glmdisc.Glmdisc()
+    cuts = ([0, 0.333, 0.666, 1])
+    xd = np.ndarray.copy(x)
+    model.fit(predictors_cont=x, predictors_qual=None, labels=y)
