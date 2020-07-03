@@ -38,12 +38,12 @@ def fit(self, predictors_cont, predictors_qual, labels):
     """
 
     # Tester la présence de labels
-    if not type(labels) is np.ndarray:
+    if not isinstance(labels, np.ndarray):
         raise ValueError('glmdisc only supports numpy.ndarray inputs')
 
     # Tester la présence d'au moins qual ou cont
     if predictors_cont is None and predictors_qual is None:
-        raise ValueError(('You must provide either qualitative or quantitative'
+        raise ValueError(('You must provide either qualitative or quantitative '
                          'features'))
 
     # Tester la présence de prédicteurs continus et de même longueur que labels
@@ -290,8 +290,9 @@ def fit(self, predictors_cont, predictors_qual, labels):
                     y_p[:, k] = model_edisc.predict_proba(np.column_stack(
                         (base_disjonctive[:, 0:(sum(list(map(len, m[0:j]))))],
                          modalites,
-                         base_disjonctive[:, (sum(list(map(len, m[0:(j + 1)])))):(sum(list(map(len, m))))])))[:, 1] * \
-                            (2 * np.ravel(self.labels) - 1) - np.ravel(self.labels) + 1
+                         base_disjonctive[:,
+                         (sum(list(map(len, m[0:(j + 1)])))):(sum(list(map(len, m))))]))
+                    )[:, 1] * (2 * np.ravel(self.labels) - 1) - np.ravel(self.labels) + 1
 
                 t = np.zeros((n, int(len(m[j]))))
 

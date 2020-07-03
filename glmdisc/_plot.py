@@ -96,7 +96,7 @@ def plot(self,
         # predictors_qual_number, on plot tout pour l'instant
         XX = gam.generate_X_grid()
         plt.rcParams['figure.figsize'] = (28, 8)
-        fig, axs = plt.subplots(1, d1+d2)
+        fig, axs = plt.subplots(1, d1 + d2)
         for i, ax in enumerate(axs):
             pdep, confi = gam.partial_dependence(XX, feature=i + 1, width=.95)
             ax.plot(XX[:, i], pdep)

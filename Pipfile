@@ -11,6 +11,7 @@ sphinx-rtd-theme = "*"
 flake8 = "*"
 pipenv-setup = "*"
 numpydoc = "*"
+wheel = "*"
 
 [packages]
 scikit-learn = ">=0.21.2"
