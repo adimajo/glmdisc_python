@@ -1,3 +1,8 @@
+[![PyPI version](https://badge.fury.io/py/glmdisc.svg)](https://badge.fury.io/py/glmdisc)
+[![PyPi Downloads](https://img.shields.io/pypi/dm/glmdisc)](https://img.shields.io/pypi/dm/glmdisc)
+![](https://github.com/adimajo/glmdisc-python/workflows/Python%20package/badge.svg)
+
+
 # Feature quantization for parsimonious and interpretable models
 
 Credit institutions are interested in the refunding probability of a loan given the applicant’s characteristics in order to assess the worthiness of the credit. For regulatory and interpretability reasons, the logistic regression is still widely used to learn this probability from the data. Although logistic regression handles naturally both quantitative and qualitative data, three pre-processing steps are usually performed: firstly, continuous features are discretized by assigning factor levels to pre-determined intervals; secondly, qualitative features, if they take numerous values, are grouped; thirdly, interactions (products between two different predictors) are sparsely introduced. By reinterpreting discretized (resp. grouped) features as latent variables, we are able, through the use of a Stochastic Expectation-Maximization (SEM) algorithm and a Gibbs sampler to find the best discretization (resp. grouping) scheme w.r.t. the logistic regression loss. For detecting interacting features, the same scheme is used by replacing the Gibbs sampler by a Metropolis-Hastings algorithm. The good performances of this approach are illustrated on simulated and real data from Credit Agricole Consumer Finance.

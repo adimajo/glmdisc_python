@@ -18,6 +18,7 @@ def read_md(file):
 # Fields marked as "Optional" may be commented out.
 
 setup(
+    setup_requires=['wheel'],
     extras_require={
         "dev": [
             "alabaster==0.7.12",

@@ -12,6 +12,7 @@ flake8 = "*"
 pipenv-setup = "*"
 numpydoc = "*"
 wheel = "*"
+codecov = "*"
 
 [packages]
 scikit-learn = ">=0.21.2"

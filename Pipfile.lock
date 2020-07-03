@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "329f83db119f855d78d6c27c60986a27ce2a0f76e4e07a498f44475f2779c4fc"
+            "sha256": "caf4a2ac15f8fe4567b2646da97f5f642afff19f575ae3220f6329a39a6b4b52"
         },
         "pipfile-spec": 6,
         "requires": {},
@@ -30,11 +30,11 @@
         },
         "joblib": {
             "hashes": [
-                "sha256:61e49189c84b3c5d99a969d314853f4d1d263316cc694bec17548ebaa9c47b6e",
-                "sha256:6825784ffda353cc8a1be573118085789e5b5d29401856b35b756645ab5aecb5"
+                "sha256:8f52bf24c64b608bf0b2563e0e47d6fcf516abc8cfafe10cfd98ad66d94f92d6",
+                "sha256:d348c5d4ae31496b2aa060d6d9b787864dd204f9480baaa52d18850cb43e9f49"
             ],
             "markers": "python_version >= '3.6'",
-            "version": "==0.15.1"
+            "version": "==0.16.0"
         },
         "kiwisolver": {
             "hashes": [
@@ -322,6 +322,15 @@
             "markers": "python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4'",
             "version": "==7.1.2"
         },
+        "codecov": {
+            "hashes": [
+                "sha256:491938ad774ea94a963d5d16354c7299e90422a33a353ba0d38d0943ed1d5091",
+                "sha256:b67bb8029e8340a7bf22c71cbece5bd18c96261fdebc2f105ee4d5a005bc8728",
+                "sha256:d8b8109f44edad03b24f5f189dac8de9b1e3dc3c791fa37eeaf8c7381503ec34"
+            ],
+            "index": "pypi",
+            "version": "==2.1.7"
+        },
         "colorama": {
             "hashes": [
                 "sha256:7d73d2a99753107a36ac6b455ee49046802e59d9d076ef8e47b61499fa29afff",
@@ -478,11 +487,11 @@
         },
         "numpydoc": {
             "hashes": [
-                "sha256:99e9c4ec51ff0dc17f7e15afcb26ba77a2f8ccc85a19dede40006a2b93cc903f",
-                "sha256:e481c0799dfda208b6a2c2cb28757fa6b6cbc4d6e43722173697996cf556df7f"
+                "sha256:c36fd6cb7ffdc9b4e165a43f67bf6271a7b024d0bb6b00ac468c9e2bfc76448e",
+                "sha256:c53d6311190b9e3b9285bc979390ba0257ba9acde5eca1a7065fc8dfca9d46e8"
             ],
             "index": "pypi",
-            "version": "==1.0.0"
+            "version": "==1.1.0"
         },
         "orderedmultidict": {
             "hashes": [

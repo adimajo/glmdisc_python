@@ -36,3 +36,19 @@ def test_args_fit():
         model.fit(predictors_cont=None,
                   predictors_qual=xd,
                   labels=y[0:50])
+
+
+def test_calculate_shape():
+    n = 100
+    d = 2
+    x, y, theta = glmdisc.Glmdisc.generate_data(n, d)
+    model = glmdisc.Glmdisc()
+    cuts = ([0, 0.333, 0.666, 1])
+    xd = np.ndarray.copy(x)
+    n2, d1, d2, continu_complete_case = model._calculate_shape()
+    assert n2 == n
+    assert d1 == d
+    assert continu_complete_case.shape == [100, 2]
+    assert continu_complete_case.all
+
+
