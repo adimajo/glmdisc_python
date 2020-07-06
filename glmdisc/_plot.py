@@ -18,6 +18,8 @@ def plot(self,
     Plots the stepwise function associating the continuous features to their
     discretization, the groupings made and the interactions.
 
+    .. todo:: explain this function better + clean + test args
+
     :param predictors_cont_number:
         Which continuous variable(s) should be plotted
         (between 1 and the number of columns in
@@ -29,31 +31,25 @@ def plot(self,
         (between 1 and the number of columns in
         predictors_qual).
     :type predictors_qual_number: str or int
+
+    :param plot_type: disc or logodd
+    :type plot_type: str
     """
     emap = self.discretize(self.predictors_cont,
                            self.predictors_qual).astype(str)
-    try:
-        d1 = self.predictors_cont.shape[1]
-    except AttributeError:
-        d1 = 0
-
-    try:
-        d2 = self.predictors_qual.shape[1]
-    except AttributeError:
-        d2 = 0
 
     if plot_type == "disc":
 
         if predictors_cont_number == "all":
-            for j in range(d1):
+            for j in range(self.d_cont):
                 plt.plot(self.predictors_cont[:, j].reshape(-1, 1),
                          emap.astype(str)[:, j], 'ro')
                 plt.show()
 
         if predictors_qual_number == "all":
-            for j in range(d2):
+            for j in range(self.d_qual):
                 plt.plot(self.predictors_qual[:, j].reshape(-1, 1),
-                         emap.astype(str)[:, j + d1], 'ro')
+                         emap.astype(str)[:, j + self.d_cont], 'ro')
                 plt.show()
 
         if not predictors_cont_number == "all":
@@ -71,7 +67,7 @@ def plot(self,
             if type(predictors_qual_number) == int and predictors_qual_number > 0:
                 plt.plot(self.predictors_qual[:,
                          predictors_qual_number - 1].reshape(-1, 1),
-                         emap.astype(str)[:, predictors_qual_number - 1 + d1],
+                         emap.astype(str)[:, predictors_qual_number - 1 + self.d_cont],
                          'ro')
                 plt.show()
             else:
@@ -86,7 +82,8 @@ def plot(self,
             np.isnan(self.predictors_cont).sum(axis=1).astype(bool))
 
         # Fit du GAM sur tout le monde
-        gam = LogisticGAM(dtype=['numerical' for _ in range(d1)] + ['categorical' for _ in range(d2)]).fit(
+        gam = LogisticGAM(dtype=['numerical' for _ in range(self.d_cont)] + ['categorical' for _ in range(
+            self.d_qual)]).fit(
             pd.concat([pd.DataFrame(self.predictors_cont[lignes_completes, :]).apply(
                 lambda x: x.astype('float')),
                 pd.DataFrame(self.predictors_qual[lignes_completes, :]).apply(
@@ -96,7 +93,7 @@ def plot(self,
         # predictors_qual_number, on plot tout pour l'instant
         XX = gam.generate_X_grid()
         plt.rcParams['figure.figsize'] = (28, 8)
-        fig, axs = plt.subplots(1, d1 + d2)
+        fig, axs = plt.subplots(1, self.d_cont + self.d_qual)
         for i, ax in enumerate(axs):
             pdep, confi = gam.partial_dependence(XX, feature=i + 1, width=.95)
             ax.plot(XX[:, i], pdep)

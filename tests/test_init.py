@@ -58,6 +58,9 @@ def test_iter():
     with pytest.raises(ValueError):
         glmdisc.Glmdisc(iter=-12)
 
+    with pytest.raises(ValueError):
+        glmdisc.Glmdisc(iter=100000000)
+
 
 def test_m_start():
     glmdisc.Glmdisc(m_start=10)

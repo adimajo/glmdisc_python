@@ -224,7 +224,6 @@ class Glmdisc:
 
     # Imported methods
     from ._bestFormula import best_formula
-    from ._contData import cont_data
     from ._discreteData import discrete_data
     from ._discretize import discretize
     from ._discretizeDummy import discretize_dummy
