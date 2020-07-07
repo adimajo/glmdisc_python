@@ -85,19 +85,19 @@ def _calculate_criterion(self, emap, model_emap, current_encoder_emap):
         return -(2 * model_emap.coef_.shape[1] - 2 * loglik)
 
     if self.criterion == 'bic' and not self.validation:
-        return -(log(n) * model_emap.coef_.shape[1] - 2 * loglik)
+        return -(log(self.n) * model_emap.coef_.shape[1] - 2 * loglik)
 
     if self.criterion == 'gini' and self.validation:
         return sk.metrics.roc_auc_score(
             self.labels[self.validate], model_emap.predict_proba(
                 X=current_encoder_emap.transform(
-                    emap[self.validate, :].astype(str))))
+                    emap[self.validate, :].astype(str)))[:, 1:])
 
     if self.criterion == 'gini' and not self.validation:
         return sk.metrics.roc_auc_score(
             self.labels[self.train], model_emap.predict_proba(
                 X=current_encoder_emap.transform(
-                    emap[self.train, :].astype(str))))
+                    emap[self.train, :].astype(str)))[:, 1:])
 
 
 def _init_disc(self, continu_complete_case):
@@ -132,17 +132,17 @@ def _split(self):
         self.train, self.validate, self.test_rows = np.split(np.random.choice(self.n,
                                                                               self.n,
                                                                               replace=False),
-                                                                              [int(.6 * self.n), int(.8 * self.n)])
+                                                             [int(.6 * self.n), int(.8 * self.n)])
     elif self.validation:
-        self.train, self.validate = np.split(np.random.choice(self.self.n, self.self.n, replace=False),
-                                             int(.6 * self.n))
+        self.train, self.validate = np.split(np.random.choice(self.n, self.n, replace=False),
+                                             [int(.6 * self.n)])
         self.test_rows = None
     elif self.test:
-        self.train, self.test_rows = np.split(np.random.choice(self.self.n, self.self.n, replace=False),
-                                              int(.6 * self.n))
+        self.train, self.test_rows = np.split(np.random.choice(self.n, self.n, replace=False),
+                                              [int(.6 * self.n)])
         self.validate = None
     else:
-        self.train = np.random.choice(self.self.n, self.self.n, replace=False)
+        self.train = np.random.choice(self.n, self.n, replace=False)
         self.validate = None
         self.test_rows = None
 

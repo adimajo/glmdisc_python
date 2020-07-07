@@ -18,7 +18,9 @@ def test_init():
     assert glmdisc_instance.affectations == []
     assert glmdisc_instance.best_encoder_emap == []
     assert glmdisc_instance.performance == -np.inf
-    assert glmdisc_instance.splitting == []
+    np.testing.assert_array_equal(glmdisc_instance.train, np.array([]))
+    np.testing.assert_array_equal(glmdisc_instance.validate, np.array([]))
+    np.testing.assert_array_equal(glmdisc_instance.test_rows, np.array([]))
 
 
 def test_criterion():

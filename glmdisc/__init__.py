@@ -220,7 +220,9 @@ class Glmdisc:
         self.affectations = []
         self.best_encoder_emap = []
         self.performance = -np.inf
-        self.splitting = []
+        self.train = np.array([])
+        self.validate = np.array([])
+        self.test_rows = np.array([])
 
     # Imported methods
     from ._bestFormula import best_formula

@@ -3,6 +3,9 @@
 import pytest
 import numpy as np
 import pandas as pd
+import sklearn as sk
+from math import log
+import random
 import glmdisc
 
 
@@ -74,12 +77,46 @@ def test_calculate_criterion():
     d = 2
     x, y, theta = glmdisc.Glmdisc.generate_data(n, d)
     model = glmdisc.Glmdisc(iter=11, criterion="bic")
+    random.seed(1)
+    np.random.seed(1)
     model.fit(predictors_cont=x, predictors_qual=None, labels=y)
-    model._calculate_criterion(emap, model_emap, current_encoder_emap)
+    training = model.train
+    emap = np.resize(np.array([np.where(
+        np.random.multinomial(1,
+                              pvals=[0.33, 0.33, 0.34]))[0][0] + 1 for _ in range(n*d)]),
+                     (n, d))
+
+    current_encoder_emap = sk.preprocessing.OneHotEncoder()
+    current_encoder_emap.fit(X=emap.astype(str))
+
+    model_emap = sk.linear_model.LogisticRegression(solver='liblinear',
+                                                    C=1e40,
+                                                    tol=0.001,
+                                                    max_iter=25,
+                                                    warm_start=False)
+    model_emap.fit(X=current_encoder_emap.transform(emap.astype(str)),
+                   y=y)
+
+    modele_bic = model._calculate_criterion(emap, model_emap, current_encoder_emap)
+    assert modele_bic < 0
 
     model = glmdisc.Glmdisc(iter=11, criterion="aic")
+    random.seed(1)
+    np.random.seed(1)
     model.fit(predictors_cont=x, predictors_qual=None, labels=y)
-    model._calculate_criterion(emap, model_emap, current_encoder_emap)
+    assert model._calculate_criterion(emap, model_emap, current_encoder_emap) == modele_bic
+
+    model = glmdisc.Glmdisc(iter=11, validation=False)
+    random.seed(1)
+    np.random.seed(1)
+    model.fit(predictors_cont=x, predictors_qual=None, labels=y)
+    modele_bic = model._calculate_criterion(emap, model_emap, current_encoder_emap)
+
+    model = glmdisc.Glmdisc(iter=11, criterion="aic", validation=False)
+    random.seed(1)
+    np.random.seed(1)
+    model.fit(predictors_cont=x, predictors_qual=None, labels=y)
+    assert model._calculate_criterion(emap, model_emap, current_encoder_emap) == modele_bic + (log(model.n) - 2) * model_emap.coef_.shape[1]
 
     model = glmdisc.Glmdisc(iter=11, criterion="gini")
     model.fit(predictors_cont=x, predictors_qual=None, labels=y)
@@ -97,5 +134,39 @@ def test_split():
     n = 100
     d = 2
     x, y, theta = glmdisc.Glmdisc.generate_data(n, d)
-    model = glmdisc.Glmdisc(iter=11, criterion="bic")
+    model = glmdisc.Glmdisc(iter=11)
+    random.seed(1)
+    np.random.seed(1)
+    model.fit(predictors_cont=x, predictors_qual=None, labels=y)
+    training = model.train
+    validating = model.validate
+    testing = model.test_rows
 
+    model = glmdisc.Glmdisc(iter=11)
+    random.seed(1)
+    np.random.seed(1)
+    model.fit(predictors_cont=x, predictors_qual=None, labels=y)
+    np.testing.assert_array_equal(training, model.train)
+    np.testing.assert_array_equal(validating, model.validate)
+    np.testing.assert_array_equal(testing, model.test_rows)
+    assert len(model.train) > 0
+    assert len(model.validate) > 0
+    assert len(model.test_rows) > 0
+
+    model = glmdisc.Glmdisc(iter=11, validation=False)
+    model.fit(predictors_cont=x, predictors_qual=None, labels=y)
+    assert len(model.train) > 0
+    assert model.validate is None
+    assert len(model.test_rows) > 0
+
+    model = glmdisc.Glmdisc(iter=11, test=False)
+    model.fit(predictors_cont=x, predictors_qual=None, labels=y)
+    assert len(model.train) > 0
+    assert len(model.validate) > 0
+    assert model.test_rows is None
+
+    model = glmdisc.Glmdisc(iter=11, validation=False, test=False)
+    model.fit(predictors_cont=x, predictors_qual=None, labels=y)
+    assert len(model.train) > 0
+    assert model.validate is None
+    assert model.test_rows is None
