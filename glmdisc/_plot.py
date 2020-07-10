@@ -98,6 +98,6 @@ def plot(self,
                 XX = gam.generate_X_grid(term=i)
                 ax.plot(XX[:, i], gam.partial_dependence(term=i, X=XX))
                 ax.plot(XX[:, i], gam.partial_dependence(term=i, X=XX, width=.95)[1], c='r', ls='--')
-            except ValueError:
+            except ValueError:  # pragma: no cover
                 continue
         plt.show(block=False)

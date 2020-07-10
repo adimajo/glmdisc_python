@@ -76,7 +76,7 @@ def discretize(self, predictors_cont, predictors_qual):
 
             emap[:, j] = np.argmax(t, axis=1)
 
-        else:
-            raise ValueError('Not quantitative nor qualitative?')
+        else:  # pragma: no cover
+            raise ValueError('Loophole: please open an issue at https://github.com/adimajo/glmdisc_python/issues')
 
     return emap

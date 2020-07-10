@@ -108,7 +108,7 @@ def test_discrete_data_both():
 
 
 def test_discrete_data_val_both():
-    n = 500
+    n = 1000
     d = 2
     x, y, theta = glmdisc.Glmdisc.generate_data(n, d)
     cuts = ([0, 0.333, 0.666, 1])
@@ -117,11 +117,11 @@ def test_discrete_data_val_both():
     for i in range(d):
         xd[:, i] = pd.cut(x[:, i], bins=cuts, labels=[0, 1, 2])
 
-    model = glmdisc.Glmdisc(validation=True, test=False, iter=50)
+    model = glmdisc.Glmdisc(validation=True, test=False, iter=100)
     model.fit(predictors_cont=x, predictors_qual=xd, labels=y)
     result = model.discrete_data()
     assert isinstance(result, scipy.sparse.csr.csr_matrix)
-    assert result.shape[0] == 200
+    assert result.shape[0] == 400
 
 
 def test_discrete_data_test_both():

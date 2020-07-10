@@ -40,5 +40,6 @@ jobs:
     - name: Build and check package
       run: |
         pipenv run pipenv-setup sync --dev
+        pipenv run pip install --upgrade keyring keyrings.alt
         python setup.py build sdist bdist_wheel
         pipenv run twine check dist/*
