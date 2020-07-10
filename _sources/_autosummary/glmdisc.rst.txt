@@ -1,0 +1,41 @@
+glmdisc
+=======
+
+.. automodule:: glmdisc
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      vectorized_multinouilli
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      Glmdisc
+   
+   
+
+   
+   
+   .. rubric:: Exceptions
+
+   .. autosummary::
+   
+      NotFittedError
+   
+   
+
+
+

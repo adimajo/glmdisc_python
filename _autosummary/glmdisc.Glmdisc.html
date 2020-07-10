@@ -1,0 +1,510 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>glmdisc.Glmdisc &mdash; glmdisc 0.1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="glmdisc.Glmdisc.best_formula" href="glmdisc.Glmdisc.best_formula.html" />
+    <link rel="prev" title="glmdisc" href="glmdisc.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> glmdisc
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="glmdisc.html">glmdisc</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">glmdisc.Glmdisc</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="glmdisc.Glmdisc.best_formula.html">glmdisc.Glmdisc.best_formula</a></li>
+<li class="toctree-l3"><a class="reference internal" href="glmdisc.Glmdisc.check_is_fitted.html">glmdisc.Glmdisc.check_is_fitted</a></li>
+<li class="toctree-l3"><a class="reference internal" href="glmdisc.Glmdisc.discrete_data.html">glmdisc.Glmdisc.discrete_data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="glmdisc.Glmdisc.discretize.html">glmdisc.Glmdisc.discretize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="glmdisc.Glmdisc.discretize_dummy.html">glmdisc.Glmdisc.discretize_dummy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="glmdisc.Glmdisc.fit.html">glmdisc.Glmdisc.fit</a></li>
+<li class="toctree-l3"><a class="reference internal" href="glmdisc.Glmdisc.generate_data.html">glmdisc.Glmdisc.generate_data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="glmdisc.Glmdisc.plot.html">glmdisc.Glmdisc.plot</a></li>
+<li class="toctree-l3"><a class="reference internal" href="glmdisc.Glmdisc.predict.html">glmdisc.Glmdisc.predict</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="glmdisc.Glmdisc.check_is_fitted.html">glmdisc.Glmdisc.check_is_fitted</a></li>
+<li class="toctree-l2"><a class="reference internal" href="glmdisc.Glmdisc.best_formula.html">glmdisc.Glmdisc.best_formula</a></li>
+<li class="toctree-l2"><a class="reference internal" href="glmdisc.Glmdisc.discrete_data.html">glmdisc.Glmdisc.discrete_data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="glmdisc.Glmdisc.discretize.html">glmdisc.Glmdisc.discretize</a></li>
+<li class="toctree-l2"><a class="reference internal" href="glmdisc.Glmdisc.discretize_dummy.html">glmdisc.Glmdisc.discretize_dummy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="glmdisc.Glmdisc.fit.html">glmdisc.Glmdisc.fit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="glmdisc.Glmdisc.plot.html">glmdisc.Glmdisc.plot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="glmdisc.Glmdisc.predict.html">glmdisc.Glmdisc.predict</a></li>
+<li class="toctree-l2"><a class="reference internal" href="glmdisc.Glmdisc.generate_data.html">glmdisc.Glmdisc.generate_data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="glmdisc.NotFittedError.html">glmdisc.NotFittedError</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">glmdisc</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="glmdisc.html">glmdisc</a> &raquo;</li>
+        
+      <li>glmdisc.Glmdisc</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/_autosummary/glmdisc.Glmdisc.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="glmdisc-glmdisc">
+<h1>glmdisc.Glmdisc<a class="headerlink" href="#glmdisc-glmdisc" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt id="glmdisc.Glmdisc">
+<em class="property">class </em><code class="sig-prename descclassname">glmdisc.</code><code class="sig-name descname">Glmdisc</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">test</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">validation</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">criterion</span><span class="o">=</span><span class="default_value">'bic'</span></em>, <em class="sig-param"><span class="n">iter</span><span class="o">=</span><span class="default_value">100</span></em>, <em class="sig-param"><span class="n">m_start</span><span class="o">=</span><span class="default_value">20</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/glmdisc.html#Glmdisc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#glmdisc.Glmdisc" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class implements a supervised multivariate discretization method,
+factor levels grouping and interaction discovery for logistic regression.</p>
+<dl class="py attribute">
+<dt id="glmdisc.Glmdisc.test">
+<code class="sig-name descname">test</code><a class="headerlink" href="#glmdisc.Glmdisc.test" title="Permalink to this definition">¶</a></dt>
+<dd><blockquote>
+<div><p>Boolean (T/F) specifying if a test set is required.
+If True, the provided data is split to provide 20%
+of observations in a test set and the reported
+performance is the Gini index on test set.</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="glmdisc.Glmdisc.validation">
+<code class="sig-name descname">validation</code><a class="headerlink" href="#glmdisc.Glmdisc.validation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Boolean (T/F) specifying if a validation set is
+required. If True, the provided data is split to
+provide 20% of observations in a validation set
+and the reported performance is the Gini index on
+the validation set (if no test=False). The quality
+of the discretization at each step is evaluated
+using the Gini index on the validation set, so
+criterion must be set to “gini”.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="glmdisc.Glmdisc.criterion">
+<code class="sig-name descname">criterion</code><a class="headerlink" href="#glmdisc.Glmdisc.criterion" title="Permalink to this definition">¶</a></dt>
+<dd><p>The criterion to be used to assess the
+goodness-of-fit of the discretization: “bic” or
+“aic” if no validation set, else “gini”.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="glmdisc.Glmdisc.iter">
+<code class="sig-name descname">iter</code><a class="headerlink" href="#glmdisc.Glmdisc.iter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of MCMC steps to perform. The more the
+better, but it may be more intelligent to use
+several MCMCs. Computation time can increase
+dramatically.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="glmdisc.Glmdisc.m_start">
+<code class="sig-name descname">m_start</code><a class="headerlink" href="#glmdisc.Glmdisc.m_start" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of initial discretization intervals for all
+variables. If <code class="code docutils literal notranslate"><span class="pre">m_start</span></code> is bigger than the number of
+factor levels for a given variable in
+predictors_qual, m_start is set (for this variable
+only) to this variable’s number of factor levels.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="glmdisc.Glmdisc.criterion_iter">
+<code class="sig-name descname">criterion_iter</code><a class="headerlink" href="#glmdisc.Glmdisc.criterion_iter" title="Permalink to this definition">¶</a></dt>
+<dd><p>The value of the criterion wished to be optimized
+over the iterations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)">list</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="glmdisc.Glmdisc.best_link">
+<code class="sig-name descname">best_link</code><a class="headerlink" href="#glmdisc.Glmdisc.best_link" title="Permalink to this definition">¶</a></dt>
+<dd><p>The best link function between the original
+features and their quantized counterparts that
+allows to quantize the data after learning.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)">list</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt>
+<code class="sig-name descname">best_reglog:</code></dt>
+<dd><p>The best logistic regression on quantized data found with best_link.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html#sklearn.linear_model.LogisticRegression" title="(in scikit-learn v0.23)">sklearn.linear_model.LogisticRegression</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="glmdisc.Glmdisc.affectations">
+<code class="sig-name descname">affectations</code><a class="headerlink" href="#glmdisc.Glmdisc.affectations" title="Permalink to this definition">¶</a></dt>
+<dd><p>The label encoder of each original feature.
+best_encoder_emap (list): The label encoder of each of the best_link.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)">list</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt>
+<code class="sig-name descname">performance:</code></dt>
+<dd><p>The best ‘criterion’ obtained.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)">list</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="glmdisc.Glmdisc.splitting">
+<code class="sig-name descname">splitting</code><a class="headerlink" href="#glmdisc.Glmdisc.splitting" title="Permalink to this definition">¶</a></dt>
+<dd><p>The line rows corresponding to the splits.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)">list</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="glmdisc.Glmdisc.best_formula.html#glmdisc.Glmdisc.best_formula" title="glmdisc.Glmdisc.best_formula"><code class="xref py py-obj docutils literal notranslate"><span class="pre">best_formula</span></code></a>()</p></td>
+<td><p>Returns the best quantization found by the MCMC and prints it.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="glmdisc.Glmdisc.check_is_fitted.html#glmdisc.Glmdisc.check_is_fitted" title="glmdisc.Glmdisc.check_is_fitted"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_is_fitted</span></code></a>()</p></td>
+<td><p>Perform is_fitted validation for estimator.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="glmdisc.Glmdisc.discrete_data.html#glmdisc.Glmdisc.discrete_data" title="glmdisc.Glmdisc.discrete_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">discrete_data</span></code></a>()</p></td>
+<td><p>Returns the best discrete data (train, validation or test) found by the MCMC.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="glmdisc.Glmdisc.discretize.html#glmdisc.Glmdisc.discretize" title="glmdisc.Glmdisc.discretize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">discretize</span></code></a>(predictors_cont, predictors_qual)</p></td>
+<td><p>Discretizes new continuous and categorical features using a previously fitted glmdisc object.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="glmdisc.Glmdisc.discretize_dummy.html#glmdisc.Glmdisc.discretize_dummy" title="glmdisc.Glmdisc.discretize_dummy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">discretize_dummy</span></code></a>(predictors_cont, …)</p></td>
+<td><p>Discretizes new continuous and categorical features using a previously fitted glmdisc object as Dummy Variables usable with the best_reglog object.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="glmdisc.Glmdisc.fit.html#glmdisc.Glmdisc.fit" title="glmdisc.Glmdisc.fit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit</span></code></a>(predictors_cont, predictors_qual, labels)</p></td>
+<td><p>Fits the Glmdisc object.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="glmdisc.Glmdisc.generate_data.html#glmdisc.Glmdisc.generate_data" title="glmdisc.Glmdisc.generate_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">generate_data</span></code></a>(n, d[, theta, seed])</p></td>
+<td><p>Generates some toy continuous data that gets discretized, and a label is drawn from a logistic regression given the discretized features.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="glmdisc.Glmdisc.plot.html#glmdisc.Glmdisc.plot" title="glmdisc.Glmdisc.plot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot</span></code></a>([predictors_cont_number, …])</p></td>
+<td><p>Plots the stepwise function associating the continuous features to their discretization, the groupings made and the interactions.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="glmdisc.Glmdisc.predict.html#glmdisc.Glmdisc.predict" title="glmdisc.Glmdisc.predict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">predict</span></code></a>(predictors_cont, predictors_qual)</p></td>
+<td><p>Predicts the label values with new continuous and categorical features using a previously fitted glmdisc object.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt id="glmdisc.Glmdisc.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">test</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">validation</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">criterion</span><span class="o">=</span><span class="default_value">'bic'</span></em>, <em class="sig-param"><span class="n">iter</span><span class="o">=</span><span class="default_value">100</span></em>, <em class="sig-param"><span class="n">m_start</span><span class="o">=</span><span class="default_value">20</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/glmdisc.html#Glmdisc.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#glmdisc.Glmdisc.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initializes self by checking if its arguments are appropriately specified.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>test</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – Boolean specifying if a test set is required.
+If True, the provided data is split to provide 20%
+of observations in a test set and the reported
+performance is the Gini index on test set.</p></li>
+<li><p><strong>validation</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – Boolean (T/F) specifying if a validation set is
+required. If True, the provided data is split to
+provide 20% of observations in a validation set
+and the reported performance is the Gini index on
+the validation set (if no test=False). The quality
+of the discretization at each step is evaluated
+using the Gini index on the validation set, so
+criterion must be set to “gini”.</p></li>
+<li><p><strong>criterion</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The criterion to be used to assess the
+goodness-of-fit of the discretization: “bic” or
+“aic” if no validation set, else “gini”.</p></li>
+<li><p><strong>iter</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – Number of MCMC steps to perform. The more the
+better, but it may be more intelligent to use
+several MCMCs. Computation time can increase
+dramatically. Defaults to 100.</p></li>
+<li><p><strong>m_start</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – Number of initial discretization intervals for all
+variables. If <code class="code docutils literal notranslate"><span class="pre">m_start</span></code> is bigger than the number of
+factor levels for a given variable in
+<code class="code docutils literal notranslate"><span class="pre">predictors_qual</span></code>, <code class="code docutils literal notranslate"><span class="pre">m_start</span></code> is set (for this variable
+only) to this variable’s number of factor levels. Defaults to 20.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition-todo admonition" id="id1">
+<p class="admonition-title">Todo</p>
+<p>Gérer un try catch pour warm start ?</p>
+</div>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#glmdisc.Glmdisc.__init__" title="glmdisc.Glmdisc.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>([test, validation, criterion, …])</p></td>
+<td><p>Initializes self by checking if its arguments are appropriately specified.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="glmdisc.Glmdisc.best_formula.html#glmdisc.Glmdisc.best_formula" title="glmdisc.Glmdisc.best_formula"><code class="xref py py-obj docutils literal notranslate"><span class="pre">best_formula</span></code></a>()</p></td>
+<td><p>Returns the best quantization found by the MCMC and prints it.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="glmdisc.Glmdisc.check_is_fitted.html#glmdisc.Glmdisc.check_is_fitted" title="glmdisc.Glmdisc.check_is_fitted"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_is_fitted</span></code></a>()</p></td>
+<td><p>Perform is_fitted validation for estimator.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="glmdisc.Glmdisc.discrete_data.html#glmdisc.Glmdisc.discrete_data" title="glmdisc.Glmdisc.discrete_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">discrete_data</span></code></a>()</p></td>
+<td><p>Returns the best discrete data (train, validation or test) found by the MCMC.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="glmdisc.Glmdisc.discretize.html#glmdisc.Glmdisc.discretize" title="glmdisc.Glmdisc.discretize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">discretize</span></code></a>(predictors_cont, predictors_qual)</p></td>
+<td><p>Discretizes new continuous and categorical features using a previously fitted glmdisc object.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="glmdisc.Glmdisc.discretize_dummy.html#glmdisc.Glmdisc.discretize_dummy" title="glmdisc.Glmdisc.discretize_dummy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">discretize_dummy</span></code></a>(predictors_cont, …)</p></td>
+<td><p>Discretizes new continuous and categorical features using a previously fitted glmdisc object as Dummy Variables usable with the best_reglog object.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="glmdisc.Glmdisc.fit.html#glmdisc.Glmdisc.fit" title="glmdisc.Glmdisc.fit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit</span></code></a>(predictors_cont, predictors_qual, labels)</p></td>
+<td><p>Fits the Glmdisc object.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="glmdisc.Glmdisc.generate_data.html#glmdisc.Glmdisc.generate_data" title="glmdisc.Glmdisc.generate_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">generate_data</span></code></a>(n, d[, theta, seed])</p></td>
+<td><p>Generates some toy continuous data that gets discretized, and a label is drawn from a logistic regression given the discretized features.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="glmdisc.Glmdisc.plot.html#glmdisc.Glmdisc.plot" title="glmdisc.Glmdisc.plot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot</span></code></a>([predictors_cont_number, …])</p></td>
+<td><p>Plots the stepwise function associating the continuous features to their discretization, the groupings made and the interactions.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="glmdisc.Glmdisc.predict.html#glmdisc.Glmdisc.predict" title="glmdisc.Glmdisc.predict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">predict</span></code></a>(predictors_cont, predictors_qual)</p></td>
+<td><p>Predicts the label values with new continuous and categorical features using a previously fitted glmdisc object.</p></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="glmdisc.Glmdisc.best_formula.html" class="btn btn-neutral float-right" title="glmdisc.Glmdisc.best_formula" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="glmdisc.html" class="btn btn-neutral float-left" title="glmdisc" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, Adrien Ehrhardt
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

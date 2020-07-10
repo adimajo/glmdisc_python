@@ -1,0 +1,6 @@
+glmdisc.Glmdisc.best\_formula
+=============================
+
+.. currentmodule:: glmdisc
+
+.. automethod:: Glmdisc.best_formula

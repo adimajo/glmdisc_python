@@ -1,0 +1,6 @@
+glmdisc.Glmdisc.check\_is\_fitted
+=================================
+
+.. currentmodule:: glmdisc
+
+.. automethod:: Glmdisc.check_is_fitted

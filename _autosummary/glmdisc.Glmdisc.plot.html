@@ -1,0 +1,268 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>glmdisc.Glmdisc.plot &mdash; glmdisc 0.1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="glmdisc.Glmdisc.predict" href="glmdisc.Glmdisc.predict.html" />
+    <link rel="prev" title="glmdisc.Glmdisc.generate_data" href="glmdisc.Glmdisc.generate_data.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> glmdisc
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="glmdisc.html">glmdisc</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="glmdisc.Glmdisc.html">glmdisc.Glmdisc</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="glmdisc.Glmdisc.best_formula.html">glmdisc.Glmdisc.best_formula</a></li>
+<li class="toctree-l3"><a class="reference internal" href="glmdisc.Glmdisc.check_is_fitted.html">glmdisc.Glmdisc.check_is_fitted</a></li>
+<li class="toctree-l3"><a class="reference internal" href="glmdisc.Glmdisc.discrete_data.html">glmdisc.Glmdisc.discrete_data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="glmdisc.Glmdisc.discretize.html">glmdisc.Glmdisc.discretize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="glmdisc.Glmdisc.discretize_dummy.html">glmdisc.Glmdisc.discretize_dummy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="glmdisc.Glmdisc.fit.html">glmdisc.Glmdisc.fit</a></li>
+<li class="toctree-l3"><a class="reference internal" href="glmdisc.Glmdisc.generate_data.html">glmdisc.Glmdisc.generate_data</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">glmdisc.Glmdisc.plot</a></li>
+<li class="toctree-l3"><a class="reference internal" href="glmdisc.Glmdisc.predict.html">glmdisc.Glmdisc.predict</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="glmdisc.Glmdisc.check_is_fitted.html">glmdisc.Glmdisc.check_is_fitted</a></li>
+<li class="toctree-l2"><a class="reference internal" href="glmdisc.Glmdisc.best_formula.html">glmdisc.Glmdisc.best_formula</a></li>
+<li class="toctree-l2"><a class="reference internal" href="glmdisc.Glmdisc.discrete_data.html">glmdisc.Glmdisc.discrete_data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="glmdisc.Glmdisc.discretize.html">glmdisc.Glmdisc.discretize</a></li>
+<li class="toctree-l2"><a class="reference internal" href="glmdisc.Glmdisc.discretize_dummy.html">glmdisc.Glmdisc.discretize_dummy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="glmdisc.Glmdisc.fit.html">glmdisc.Glmdisc.fit</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">glmdisc.Glmdisc.plot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="glmdisc.Glmdisc.predict.html">glmdisc.Glmdisc.predict</a></li>
+<li class="toctree-l2"><a class="reference internal" href="glmdisc.Glmdisc.generate_data.html">glmdisc.Glmdisc.generate_data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="glmdisc.NotFittedError.html">glmdisc.NotFittedError</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">glmdisc</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="glmdisc.html">glmdisc</a> &raquo;</li>
+        
+          <li><a href="glmdisc.Glmdisc.html">glmdisc.Glmdisc</a> &raquo;</li>
+        
+      <li>glmdisc.Glmdisc.plot</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/_autosummary/glmdisc.Glmdisc.plot.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="glmdisc-glmdisc-plot">
+<h1>glmdisc.Glmdisc.plot<a class="headerlink" href="#glmdisc-glmdisc-plot" title="Permalink to this headline">¶</a></h1>
+<dl class="py method">
+<dt id="glmdisc.Glmdisc.plot">
+<code class="sig-prename descclassname">Glmdisc.</code><code class="sig-name descname">plot</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">predictors_cont_number</span><span class="o">=</span><span class="default_value">'all'</span></em>, <em class="sig-param"><span class="n">predictors_qual_number</span><span class="o">=</span><span class="default_value">'all'</span></em>, <em class="sig-param"><span class="n">plot_type</span><span class="o">=</span><span class="default_value">'disc'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#glmdisc.Glmdisc.plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots the stepwise function associating the continuous features to their
+discretization, the groupings made and the interactions.</p>
+<div class="admonition-todo admonition" id="id1">
+<p class="admonition-title">Todo</p>
+<p>explain this function better + clean + test args</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>predictors_cont_number</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – Which continuous variable(s) should be plotted
+(between 1 and the number of columns in
+predictors_cont).</p></li>
+<li><p><strong>predictors_qual_number</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – Which categorical variable(s) should be plotted
+(between 1 and the number of columns in
+predictors_qual).</p></li>
+<li><p><strong>plot_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – disc or logodd</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="glmdisc.Glmdisc.predict.html" class="btn btn-neutral float-right" title="glmdisc.Glmdisc.predict" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="glmdisc.Glmdisc.generate_data.html" class="btn btn-neutral float-left" title="glmdisc.Glmdisc.generate_data" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, Adrien Ehrhardt
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,6 @@
+glmdisc.Glmdisc.discrete\_data
+==============================
+
+.. currentmodule:: glmdisc
+
+.. automethod:: Glmdisc.discrete_data

@@ -1,0 +1,6 @@
+glmdisc.Glmdisc.fit
+===================
+
+.. currentmodule:: glmdisc
+
+.. automethod:: Glmdisc.fit

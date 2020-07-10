@@ -1,0 +1,31 @@
+glmdisc.Glmdisc
+===============
+
+.. currentmodule:: glmdisc
+
+.. autoclass:: Glmdisc
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~Glmdisc.__init__
+      ~Glmdisc.best_formula
+      ~Glmdisc.check_is_fitted
+      ~Glmdisc.discrete_data
+      ~Glmdisc.discretize
+      ~Glmdisc.discretize_dummy
+      ~Glmdisc.fit
+      ~Glmdisc.generate_data
+      ~Glmdisc.plot
+      ~Glmdisc.predict
+   
+   
+
+   
+   
+   

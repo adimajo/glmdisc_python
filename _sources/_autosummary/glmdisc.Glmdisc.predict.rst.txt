@@ -1,0 +1,6 @@
+glmdisc.Glmdisc.predict
+=======================
+
+.. currentmodule:: glmdisc
+
+.. automethod:: Glmdisc.predict

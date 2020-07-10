@@ -1,0 +1,6 @@
+glmdisc.Glmdisc.plot
+====================
+
+.. currentmodule:: glmdisc
+
+.. automethod:: Glmdisc.plot

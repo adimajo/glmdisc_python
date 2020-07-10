@@ -1,0 +1,471 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>glmdisc &mdash; glmdisc 0.1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> glmdisc
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../_autosummary/glmdisc.html">glmdisc</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">glmdisc</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="index.html">Module code</a> &raquo;</li>
+        
+      <li>glmdisc</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for glmdisc</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;This module is dedicated to preprocessing tasks for logistic regression and</span>
+<span class="sd">post-learning graphical tools.</span>
+
+<span class="sd">.. autosummary::</span>
+<span class="sd">    :toctree:</span>
+
+<span class="sd">    Glmdisc</span>
+<span class="sd">    Glmdisc.check_is_fitted</span>
+<span class="sd">    Glmdisc.best_formula</span>
+<span class="sd">    Glmdisc.discrete_data</span>
+<span class="sd">    Glmdisc.discretize</span>
+<span class="sd">    Glmdisc.discretize_dummy</span>
+<span class="sd">    Glmdisc.fit</span>
+<span class="sd">    Glmdisc.plot</span>
+<span class="sd">    Glmdisc.predict</span>
+<span class="sd">    Glmdisc.generate_data</span>
+<span class="sd">    NotFittedError</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">sklearn</span> <span class="k">as</span> <span class="nn">sk</span>
+<span class="kn">from</span> <span class="nn">loguru</span> <span class="kn">import</span> <span class="n">logger</span>
+
+
+<div class="viewcode-block" id="NotFittedError"><a class="viewcode-back" href="../_autosummary/glmdisc.NotFittedError.html#glmdisc.NotFittedError">[docs]</a><span class="k">class</span> <span class="nc">NotFittedError</span><span class="p">(</span><span class="n">sk</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">NotFittedError</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Exception class to raise if estimator is used before fitting.</span>
+<span class="sd">    This class inherits from both NotFittedError from sklearn which</span>
+<span class="sd">    itself inherits from ValueError and AttributeError to help with</span>
+<span class="sd">    exception handling and backward compatibility.</span>
+<span class="sd">    &quot;&quot;&quot;</span></div>
+
+
+<span class="k">def</span> <span class="nf">vectorized_multinouilli</span><span class="p">(</span><span class="n">prob_matrix</span><span class="p">,</span> <span class="n">items</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A vectorized version of multinouilli sampling.</span>
+
+<span class="sd">    .. todo:: check that the number of columns of prob_matrix is the same as the number of elements in items</span>
+
+<span class="sd">    :param prob_matrix: A probability matrix of size n (number of training</span>
+<span class="sd">        examples) * m[j] (the factor levels to sample from).</span>
+<span class="sd">    :type prob_matrix: numpy.array</span>
+
+<span class="sd">    :param list items: The factor levels to sample from.</span>
+
+<span class="sd">    :returns: The drawn factor levels for each observation.</span>
+<span class="sd">    :rtype: numpy.array</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">s</span> <span class="o">=</span> <span class="n">prob_matrix</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">prob_matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="n">k</span> <span class="o">=</span> <span class="p">(</span><span class="n">s</span> <span class="o">&lt;</span> <span class="n">r</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">items</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="Glmdisc"><a class="viewcode-back" href="../_autosummary/glmdisc.Glmdisc.html#glmdisc.Glmdisc">[docs]</a><span class="k">class</span> <span class="nc">Glmdisc</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class implements a supervised multivariate discretization method,</span>
+<span class="sd">    factor levels grouping and interaction discovery for logistic regression.</span>
+
+<span class="sd">    .. attribute:: test</span>
+
+<span class="sd">        Boolean (T/F) specifying if a test set is required.</span>
+<span class="sd">        If True, the provided data is split to provide 20%</span>
+<span class="sd">        of observations in a test set and the reported</span>
+<span class="sd">        performance is the Gini index on test set.</span>
+
+<span class="sd">       :type: bool</span>
+
+<span class="sd">    .. attribute:: validation</span>
+
+<span class="sd">        Boolean (T/F) specifying if a validation set is</span>
+<span class="sd">        required. If True, the provided data is split to</span>
+<span class="sd">        provide 20% of observations in a validation set</span>
+<span class="sd">        and the reported performance is the Gini index on</span>
+<span class="sd">        the validation set (if no test=False). The quality</span>
+<span class="sd">        of the discretization at each step is evaluated</span>
+<span class="sd">        using the Gini index on the validation set, so</span>
+<span class="sd">        criterion must be set to &quot;gini&quot;.</span>
+
+<span class="sd">        :type: bool</span>
+
+<span class="sd">    .. attribute:: criterion</span>
+
+<span class="sd">        The criterion to be used to assess the</span>
+<span class="sd">        goodness-of-fit of the discretization: &quot;bic&quot; or</span>
+<span class="sd">        &quot;aic&quot; if no validation set, else &quot;gini&quot;.</span>
+
+<span class="sd">        :type: str</span>
+
+<span class="sd">    .. attribute:: iter</span>
+
+<span class="sd">        Number of MCMC steps to perform. The more the</span>
+<span class="sd">        better, but it may be more intelligent to use</span>
+<span class="sd">        several MCMCs. Computation time can increase</span>
+<span class="sd">        dramatically.</span>
+
+<span class="sd">        :type: int</span>
+
+<span class="sd">    .. attribute:: m_start</span>
+
+<span class="sd">        Number of initial discretization intervals for all</span>
+<span class="sd">        variables. If :code:`m_start` is bigger than the number of</span>
+<span class="sd">        factor levels for a given variable in</span>
+<span class="sd">        predictors_qual, m_start is set (for this variable</span>
+<span class="sd">        only) to this variable&#39;s number of factor levels.</span>
+
+<span class="sd">        :type: int</span>
+
+<span class="sd">    .. attribute:: criterion_iter</span>
+
+<span class="sd">        The value of the criterion wished to be optimized</span>
+<span class="sd">        over the iterations.</span>
+
+<span class="sd">        :type: list</span>
+
+<span class="sd">    .. attribute:: best_link</span>
+
+<span class="sd">        The best link function between the original</span>
+<span class="sd">        features and their quantized counterparts that</span>
+<span class="sd">        allows to quantize the data after learning.</span>
+
+<span class="sd">        :type: list</span>
+
+<span class="sd">    .. attribute:: best_reglog:</span>
+
+<span class="sd">        The best logistic regression on quantized data found with best_link.</span>
+
+<span class="sd">        :type: sklearn.linear_model.LogisticRegression</span>
+
+<span class="sd">    .. attribute:: affectations</span>
+
+<span class="sd">        The label encoder of each original feature.</span>
+<span class="sd">        best_encoder_emap (list): The label encoder of each of the best_link.</span>
+
+<span class="sd">        :type: list</span>
+
+<span class="sd">    .. attribute:: performance:</span>
+
+<span class="sd">        The best &#39;criterion&#39; obtained.</span>
+
+<span class="sd">        :type: list</span>
+
+<span class="sd">    .. attribute:: splitting</span>
+
+<span class="sd">        The line rows corresponding to the splits.</span>
+
+<span class="sd">        :type: list</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="Glmdisc.__init__"><a class="viewcode-back" href="../_autosummary/glmdisc.Glmdisc.html#glmdisc.Glmdisc.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">validation</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">criterion</span><span class="o">=</span><span class="s2">&quot;bic&quot;</span><span class="p">,</span> <span class="nb">iter</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">m_start</span><span class="o">=</span><span class="mi">20</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initializes self by checking if its arguments are appropriately specified.</span>
+
+<span class="sd">        :param bool test: Boolean specifying if a test set is required.</span>
+<span class="sd">                            If True, the provided data is split to provide 20%</span>
+<span class="sd">                            of observations in a test set and the reported</span>
+<span class="sd">                            performance is the Gini index on test set.</span>
+
+<span class="sd">        :param bool validation: Boolean (T/F) specifying if a validation set is</span>
+<span class="sd">                            required. If True, the provided data is split to</span>
+<span class="sd">                            provide 20% of observations in a validation set</span>
+<span class="sd">                            and the reported performance is the Gini index on</span>
+<span class="sd">                            the validation set (if no test=False). The quality</span>
+<span class="sd">                            of the discretization at each step is evaluated</span>
+<span class="sd">                            using the Gini index on the validation set, so</span>
+<span class="sd">                            criterion must be set to &quot;gini&quot;.</span>
+
+<span class="sd">        :param str criterion: The criterion to be used to assess the</span>
+<span class="sd">                            goodness-of-fit of the discretization: &quot;bic&quot; or</span>
+<span class="sd">                            &quot;aic&quot; if no validation set, else &quot;gini&quot;.</span>
+
+<span class="sd">        :param int iter: Number of MCMC steps to perform. The more the</span>
+<span class="sd">                            better, but it may be more intelligent to use</span>
+<span class="sd">                            several MCMCs. Computation time can increase</span>
+<span class="sd">                            dramatically. Defaults to 100.</span>
+
+<span class="sd">        :param int m_start: Number of initial discretization intervals for all</span>
+<span class="sd">                            variables. If :code:`m_start` is bigger than the number of</span>
+<span class="sd">                            factor levels for a given variable in</span>
+<span class="sd">                            :code:`predictors_qual`, :code:`m_start` is set (for this variable</span>
+<span class="sd">                            only) to this variable&#39;s number of factor levels. Defaults to 20.</span>
+
+<span class="sd">        .. todo:: Gérer un try catch pour warm start ?</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Tests des variables d&#39;entrée</span>
+
+        <span class="c1"># Le critère doit être un des trois de la liste</span>
+        <span class="k">if</span> <span class="n">criterion</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;gini&#39;</span><span class="p">,</span> <span class="s1">&#39;aic&#39;</span><span class="p">,</span> <span class="s1">&#39;bic&#39;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Criterion must be one of Gini, Aic, Bic&#39;</span><span class="p">)</span>
+
+        <span class="c1"># test est bool</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">type</span><span class="p">(</span><span class="n">test</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">bool</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;test must be boolean&#39;</span><span class="p">)</span>
+
+        <span class="c1"># validation est bool</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">type</span><span class="p">(</span><span class="n">validation</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">bool</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;validation must be boolean&#39;</span><span class="p">)</span>
+
+        <span class="c1"># iter doit être suffisamment grand</span>
+        <span class="k">if</span> <span class="nb">iter</span> <span class="o">&lt;=</span> <span class="mi">10</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;iter is too low / negative. Please set 10 &lt; iter &lt; 100 000&#39;</span><span class="p">)</span>
+
+        <span class="c1"># iter doit être suffisamment petit</span>
+        <span class="k">if</span> <span class="nb">iter</span> <span class="o">&gt;=</span> <span class="mi">100000</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;iter is too high, it will take years to finish! Please set 10 &lt; iter &lt; 100 000&#39;</span><span class="p">)</span>
+
+        <span class="c1"># m_start doit être pas déconnant</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="mi">2</span> <span class="o">&lt;=</span> <span class="n">m_start</span> <span class="o">&lt;=</span> <span class="mi">50</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Please set 2 &lt;= m_start &lt;= 50&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">validation</span> <span class="ow">and</span> <span class="n">criterion</span> <span class="o">==</span> <span class="s1">&#39;gini&#39;</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Using Gini index on training set might yield an overfitted model&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">validation</span> <span class="ow">and</span> <span class="n">criterion</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;aic&#39;</span><span class="p">,</span> <span class="s1">&#39;bic&#39;</span><span class="p">]:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;No need to penalize the log-likelihood when a validation set is used. &#39;</span>
+                           <span class="s1">&#39;Using log-likelihood instead.&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Attributes from parameters from __init__</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">test</span> <span class="o">=</span> <span class="n">test</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">validation</span> <span class="o">=</span> <span class="n">validation</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">criterion</span> <span class="o">=</span> <span class="n">criterion</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">iter</span> <span class="o">=</span> <span class="nb">iter</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">m_start</span> <span class="o">=</span> <span class="n">m_start</span>
+
+        <span class="c1"># Attributes from fit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">d_cont</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">d_qual</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">predictors_cont</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">predictors_qual</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">predictors_labels</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">criterion_iter</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">best_link</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">best_reglog</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">affectations</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">best_encoder_emap</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">performance</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">train</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">validate</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">test_rows</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span></div>
+
+<div class="viewcode-block" id="Glmdisc.check_is_fitted"><a class="viewcode-back" href="../_autosummary/glmdisc.Glmdisc.check_is_fitted.html#glmdisc.Glmdisc.check_is_fitted">[docs]</a>    <span class="k">def</span> <span class="nf">check_is_fitted</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Perform is_fitted validation for estimator.</span>
+<span class="sd">        Checks if the estimator is fitted by verifying the presence of</span>
+<span class="sd">        fitted attributes (ending with a trailing underscore) and otherwise</span>
+<span class="sd">        raises a NotFittedError with the given message.</span>
+<span class="sd">        This utility is meant to be used internally by estimators themselves,</span>
+<span class="sd">        typically in their own predict / transform methods.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">sk</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">validation</span><span class="o">.</span><span class="n">check_is_fitted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">best_reglog</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">link</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">best_link</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">link</span><span class="p">,</span> <span class="n">sk</span><span class="o">.</span><span class="n">linear_model</span><span class="o">.</span><span class="n">LogisticRegression</span><span class="p">):</span>
+                    <span class="n">sk</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">validation</span><span class="o">.</span><span class="n">check_is_fitted</span><span class="p">(</span><span class="n">link</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">sk</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">NotFittedError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">NotFittedError</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; If you did call fit, try increasing iter: &quot;</span>
+                                          <span class="s2">&quot;it means it did not find a better solution than the random initialization.&quot;</span><span class="p">)</span></div>
+
+    <span class="c1"># Imported methods</span>
+    <span class="kn">from</span> <span class="nn">._bestFormula</span> <span class="kn">import</span> <span class="n">best_formula</span>
+    <span class="kn">from</span> <span class="nn">._discreteData</span> <span class="kn">import</span> <span class="n">discrete_data</span>
+    <span class="kn">from</span> <span class="nn">._discretize</span> <span class="kn">import</span> <span class="n">discretize</span>
+    <span class="kn">from</span> <span class="nn">._discretizeDummy</span> <span class="kn">import</span> <span class="n">discretize_dummy</span>
+    <span class="kn">from</span> <span class="nn">._fit</span> <span class="kn">import</span> <span class="n">fit</span><span class="p">,</span> <span class="n">_calculate_shape</span><span class="p">,</span> <span class="n">_calculate_criterion</span><span class="p">,</span> <span class="n">_init_disc</span><span class="p">,</span> <span class="n">_split</span>
+    <span class="kn">from</span> <span class="nn">._plot</span> <span class="kn">import</span> <span class="n">plot</span>
+    <span class="kn">from</span> <span class="nn">._predict</span> <span class="kn">import</span> <span class="n">predict</span>
+    <span class="kn">from</span> <span class="nn">._generateData</span> <span class="kn">import</span> <span class="n">generate_data</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, Adrien Ehrhardt
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

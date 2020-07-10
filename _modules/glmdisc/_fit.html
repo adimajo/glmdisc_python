@@ -1,0 +1,551 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>glmdisc._fit &mdash; glmdisc 0.1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home" alt="Documentation Home"> glmdisc
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../_autosummary/glmdisc.html">glmdisc</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">glmdisc</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+          <li><a href="../glmdisc.html">glmdisc</a> &raquo;</li>
+        
+      <li>glmdisc._fit</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for glmdisc._fit</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python3</span>
+<span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;fit method for the glmdisc class.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">sklearn</span> <span class="k">as</span> <span class="nn">sk</span>
+<span class="kn">import</span> <span class="nn">sklearn.preprocessing</span>
+<span class="kn">import</span> <span class="nn">sklearn.linear_model</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">stats</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">Counter</span>
+<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">log</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+<span class="kn">from</span> <span class="nn">glmdisc</span> <span class="kn">import</span> <span class="n">vectorized_multinouilli</span>
+
+<span class="n">NUMPY_NDARRAY_INPUTS</span> <span class="o">=</span> <span class="s1">&#39;glmdisc only supports numpy.ndarray inputs&#39;</span>
+
+
+<span class="k">def</span> <span class="nf">_check_args</span><span class="p">(</span><span class="n">predictors_cont</span><span class="p">,</span> <span class="n">predictors_qual</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">check_labels</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Checks inputs</span>
+
+<span class="sd">    :param numpy.array predictors_cont: continuous predictors</span>
+<span class="sd">    :type predictors_cont: numpy.array</span>
+<span class="sd">    :param numpy.array predictors_qual: categorical predictors</span>
+<span class="sd">    :type predictors_qual: numpy.array</span>
+<span class="sd">    :param labels: binary labels</span>
+<span class="sd">    :type labels: numpy.array</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Tester la présence de labels</span>
+    <span class="k">if</span> <span class="n">predictors_cont</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">predictors_cont</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">NUMPY_NDARRAY_INPUTS</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">predictors_qual</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">predictors_qual</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">NUMPY_NDARRAY_INPUTS</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">check_labels</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">labels</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">NUMPY_NDARRAY_INPUTS</span><span class="p">)</span>
+
+    <span class="c1"># Tester la présence d&#39;au moins qual ou cont</span>
+    <span class="k">if</span> <span class="n">predictors_cont</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">predictors_qual</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">((</span><span class="s1">&#39;You must provide either qualitative or quantitative &#39;</span>
+                         <span class="s1">&#39;features&#39;</span><span class="p">))</span>
+
+    <span class="c1"># Tester la présence de prédicteurs catégoriels et de même longueur que labels</span>
+    <span class="k">if</span> <span class="n">check_labels</span> <span class="ow">and</span> <span class="p">((</span><span class="n">predictors_cont</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">predictors_cont</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">labels</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="ow">or</span>
+                         <span class="p">(</span><span class="n">predictors_qual</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">predictors_qual</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">labels</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Predictors and labels must be of same size&#39;</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_calculate_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculates shape of inputs, stores number of samples and number of continuous and</span>
+<span class="sd">    categorical predictors in self.</span>
+
+<span class="sd">    :returns: array of positions of non np.nan continuous predictors</span>
+<span class="sd">    :rtype: numpy.array</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Calculate shape of predictors (re-used multiple times)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">predictors_cont</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">d_cont</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">predictors_cont</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">d_cont</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">predictors_qual</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">d_qual</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">predictors_qual</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">d_qual</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c1"># Gérer les manquants des variables continues, dans un premier temps</span>
+    <span class="c1"># comme une modalité à part</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">predictors_cont</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">continu_complete_case</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">invert</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">predictors_cont</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">continu_complete_case</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">return</span> <span class="n">continu_complete_case</span>
+
+
+<span class="k">def</span> <span class="nf">_calculate_criterion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">emap</span><span class="p">,</span> <span class="n">model_emap</span><span class="p">,</span> <span class="n">current_encoder_emap</span><span class="p">):</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">criterion</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;aic&#39;</span><span class="p">,</span> <span class="s1">&#39;bic&#39;</span><span class="p">]:</span>
+        <span class="n">loglik</span> <span class="o">=</span> <span class="o">-</span><span class="n">sk</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">log_loss</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">train</span><span class="p">],</span>
+                                      <span class="n">model_emap</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span>
+                                          <span class="n">X</span><span class="o">=</span><span class="n">current_encoder_emap</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span>
+                                              <span class="n">emap</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">train</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">))),</span>
+                                      <span class="n">normalize</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">validation</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">loglik</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">criterion</span> <span class="o">==</span> <span class="s1">&#39;aic&#39;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">validation</span><span class="p">:</span>
+        <span class="k">return</span> <span class="o">-</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">model_emap</span><span class="o">.</span><span class="n">coef_</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">loglik</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">criterion</span> <span class="o">==</span> <span class="s1">&#39;bic&#39;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">validation</span><span class="p">:</span>
+        <span class="k">return</span> <span class="o">-</span><span class="p">(</span><span class="n">log</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">)</span> <span class="o">*</span> <span class="n">model_emap</span><span class="o">.</span><span class="n">coef_</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">loglik</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">criterion</span> <span class="o">==</span> <span class="s1">&#39;gini&#39;</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">validation</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">sk</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">roc_auc_score</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">validate</span><span class="p">],</span> <span class="n">model_emap</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span>
+                <span class="n">X</span><span class="o">=</span><span class="n">current_encoder_emap</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span>
+                    <span class="n">emap</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">validate</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)))[:,</span> <span class="mi">1</span><span class="p">:])</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">criterion</span> <span class="o">==</span> <span class="s1">&#39;gini&#39;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">validation</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">sk</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">roc_auc_score</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">train</span><span class="p">],</span> <span class="n">model_emap</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span>
+                <span class="n">X</span><span class="o">=</span><span class="n">current_encoder_emap</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span>
+                    <span class="n">emap</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">train</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)))[:,</span> <span class="mi">1</span><span class="p">:])</span>
+
+
+<span class="k">def</span> <span class="nf">_init_disc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">continu_complete_case</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">affectations</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_cont</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_qual</span><span class="p">)</span>
+    <span class="n">edisc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">m_start</span><span class="p">)),</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_cont</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_qual</span><span class="p">))</span>
+
+    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_cont</span><span class="p">):</span>
+        <span class="n">edisc</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">invert</span><span class="p">(</span><span class="n">continu_complete_case</span><span class="p">[:,</span> <span class="n">j</span><span class="p">]),</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">m_start</span>
+
+    <span class="n">predictors_trans</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_qual</span><span class="p">))</span>
+
+    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_qual</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">affectations</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_cont</span><span class="p">]</span> <span class="o">=</span> <span class="n">sk</span><span class="o">.</span><span class="n">preprocessing</span><span class="o">.</span><span class="n">LabelEncoder</span><span class="p">()</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">predictors_qual</span><span class="p">[:,</span> <span class="n">j</span><span class="p">])</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">m_start</span> <span class="o">&gt;</span> <span class="n">stats</span><span class="o">.</span><span class="n">describe</span><span class="p">(</span><span class="n">sk</span><span class="o">.</span><span class="n">preprocessing</span><span class="o">.</span><span class="n">LabelEncoder</span><span class="p">()</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">predictors_qual</span><span class="p">[:,</span> <span class="n">j</span><span class="p">])</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">predictors_qual</span><span class="p">[:,</span> <span class="n">j</span><span class="p">]))</span><span class="o">.</span><span class="n">minmax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">edisc</span><span class="p">[:,</span> <span class="n">j</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_cont</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span>
+                <span class="n">stats</span><span class="o">.</span><span class="n">describe</span><span class="p">(</span><span class="n">sk</span><span class="o">.</span><span class="n">preprocessing</span><span class="o">.</span><span class="n">LabelEncoder</span><span class="p">()</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">predictors_qual</span><span class="p">[:,</span> <span class="n">j</span><span class="p">])</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">predictors_qual</span><span class="p">[:,</span> <span class="n">j</span><span class="p">]))</span><span class="o">.</span><span class="n">minmax</span><span class="p">[</span><span class="mi">1</span><span class="p">])),</span>
+                <span class="n">size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">edisc</span><span class="p">[:,</span> <span class="n">j</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_cont</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">m_start</span><span class="p">)),</span>
+                                                         <span class="n">size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>
+
+        <span class="n">predictors_trans</span><span class="p">[:,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">affectations</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_cont</span><span class="p">]</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">predictors_qual</span><span class="p">[:,</span> <span class="n">j</span><span class="p">]))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">edisc</span><span class="p">,</span> <span class="n">predictors_trans</span>
+
+
+<span class="k">def</span> <span class="nf">_split</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">validation</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">test</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">train</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">validate</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_rows</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span>
+                                                                              <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span>
+                                                                              <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+                                                             <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="o">.</span><span class="mi">6</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="o">.</span><span class="mi">8</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">)])</span>
+    <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">validation</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">train</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">validate</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+                                             <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="o">.</span><span class="mi">6</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">)])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">test_rows</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">test</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">train</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_rows</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+                                              <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="o">.</span><span class="mi">6</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">)])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">validate</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">train</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">validate</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">test_rows</span> <span class="o">=</span> <span class="kc">None</span>
+
+
+<span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">predictors_cont</span><span class="p">,</span> <span class="n">predictors_qual</span><span class="p">,</span> <span class="n">labels</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Fits the Glmdisc object.</span>
+
+<span class="sd">    .. todo:: On regarde si des modalités sont présentes dans validation et pas dans train</span>
+
+<span class="sd">    .. todo:: Refactor due to complexity</span>
+
+<span class="sd">    .. todo:: Add glmdisc-NN</span>
+
+<span class="sd">    :param numpy.array predictors_cont:</span>
+<span class="sd">        Continuous predictors to be discretized in a numpy</span>
+<span class="sd">        &quot;numeric&quot; array. Can be provided either here or with</span>
+<span class="sd">        the __init__ method.</span>
+<span class="sd">    :param numpy.array predictors_qual:</span>
+<span class="sd">        Categorical features which levels are to be merged</span>
+<span class="sd">        (also in a numpy &quot;string&quot; array). Can be provided</span>
+<span class="sd">        either here or with the __init__ method.</span>
+<span class="sd">    :param numpy.array labels:</span>
+<span class="sd">        Boolean (0/1) labels of the observations. Must be of</span>
+<span class="sd">        the same length as predictors_qual and predictors_cont</span>
+<span class="sd">        (numpy &quot;numeric&quot; array).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_check_args</span><span class="p">(</span><span class="n">predictors_cont</span><span class="p">,</span> <span class="n">predictors_qual</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">predictors_cont</span> <span class="o">=</span> <span class="n">predictors_cont</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">predictors_qual</span> <span class="o">=</span> <span class="n">predictors_qual</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">labels</span> <span class="o">=</span> <span class="n">labels</span>
+
+    <span class="c1"># Calcul des variables locales utilisées dans la suite</span>
+    <span class="n">continu_complete_case</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_shape</span><span class="p">()</span>
+
+    <span class="c1"># Initialization for following the performance of the discretization</span>
+    <span class="n">current_best</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c1"># Initial random &quot;discretization&quot;</span>
+    <span class="n">edisc</span><span class="p">,</span> <span class="n">predictors_trans</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_init_disc</span><span class="p">(</span><span class="n">continu_complete_case</span><span class="p">)</span>
+
+    <span class="n">emap</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">edisc</span><span class="p">)</span>
+
+    <span class="n">model_edisc</span> <span class="o">=</span> <span class="n">sk</span><span class="o">.</span><span class="n">linear_model</span><span class="o">.</span><span class="n">LogisticRegression</span><span class="p">(</span><span class="n">solver</span><span class="o">=</span><span class="s1">&#39;liblinear&#39;</span><span class="p">,</span>
+                                                     <span class="n">C</span><span class="o">=</span><span class="mf">1e40</span><span class="p">,</span>
+                                                     <span class="n">tol</span><span class="o">=</span><span class="mf">0.001</span><span class="p">,</span>
+                                                     <span class="n">max_iter</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span>
+                                                     <span class="n">warm_start</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="n">model_emap</span> <span class="o">=</span> <span class="n">sk</span><span class="o">.</span><span class="n">linear_model</span><span class="o">.</span><span class="n">LogisticRegression</span><span class="p">(</span><span class="n">solver</span><span class="o">=</span><span class="s1">&#39;liblinear&#39;</span><span class="p">,</span>
+                                                    <span class="n">C</span><span class="o">=</span><span class="mf">1e40</span><span class="p">,</span>
+                                                    <span class="n">tol</span><span class="o">=</span><span class="mf">0.001</span><span class="p">,</span>
+                                                    <span class="n">max_iter</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span>
+                                                    <span class="n">warm_start</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="n">current_encoder_edisc</span> <span class="o">=</span> <span class="n">sk</span><span class="o">.</span><span class="n">preprocessing</span><span class="o">.</span><span class="n">OneHotEncoder</span><span class="p">()</span>
+
+    <span class="n">current_encoder_emap</span> <span class="o">=</span> <span class="n">sk</span><span class="o">.</span><span class="n">preprocessing</span><span class="o">.</span><span class="n">OneHotEncoder</span><span class="p">()</span>
+
+    <span class="c1"># Initialisation link et m</span>
+    <span class="n">link</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_cont</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_qual</span><span class="p">)</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_cont</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_qual</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_cont</span><span class="p">):</span>
+        <span class="n">link</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">sk</span><span class="o">.</span><span class="n">linear_model</span><span class="o">.</span><span class="n">LogisticRegression</span><span class="p">(</span><span class="n">C</span><span class="o">=</span><span class="mf">1e40</span><span class="p">,</span>
+                                                     <span class="n">multi_class</span><span class="o">=</span><span class="s1">&#39;multinomial&#39;</span><span class="p">,</span>
+                                                     <span class="n">solver</span><span class="o">=</span><span class="s1">&#39;newton-cg&#39;</span><span class="p">,</span>
+                                                     <span class="n">max_iter</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span>
+                                                     <span class="n">tol</span><span class="o">=</span><span class="mf">0.001</span><span class="p">,</span>
+                                                     <span class="n">warm_start</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="c1"># Random splitting</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_split</span><span class="p">()</span>
+
+    <span class="c1"># Itérations MCMC</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">iter</span><span class="p">):</span>
+
+        <span class="c1"># Recalcul des matrices disjonctives</span>
+        <span class="n">current_encoder_edisc</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">edisc</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">))</span>
+        <span class="n">current_encoder_emap</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">emap</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">))</span>
+
+        <span class="c1"># Apprentissage p(y|e) et p(y|emap)</span>
+        <span class="n">model_edisc</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">current_encoder_edisc</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span>
+            <span class="n">edisc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">train</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)),</span>
+            <span class="n">y</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">train</span><span class="p">])</span>
+
+        <span class="n">model_emap</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">current_encoder_emap</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span>
+            <span class="n">emap</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">train</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)),</span>
+            <span class="n">y</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">train</span><span class="p">])</span>
+
+        <span class="c1"># Calcul du critère</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">criterion_iter</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_calculate_criterion</span><span class="p">(</span><span class="n">emap</span><span class="p">,</span>
+                                                             <span class="n">model_emap</span><span class="p">,</span>
+                                                             <span class="n">current_encoder_emap</span><span class="p">))</span>
+
+        <span class="c1"># Mise à jour éventuelle du meilleur critère</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">criterion_iter</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">criterion_iter</span><span class="p">[</span><span class="n">current_best</span><span class="p">]:</span>
+            <span class="c1"># Update current best logistic regression</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">best_reglog</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">model_emap</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">best_link</span> <span class="o">=</span> <span class="p">[</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">link_model</span><span class="p">)</span> <span class="k">for</span> <span class="n">link_model</span> <span class="ow">in</span> <span class="n">link</span><span class="p">]</span>
+            <span class="n">current_best</span> <span class="o">=</span> <span class="n">i</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">best_encoder_emap</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">current_encoder_emap</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">best_encoder_emap</span><span class="o">.</span><span class="n">set_params</span><span class="p">(</span><span class="n">handle_unknown</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">performance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">criterion_iter</span><span class="p">[</span><span class="n">current_best</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_cont</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_qual</span><span class="p">):</span>
+            <span class="n">m</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">edisc</span><span class="p">[:,</span> <span class="n">j</span><span class="p">])</span>
+
+        <span class="c1"># On construit la base disjonctive nécessaire au modèle de régression</span>
+        <span class="c1"># logistique</span>
+        <span class="n">base_disjonctive</span> <span class="o">=</span> <span class="n">current_encoder_edisc</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span>
+            <span class="n">X</span><span class="o">=</span><span class="n">edisc</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">))</span><span class="o">.</span><span class="n">toarray</span><span class="p">()</span>
+
+        <span class="c1"># On boucle sur les variables pour le tirage de e^j | reste</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">permutation</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_cont</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_qual</span><span class="p">):</span>
+            <span class="c1"># On commence par les quantitatives</span>
+            <span class="k">if</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_cont</span><span class="p">:</span>
+                <span class="c1"># On apprend e^j | x^j</span>
+                <span class="n">link</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">edisc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">train</span><span class="p">,</span> <span class="p">:][</span><span class="n">continu_complete_case</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">train</span><span class="p">,</span> <span class="n">j</span><span class="p">],</span> <span class="n">j</span><span class="p">],</span>
+                            <span class="n">X</span><span class="o">=</span><span class="n">predictors_cont</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">train</span><span class="p">,</span> <span class="p">:][</span><span class="n">continu_complete_case</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">train</span><span class="p">,</span> <span class="n">j</span><span class="p">],</span> <span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+
+                <span class="n">y_p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="n">j</span><span class="p">])))</span>
+
+                <span class="c1"># On calcule y | e^{-j} , e^j</span>
+                <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="n">j</span><span class="p">])):</span>
+                    <span class="n">modalites</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="n">j</span><span class="p">])))</span>
+                    <span class="n">modalites</span><span class="p">[:,</span> <span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="p">))</span>
+                    <span class="n">y_p</span><span class="p">[:,</span> <span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">model_edisc</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">(</span>
+                        <span class="p">(</span><span class="n">base_disjonctive</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">:(</span><span class="nb">sum</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">len</span><span class="p">,</span> <span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">j</span><span class="p">]))))],</span>
+                         <span class="n">modalites</span><span class="p">,</span>
+                         <span class="n">base_disjonctive</span><span class="p">[:,</span> <span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">len</span><span class="p">,</span>
+                                                           <span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">:(</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)])))):(</span><span class="nb">sum</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">len</span><span class="p">,</span> <span class="n">m</span><span class="p">))))]))</span>
+                    <span class="p">)[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ravel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">ravel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+
+                <span class="c1"># On calcule e^j | x^j sur tout le monde</span>
+                <span class="n">t</span> <span class="o">=</span> <span class="n">link</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">predictors_cont</span><span class="p">[(</span><span class="n">continu_complete_case</span><span class="p">[:,</span> <span class="n">j</span><span class="p">]),</span> <span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+
+                <span class="c1"># On gère le cas où une ou plusieurs modalités ont disparu de train</span>
+                <span class="k">if</span> <span class="n">t</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">y_p</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                    <span class="n">modalites_manquantes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">in1d</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="n">j</span><span class="p">],</span>
+                                                   <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">edisc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">train</span><span class="p">,</span> <span class="p">:][</span><span class="n">continu_complete_case</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">train</span><span class="p">,</span> <span class="n">j</span><span class="p">],</span>
+                                                                                  <span class="n">j</span><span class="p">]))</span>
+                    <span class="n">t2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">sum</span><span class="p">(</span><span class="n">continu_complete_case</span><span class="p">[:,</span> <span class="n">j</span><span class="p">]),</span> <span class="nb">len</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="n">j</span><span class="p">])))</span>
+                    <span class="n">t2</span><span class="p">[:,</span> <span class="n">modalites_manquantes</span><span class="p">]</span> <span class="o">=</span> <span class="n">t</span>
+                    <span class="n">t</span> <span class="o">=</span> <span class="n">t2</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+                <span class="c1"># On met à jour emap^j</span>
+                <span class="n">emap</span><span class="p">[(</span><span class="n">continu_complete_case</span><span class="p">[:,</span> <span class="n">j</span><span class="p">]),</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">emap</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">invert</span><span class="p">(</span><span class="n">continu_complete_case</span><span class="p">[:,</span> <span class="n">j</span><span class="p">]),</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">m</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+                <span class="c1"># On calcule e^j | reste</span>
+                <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">invert</span><span class="p">(</span><span class="n">continu_complete_case</span><span class="p">[:,</span> <span class="n">j</span><span class="p">])</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">t</span> <span class="o">=</span> <span class="n">t</span> <span class="o">*</span> <span class="n">y_p</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">t</span> <span class="o">=</span> <span class="n">t</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">:(</span><span class="nb">len</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)]</span> <span class="o">*</span> <span class="n">y_p</span><span class="p">[</span><span class="n">continu_complete_case</span><span class="p">[:,</span> <span class="n">j</span><span class="p">],</span> <span class="mi">0</span><span class="p">:(</span><span class="nb">len</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)]</span>
+
+                <span class="n">t</span> <span class="o">=</span> <span class="n">t</span> <span class="o">/</span> <span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)[:,</span> <span class="kc">None</span><span class="p">])</span>
+
+                <span class="c1"># On met à jour e^j</span>
+                <span class="n">edisc</span><span class="p">[</span><span class="n">continu_complete_case</span><span class="p">[:,</span> <span class="n">j</span><span class="p">],</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">vectorized_multinouilli</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">m</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+                <span class="n">edisc</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">invert</span><span class="p">(</span><span class="n">continu_complete_case</span><span class="p">[:,</span> <span class="n">j</span><span class="p">]),</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+
+            <span class="c1"># Variables qualitatives</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># On fait le tableau de contingence e^j | x^j</span>
+                <span class="n">link</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">([</span><span class="nb">tuple</span><span class="p">(</span><span class="n">element</span><span class="p">)</span> <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">(</span>
+                    <span class="p">(</span><span class="n">predictors_trans</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">train</span><span class="p">,</span> <span class="n">j</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_cont</span><span class="p">],</span>
+                     <span class="n">edisc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">train</span><span class="p">,</span> <span class="n">j</span><span class="p">]))])</span>
+
+                <span class="n">y_p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="n">j</span><span class="p">])))</span>
+
+                <span class="c1"># On calcule y | e^{-j} , e^j</span>
+                <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="n">j</span><span class="p">])):</span>
+                    <span class="n">modalites</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="n">j</span><span class="p">])))</span>
+                    <span class="n">modalites</span><span class="p">[:,</span> <span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="p">))</span>
+
+                    <span class="n">y_p</span><span class="p">[:,</span> <span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">model_edisc</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">(</span>
+                        <span class="p">(</span><span class="n">base_disjonctive</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">:(</span><span class="nb">sum</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">len</span><span class="p">,</span> <span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">j</span><span class="p">]))))],</span>
+                         <span class="n">modalites</span><span class="p">,</span>
+                         <span class="n">base_disjonctive</span><span class="p">[:,</span>
+                         <span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">len</span><span class="p">,</span> <span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">:(</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)])))):(</span><span class="nb">sum</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">len</span><span class="p">,</span> <span class="n">m</span><span class="p">))))]))</span>
+                    <span class="p">)[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ravel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">ravel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+
+                <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="n">j</span><span class="p">]))))</span>
+
+                <span class="c1"># On calcule e^j | x^j sur tout le monde</span>
+                <span class="k">for</span> <span class="n">i2</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">):</span>
+                    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="n">j</span><span class="p">]))):</span>
+                        <span class="n">t</span><span class="p">[</span><span class="n">i2</span><span class="p">,</span> <span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">link</span><span class="p">[</span><span class="n">j</span><span class="p">][(</span><span class="n">predictors_trans</span><span class="p">[</span><span class="n">i2</span><span class="p">,</span> <span class="n">j</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_cont</span><span class="p">],</span> <span class="n">k</span><span class="p">)]</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span>
+
+                <span class="c1"># On met à jour emap^j</span>
+                <span class="n">emap</span><span class="p">[:,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+                <span class="c1"># On calcule e^j | reste</span>
+                <span class="n">t</span> <span class="o">=</span> <span class="n">t</span> <span class="o">*</span> <span class="n">y_p</span>
+                <span class="n">t</span> <span class="o">=</span> <span class="n">t</span> <span class="o">/</span> <span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)[:,</span> <span class="kc">None</span><span class="p">])</span>
+
+                <span class="n">edisc</span><span class="p">[:,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">vectorized_multinouilli</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">m</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, Adrien Ehrhardt
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

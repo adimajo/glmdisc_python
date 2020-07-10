@@ -1,0 +1,6 @@
+glmdisc.NotFittedError
+======================
+
+.. currentmodule:: glmdisc
+
+.. autoexception:: NotFittedError

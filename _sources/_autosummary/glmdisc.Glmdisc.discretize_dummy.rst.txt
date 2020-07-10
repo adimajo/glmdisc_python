@@ -1,0 +1,6 @@
+glmdisc.Glmdisc.discretize\_dummy
+=================================
+
+.. currentmodule:: glmdisc
+
+.. automethod:: Glmdisc.discretize_dummy
