@@ -10,7 +10,10 @@ import sklearn.linear_model
 from scipy import stats
 from collections import Counter
 from math import log
+from copy import deepcopy
 from glmdisc import vectorized_multinouilli
+
+NUMPY_NDARRAY_INPUTS = 'glmdisc only supports numpy.ndarray inputs'
 
 
 def _check_args(predictors_cont, predictors_qual, labels, check_labels=True):
@@ -26,26 +29,21 @@ def _check_args(predictors_cont, predictors_qual, labels, check_labels=True):
     """
     # Tester la présence de labels
     if predictors_cont is not None and not isinstance(predictors_cont, np.ndarray):
-        raise ValueError('glmdisc only supports numpy.ndarray inputs')
+        raise ValueError(NUMPY_NDARRAY_INPUTS)
     if predictors_qual is not None and not isinstance(predictors_qual, np.ndarray):
-        raise ValueError('glmdisc only supports numpy.ndarray inputs')
-    if check_labels:
-        if not isinstance(labels, np.ndarray):
-            raise ValueError('glmdisc only supports numpy.ndarray inputs')
+        raise ValueError(NUMPY_NDARRAY_INPUTS)
+    if check_labels and not isinstance(labels, np.ndarray):
+        raise ValueError(NUMPY_NDARRAY_INPUTS)
 
     # Tester la présence d'au moins qual ou cont
     if predictors_cont is None and predictors_qual is None:
         raise ValueError(('You must provide either qualitative or quantitative '
                          'features'))
 
-    if check_labels:
-        # Tester la présence de prédicteurs continus et de même longueur que labels
-        if predictors_cont is not None and predictors_cont.shape[0] != labels.shape[0]:
-            raise ValueError('Predictors and labels must be of same size')
-
-        # Tester la présence de prédicteurs catégoriels et de même longueur que labels
-        if predictors_qual is not None and predictors_qual.shape[0] != labels.shape[0]:
-            raise ValueError('Predictors and labels must be of same size')
+    # Tester la présence de prédicteurs catégoriels et de même longueur que labels
+    if check_labels and ((predictors_cont is not None and predictors_cont.shape[0] != labels.shape[0])
+                         or (predictors_qual is not None and predictors_qual.shape[0] != labels.shape[0])):
+        raise ValueError('Predictors and labels must be of same size')
 
 
 def _calculate_shape(self):
@@ -248,10 +246,10 @@ def fit(self, predictors_cont, predictors_qual, labels):
         # Mise à jour éventuelle du meilleur critère
         if self.criterion_iter[i] >= self.criterion_iter[current_best]:
             # Update current best logistic regression
-            self.best_reglog = model_emap
-            self.best_link = link
+            self.best_reglog = deepcopy(model_emap)
+            self.best_link = [deepcopy(link_model) for link_model in link]
             current_best = i
-            self.best_encoder_emap = current_encoder_emap
+            self.best_encoder_emap = deepcopy(current_encoder_emap)
             self.performance = self.criterion_iter[current_best]
 
         for j in range(self.d_cont + self.d_qual):

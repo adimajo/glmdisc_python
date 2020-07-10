@@ -30,7 +30,7 @@ These instructions will get you a copy of the project up and running on your loc
 
 ### Prerequisites
 
-This code is supported on Python 2.7, 3.4, 3.5, 3.6, 3.7, 3.8, 3.9 and 3.10 (see [tox file](tox.ini)).
+This code is supported on Python 3.7, 3.8, 3.9 and 3.10 (see [tox file](tox.ini)).
 
 ### Installing the package
 

@@ -25,4 +25,4 @@ def discretize_dummy(self, predictors_cont, predictors_qual):
     return self.best_encoder_emap.transform(
         self.discretize(
             predictors_cont,
-            predictors_qual).astype(str))
+            predictors_qual).astype(int).astype(str))
