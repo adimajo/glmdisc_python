@@ -16,7 +16,7 @@ def test_init():
     assert glmdisc_instance.best_link == []
     assert glmdisc_instance.best_reglog is None
     assert glmdisc_instance.affectations == []
-    assert glmdisc_instance.best_encoder_emap == []
+    assert glmdisc_instance.best_encoder_emap is None
     assert glmdisc_instance.performance == -np.inf
     np.testing.assert_array_equal(glmdisc_instance.train, np.array([]))
     np.testing.assert_array_equal(glmdisc_instance.validate, np.array([]))
