@@ -40,8 +40,8 @@ def _check_args(predictors_cont, predictors_qual, labels, check_labels=True):
                          'features'))
 
     # Tester la présence de prédicteurs catégoriels et de même longueur que labels
-    if check_labels and ((predictors_cont is not None and predictors_cont.shape[0] != labels.shape[0])
-                         or (predictors_qual is not None and predictors_qual.shape[0] != labels.shape[0])):
+    if check_labels and ((predictors_cont is not None and predictors_cont.shape[0] != labels.shape[0]) or
+                         (predictors_qual is not None and predictors_qual.shape[0] != labels.shape[0])):
         raise ValueError('Predictors and labels must be of same size')
 
 

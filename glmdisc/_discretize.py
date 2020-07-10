@@ -49,12 +49,12 @@ def discretize(self, predictors_cont, predictors_qual):
     d_2bis = [isinstance(x, Counter) for x in self.best_link]
 
     if d_1 != sum(d_1bis) or d_1 != self.d_cont:
-        raise ValueError('Shape of ' + str(d_1) +
-                         ' for predictors_cont does not match provided link function '
+        raise ValueError('Shape of ' + str(d_1)
+                         + ' for predictors_cont does not match provided link function '
                          'of size ' + str(sum(d_1bis)) + ' and/or training set of size ' + str(self.d_cont) + '.')
     if d_2 != sum(d_2bis) or d_2 != self.d_qual:
-        raise ValueError('Shape of ' + str(d_2) +
-                         ' for predictors_cont does not match provided link function '
+        raise ValueError('Shape of ' + str(d_2)
+                         + ' for predictors_cont does not match provided link function '
                          'of size ' + str(sum(d_2bis)) + ' and/or training set of size ' + str(self.d_qual) + '.')
 
     emap = np.zeros((n, d_1 + d_2))

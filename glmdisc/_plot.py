@@ -43,20 +43,20 @@ def plot(self,
             for j in range(self.d_cont):
                 plt.plot(self.predictors_cont[:, j].reshape(-1, 1),
                          emap.astype(str)[:, j], 'ro')
-                plt.show()
+                plt.show(block=False)
 
         if predictors_qual_number == "all":
             for j in range(self.d_qual):
                 plt.plot(self.predictors_qual[:, j].reshape(-1, 1),
                          emap.astype(str)[:, j + self.d_cont], 'ro')
-                plt.show()
+                plt.show(block=False)
 
         if not predictors_cont_number == "all":
             if type(predictors_cont_number) == int and predictors_cont_number > 0:
                 plt.plot(self.predictors_cont[:,
                          predictors_cont_number - 1].reshape(-1, 1),
                          emap.astype(str)[:, predictors_cont_number - 1], 'ro')
-                plt.show()
+                plt.show(block=False)
             else:
                 logger.warning("A single int (more than 0 and less than the "
                                "number of columns in predictors_cont) must be "
@@ -68,7 +68,7 @@ def plot(self,
                          predictors_qual_number - 1].reshape(-1, 1),
                          emap.astype(str)[:, predictors_qual_number - 1 + self.d_cont],
                          'ro')
-                plt.show()
+                plt.show(block=False)
             else:
                 logger.warning("A single int (more than 0 and less than the "
                                "number of columns in predictors_qual) must be "
@@ -88,27 +88,16 @@ def plot(self,
                 pd.DataFrame(self.predictors_qual[lignes_completes, :]).apply(
                     lambda x: x.astype('category'))], axis=1), self.labels[lignes_completes])
 
-        # Quel que soit les valeurs de predictors_cont_number et
+        # Quelles que soient les valeurs de predictors_cont_number et
         # predictors_qual_number, on plot tout pour l'instant
-        XX = gam.generate_X_grid()
-        plt.rcParams['figure.figsize'] = (28, 8)
+        plt.figure()
         fig, axs = plt.subplots(1, self.d_cont + self.d_qual)
+        plt.rcParams['figure.figsize'] = (28, 8)
         for i, ax in enumerate(axs):
-            pdep, confi = gam.partial_dependence(XX, feature=i + 1, width=.95)
-            ax.plot(XX[:, i], pdep)
-            ax.plot(XX[:, i], confi[0][:, 0], c='grey', ls='--')
-            ax.plot(XX[:, i], confi[0][:, 1], c='grey', ls='--')
-            ax.plot(XX[:, i], )
-        plt.show()
-
-#            XX = generate_X_grid(gam)
-#            plt.rcParams['figure.figsize'] = (28, 8)
-#            fig, axs = plt.subplots(1, d1+d2)
-#            for i, ax in enumerate(axs):
-#                # Faire ici les graphiques du truc discret...
-#
-#                ax.plot(XX[:, i], pdep)
-#                ax.plot(XX[:, i], confi[0][:, 0], c='grey', ls='--')
-#                ax.plot(XX[:, i], confi[0][:, 1], c='grey', ls='--')
-#                ax.plot(XX[:, i], )
-#            plt.show()
+            try:
+                XX = gam.generate_X_grid(term=i)
+                ax.plot(XX[:, i], gam.partial_dependence(term=i, X=XX))
+                ax.plot(XX[:, i], gam.partial_dependence(term=i, X=XX, width=.95)[1], c='r', ls='--')
+            except ValueError:
+                continue
+        plt.show(block=False)

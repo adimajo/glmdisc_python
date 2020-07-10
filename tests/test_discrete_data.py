@@ -135,7 +135,7 @@ def test_discrete_data_test_both():
         xd[:, i] = pd.cut(x[:, i], bins=cuts, labels=[0, 1, 2])
 
     model = glmdisc.Glmdisc(validation=False, test=True, iter=50)
-    model.fit(predictors_cont=x, predictors_qual=None, labels=y)
+    model.fit(predictors_cont=x, predictors_qual=xd, labels=y)
     result = model.discrete_data()
     assert isinstance(result, scipy.sparse.csr.csr_matrix)
     assert result.shape[0] == 200

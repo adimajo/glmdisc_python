@@ -4,7 +4,7 @@ import pytest
 import numpy as np
 import pandas as pd
 import sklearn as sk
-from math import log
+import math
 import random
 import glmdisc
 
@@ -116,7 +116,7 @@ def test_calculate_criterion():
     random.seed(1)
     np.random.seed(1)
     model.fit(predictors_cont=x, predictors_qual=None, labels=y)
-    assert model._calculate_criterion(emap, model_emap, current_encoder_emap) == modele_bic
+    assert math.isclose(model._calculate_criterion(emap, model_emap, current_encoder_emap), modele_bic)
 
     model = glmdisc.Glmdisc(iter=11, validation=False)
     random.seed(1)
@@ -128,10 +128,10 @@ def test_calculate_criterion():
     random.seed(1)
     np.random.seed(1)
     model.fit(predictors_cont=x, predictors_qual=None, labels=y)
-    assert model._calculate_criterion(emap,
-                                      model_emap,
-                                      current_encoder_emap) == modele_bic + (log(model.n) - 2) * model_emap.coef_.shape[
-        1]
+    assert math.isclose(model._calculate_criterion(emap,
+                                                   model_emap,
+                                                   current_encoder_emap), modele_bic + (
+        math.log(model.n) - 2) * model_emap.coef_.shape[1])
 
     model = glmdisc.Glmdisc(iter=11, criterion="gini")
     model.fit(predictors_cont=x, predictors_qual=None, labels=y)
@@ -192,3 +192,20 @@ def test_split():
     assert len(model.train) > 0
     assert model.validate is None
     assert model.test_rows is None
+
+
+def test_not_fit():
+    n = 100
+    d = 2
+    x, y, theta = glmdisc.Glmdisc.generate_data(n, d)
+    model = glmdisc.Glmdisc(iter=11)
+    for i in range(100):
+        random.seed(i)
+        np.random.seed(i)
+        model.fit(predictors_cont=x, predictors_qual=None, labels=y)
+        try:
+            model.check_is_fitted()
+        except glmdisc.NotFittedError:
+            with pytest.raises(glmdisc.NotFittedError):
+                model.check_is_fitted()
+            break

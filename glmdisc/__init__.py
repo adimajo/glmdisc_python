@@ -21,7 +21,7 @@ import numpy as np
 import sklearn as sk
 from loguru import logger
 
-    
+
 class NotFittedError(sk.exceptions.NotFittedError):
     """Exception class to raise if estimator is used before fitting.
     This class inherits from both NotFittedError from sklearn which
@@ -216,11 +216,21 @@ class Glmdisc:
             logger.warning('No need to penalize the log-likelihood when a validation set is used. '
                            'Using log-likelihood instead.')
 
+        # Attributes from parameters from __init__
         self.test = test
         self.validation = validation
         self.criterion = criterion
         self.iter = iter
         self.m_start = m_start
+
+        # Attributes from fit
+        self.n = 0
+        self.d_cont = 0
+        self.d_qual = 0
+
+        self.predictors_cont = None
+        self.predictors_qual = None
+        self.predictors_labels = None
 
         self.criterion_iter = []
         self.best_link = []
