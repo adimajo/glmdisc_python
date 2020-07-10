@@ -4,16 +4,8 @@ A setuptools based setup module.
 # Always prefer setuptools over distutils
 from setuptools import setup, find_packages
 
-# To use a consistent encoding
-from codecs import open
-from os import path
-
-here = path.abspath(path.dirname(__file__))
-
-
-def read_md(file):
-    open(file, "r", encoding="utf-8").read()
-
+with open('README.md') as f:
+    long_description = f.read()
 
 # Arguments marked as "Required" below must be included for upload to PyPI.
 # Fields marked as "Optional" may be commented out.
@@ -103,7 +95,7 @@ setup(
     # For a discussion on single-sourcing the version across setup.py and the
     # project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
-    version="0.1",  # Required
+    version="0.1.1",  # Required
     # This is a one-line description or tagline of what your project does. This
     # corresponds to the "Summary" metadata field:
     # https://packaging.python.org/specifications/core-metadata/#summary
@@ -116,7 +108,7 @@ setup(
     #
     # This field corresponds to the "Description" metadata field:
     # https://packaging.python.org/specifications/core-metadata/#description-optional
-    long_description=read_md("README.md"),
+    long_description=long_description,
     long_description_content_type="text/markdown",  # Optional
     # This should be a valid link to your project's main homepage.
     #
@@ -138,7 +130,6 @@ setup(
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
-        "Programming Language :: Python :: 3.10",
     ],
     keywords="discretization logistic regression levels grouping",
     packages=find_packages(exclude=["contrib", "docs", "tests"]),
