@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-discretizeDummy module for the glmdisc class.
+"""discretizeDummy module for the glmdisc class.
 """
 
 

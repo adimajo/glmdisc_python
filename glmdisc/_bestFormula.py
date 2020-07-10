@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-best_formula method for glmdisc class.
+"""best_formula method for glmdisc class.
 """
 import numpy as np
 from loguru import logger

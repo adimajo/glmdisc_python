@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-predict method for class glmdisc
+"""predict method for class glmdisc
 """
 
 

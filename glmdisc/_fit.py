@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-fit method for the glmdisc class.
+"""fit method for the glmdisc class.
 """
 import numpy as np
 import sklearn as sk
@@ -250,6 +249,7 @@ def fit(self, predictors_cont, predictors_qual, labels):
             self.best_link = [deepcopy(link_model) for link_model in link]
             current_best = i
             self.best_encoder_emap = deepcopy(current_encoder_emap)
+            self.best_encoder_emap.set_params(handle_unknown='ignore')
             self.performance = self.criterion_iter[current_best]
 
         for j in range(self.d_cont + self.d_qual):

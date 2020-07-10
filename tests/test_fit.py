@@ -26,6 +26,16 @@ def test_args_fit():
                   labels=[])
 
     with pytest.raises(ValueError):
+        model.fit(predictors_cont="blabla",
+                  predictors_qual=None,
+                  labels=[])
+
+    with pytest.raises(ValueError):
+        model.fit(predictors_cont=None,
+                  predictors_qual="blabla",
+                  labels=[])
+
+    with pytest.raises(ValueError):
         model.fit(predictors_cont=None,
                   predictors_qual=None,
                   labels=y)
@@ -132,11 +142,14 @@ def test_calculate_criterion():
     assert 0 <= model._calculate_criterion(emap, model_emap, current_encoder_emap) <= 1
 
 
-def test_init_disc():
+def test_nan():
     n = 100
     d = 2
     x, y, theta = glmdisc.Glmdisc.generate_data(n, d)
+    x[0, 0] = np.nan
+    x[90, 1] = np.nan
     model = glmdisc.Glmdisc(iter=11, criterion="bic")
+    model.fit(predictors_cont=x, predictors_qual=None, labels=y)
 
 
 def test_split():

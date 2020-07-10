@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-discretize method for glmdisc class.
+"""discretize method for glmdisc class.
 """
 from collections import Counter
 import sklearn as sk
@@ -24,6 +23,8 @@ def discretize(self, predictors_cont, predictors_qual):
         (also in a numpy "string" array). Can be provided
         either here or with the __init__ method.
     """
+    self.check_is_fitted()
+
     glmdisc._fit._check_args(predictors_cont=predictors_cont,
                              predictors_qual=predictors_qual,
                              labels=None,
@@ -48,9 +49,13 @@ def discretize(self, predictors_cont, predictors_qual):
     d_2bis = [isinstance(x, Counter) for x in self.best_link]
 
     if d_1 != sum(d_1bis) or d_1 != self.d_cont:
-        raise ValueError('Shape of predictors_cont does not match provided link function and/or training set.')
+        raise ValueError('Shape of ' + str(d_1) +
+                         ' for predictors_cont does not match provided link function '
+                         'of size ' + str(sum(d_1bis)) + ' and/or training set of size ' + str(self.d_cont) + '.')
     if d_2 != sum(d_2bis) or d_2 != self.d_qual:
-        raise ValueError('Shape of predictors_qual does not match provided link function and/or training set.')
+        raise ValueError('Shape of ' + str(d_2) +
+                         ' for predictors_cont does not match provided link function '
+                         'of size ' + str(sum(d_2bis)) + ' and/or training set of size ' + str(self.d_qual) + '.')
 
     emap = np.zeros((n, d_1 + d_2))
 

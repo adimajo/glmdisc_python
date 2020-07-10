@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
-This module is dedicated to preprocessing tasks for logistic regression and
+"""This module is dedicated to preprocessing tasks for logistic regression and
 post-learning graphical tools.
 
 .. autosummary::
@@ -19,7 +18,16 @@ post-learning graphical tools.
     Glmdisc.generate_data
 """
 import numpy as np
+import sklearn as sk
 from loguru import logger
+
+    
+class NotFittedError(sk.exceptions.NotFittedError):
+    """Exception class to raise if estimator is used before fitting.
+    This class inherits from both NotFittedError from sklearn which
+    itself inherits from ValueError and AttributeError to help with
+    exception handling and backward compatibility.
+    """
 
 
 def vectorized_multinouilli(prob_matrix, items):
@@ -223,6 +231,23 @@ class Glmdisc:
         self.train = np.array([])
         self.validate = np.array([])
         self.test_rows = np.array([])
+
+    def check_is_fitted(self):
+        """Perform is_fitted validation for estimator.
+        Checks if the estimator is fitted by verifying the presence of
+        fitted attributes (ending with a trailing underscore) and otherwise
+        raises a NotFittedError with the given message.
+        This utility is meant to be used internally by estimators themselves,
+        typically in their own predict / transform methods.
+        """
+        try:
+            sk.utils.validation.check_is_fitted(self.best_reglog)
+            for link in self.best_link:
+                if isinstance(link, sk.linear_model.LogisticRegression):
+                    sk.utils.validation.check_is_fitted(link)
+        except sk.exceptions.NotFittedError as e:
+            raise NotFittedError(str(e) + " If you did call fit, try increasing iter: "
+                                          "it means it did not find a better solution than the random initialization.")
 
     # Imported methods
     from ._bestFormula import best_formula

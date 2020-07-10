@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-plot method for class glmdisc
+"""plot method for class glmdisc
 """
 import pandas as pd
 import matplotlib.pyplot as plt

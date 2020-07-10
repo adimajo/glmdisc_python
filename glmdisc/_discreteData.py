@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-discrete_data method for the glmdisc class.
+"""discrete_data method for the glmdisc class.
 """
 from glmdisc._discretizeDummy import discretize_dummy
 from loguru import logger

@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-generate_data method for class glmdisc.
+"""generate_data method for class glmdisc.
 """
 import random
 import numpy as np
