@@ -8,7 +8,7 @@ if "%SPHINXBUILD%" == "" (
 	set SPHINXBUILD=sphinx-build
 )
 set SOURCEDIR=source
-set BUILDDIR=build
+set BUILDDIR=../../glmdisc_python_docs
 set SPHINXPROJ=glmdisc
 
 if "%1" == "" goto help

@@ -8,10 +8,8 @@
    :caption: Contents:
 
 Welcome to :mod:`glmdisc`'s documentation!
-===================================
-The glmdisc module is currently only populated by a class that implements both the Stochastic-Expectation-Maximization approach and the neural network approach of ``feature quantization'' as proposed in Ehrhardt (2019).
-
-.. currentmodule:: glmdisc
+==========================================
+The glmdisc module is currently only populated by a class that implements both the Stochastic-Expectation-Maximization approach and the neural network approach of ``feature quantization`` as proposed in Ehrhardt (2019).
 
 .. autosummary::
    :toctree: _autosummary

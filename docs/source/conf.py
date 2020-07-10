@@ -25,9 +25,9 @@ copyright = '2020, Adrien Ehrhardt'
 author = 'Adrien Ehrhardt'
 
 # The short X.Y version
-version = '0.0.9'
+version = '0.1'
 # The full version, including alpha/beta/rc tags
-release = '0.0.9'
+release = '0.1'
 
 
 # -- General configuration ---------------------------------------------------
@@ -119,7 +119,7 @@ html_theme_options = {
     'display_version': True,
     'prev_next_buttons_location': 'bottom',
     'style_external_links': False,
-    'vcs_pageview_mode': 'blob',
+    # 'vcs_pageview_mode': 'blob',
     # Toc options
     'collapse_navigation': True,
     'sticky_navigation': True,

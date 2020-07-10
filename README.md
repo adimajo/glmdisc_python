@@ -245,7 +245,7 @@ Note that we draw <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&sp
 
 ## The `glmdisc` class
 
-The documentation is available as a [Github Page](https://adimajo.github.io/glmdisc_python/).
+The documentation is available as a [Github Page](https://adimajo.github.io/glmdisc_python/index.html).
 
 The `glmdisc` class implements the algorithm described in the previous section. Its parameters are described first, then its internals are briefly discussed. We finally focus on its ouptuts.
 
@@ -466,6 +466,9 @@ pipenv install -d
 ```
 
 You can build the documentation by going into the `docs` directory and typing `make html`.
+
+NOTE: you need to have a separate folder named `glmdisc_python_docs` in the same directory as this repository,
+as it will build the docs there so as to allow me to push this other directory as a separate `gh-pages` branch.
 
 You can run the tests by typing `coverage run -m pytest`, which relies on packages 
 [coverage](https://coverage.readthedocs.io/en/coverage-5.2/) and [pytest](https://docs.pytest.org/en/latest/).

@@ -27,7 +27,7 @@ def test_discretize_cont():
 
 
 def test_discretize_qual():
-    n = 100
+    n = 500
     d = 2
     x, y, theta = glmdisc.Glmdisc.generate_data(n, d)
     cuts = ([0, 0.333, 0.666, 1])
@@ -36,7 +36,7 @@ def test_discretize_qual():
     for i in range(d):
         xd[:, i] = pd.cut(x[:, i], bins=cuts, labels=[0, 1, 2])
 
-    model = glmdisc.Glmdisc(validation=False, test=False, iter=11)
+    model = glmdisc.Glmdisc(validation=False, test=False, iter=50)
     model.fit(predictors_cont=None, predictors_qual=xd, labels=y)
     emap = model.discretize(predictors_cont=None, predictors_qual=xd)
     model.best_encoder_emap.transform(emap.astype(int).astype(str))

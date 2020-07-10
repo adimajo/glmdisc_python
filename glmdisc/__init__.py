@@ -6,9 +6,8 @@ post-learning graphical tools.
     :toctree:
 
     Glmdisc
+    Glmdisc.check_is_fitted
     Glmdisc.best_formula
-    Glmdisc.best_formula
-    Glmdisc.cont_data
     Glmdisc.discrete_data
     Glmdisc.discretize
     Glmdisc.discretize_dummy
@@ -16,6 +15,7 @@ post-learning graphical tools.
     Glmdisc.plot
     Glmdisc.predict
     Glmdisc.generate_data
+    NotFittedError
 """
 import numpy as np
 import sklearn as sk
