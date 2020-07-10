@@ -3,6 +3,7 @@ A setuptools based setup module.
 """
 # Always prefer setuptools over distutils
 from setuptools import setup, find_packages
+
 # To use a consistent encoding
 from codecs import open
 from os import path
@@ -18,7 +19,7 @@ def read_md(file):
 # Fields marked as "Optional" may be commented out.
 
 setup(
-    setup_requires=['wheel'],
+    setup_requires=["wheel"],
     extras_require={
         "dev": [
             "alabaster==0.7.12",
@@ -76,7 +77,8 @@ setup(
             "toml==0.10.1",
             "tomlkit==0.6.0; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'",
             "typed-ast==1.4.1",
-            "urllib3==1.25.9; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4' and python_version < '4'",
+            "urllib3==1.25.9; python_version >= '2.7' "
+            "and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4' and python_version < '4'",
             "vistir==0.5.2; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'",
             "wcwidth==0.2.5",
             "wheel==0.34.2; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4'",
@@ -132,22 +134,20 @@ setup(
         "Intended Audience :: Science/Research",
         "Topic :: Scientific/Engineering :: Artificial Intelligence",
         "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
-        "Programming Language :: Python :: 2",
-        "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.4",
-        "Programming Language :: Python :: 3.5",
-        "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
     ],
     keywords="discretization logistic regression levels grouping",
     packages=find_packages(exclude=["contrib", "docs", "tests"]),
     install_requires=[
         "cycler==0.10.0",
         "future==0.18.2; python_version >= '2.6' and python_version not in '3.0, 3.1, 3.2, 3.3'",
-        "joblib==0.15.1; python_version >= '3.6'",
+        "joblib==0.16.0; python_version >= '3.6'",
         "kiwisolver==1.2.0; python_version >= '3.6'",
+        "loguru==0.5.1",
         "matplotlib==3.2.2",
         "numpy==1.19.0",
         "pandas==1.0.5",
@@ -158,7 +158,7 @@ setup(
         "python-utils==2.4.0",
         "pytz==2020.1",
         "scikit-learn==0.23.1",
-        "scipy==1.5.0",
+        "scipy==1.5.1",
         "six==1.15.0; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'",
         "threadpoolctl==2.1.0; python_version >= '3.5'",
     ],

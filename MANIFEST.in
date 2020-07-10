@@ -2,14 +2,15 @@
 include LICENSE
 include README.md
 
-# Include the data files
-recursive-include data *
-
 # Include the package
 recursive-include glmdisc *
 
-# Include the docs
-recursive-include docs *
+# Exclude the docs
+recursive-exclude docs *
 
 # Include the tests
 recursive-include tests *
+
+# Global exclude
+global-exclude .DS_Store
+global-exclude *.pyc

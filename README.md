@@ -1,13 +1,26 @@
 [![PyPI version](https://badge.fury.io/py/glmdisc.svg)](https://badge.fury.io/py/glmdisc)
+[![PyPI pyversions](https://img.shields.io/pypi/pyversions/glmdisc.svg)](https://pypi.python.org/pypi/glmdisc/)
 [![PyPi Downloads](https://img.shields.io/pypi/dm/glmdisc)](https://img.shields.io/pypi/dm/glmdisc)
 ![Python package](https://github.com/adimajo/glmdisc_python/workflows/Python%20package/badge.svg)
 [![codecov](https://codecov.io/gh/adimajo/glmdisc_python/branch/master/graph/badge.svg)](https://codecov.io/gh/adimajo/glmdisc_python)
 
 # Feature quantization for parsimonious and interpretable models
 
+Table of Contents
+-----------------
+
+* [Documentation](https://adimajo.github.io/glmdisc_python)
+* [Installation instructions](#-installing-the-package)
+* [Theory](#-use-case-example)
+* [Some examples](#-the-glmdisc-package)
+* [Open an issue](https://github.com/adimajo/glmdisc_python/issues/new/choose)
+* [Contribute](#-contribute)
+
+## Motivation
+
 Credit institutions are interested in the refunding probability of a loan given the applicant’s characteristics in order to assess the worthiness of the credit. For regulatory and interpretability reasons, the logistic regression is still widely used to learn this probability from the data. Although logistic regression handles naturally both quantitative and qualitative data, three pre-processing steps are usually performed: firstly, continuous features are discretized by assigning factor levels to pre-determined intervals; secondly, qualitative features, if they take numerous values, are grouped; thirdly, interactions (products between two different predictors) are sparsely introduced. By reinterpreting discretized (resp. grouped) features as latent variables, we are able, through the use of a Stochastic Expectation-Maximization (SEM) algorithm and a Gibbs sampler to find the best discretization (resp. grouping) scheme w.r.t. the logistic regression loss. For detecting interacting features, the same scheme is used by replacing the Gibbs sampler by a Metropolis-Hastings algorithm. The good performances of this approach are illustrated on simulated and real data from Credit Agricole Consumer Finance.
 
-This repository is the implementation of [Ehrhardt, Adrien, et al. "Feature quantization for parsimonious and interpretable predictive models." arXiv preprint arXiv:1903.08920 (2019)](https://arxiv.org/abs/1903.08920).
+This repository is the implementation of [Ehrhardt Adrien, et al. "Feature quantization for parsimonious and interpretable predictive models." arXiv preprint arXiv:1903.08920 (2019)](https://arxiv.org/abs/1903.08920).
 
 NOTE: for now, only "glmdisc-SEM" is available.
 
@@ -17,7 +30,7 @@ These instructions will get you a copy of the project up and running on your loc
 
 ### Prerequisites
 
-This code is supported on Python 3.
+This code is supported on Python 2.7, 3.4, 3.5, 3.6, 3.7, 3.8, 3.9 and 3.10 (see [tox file](tox.ini)).
 
 ### Installing the package
 
@@ -68,13 +81,17 @@ where *username*, *password*, *server* and *port* should be replaced by your own
 
 ## Use case example
 
+For a thorough exaplanation of the approach, see [this blog post](https://adimajo.github.io/discretization) or [this article](https://arxiv.org/abs/1903.08920).
+
+If you're interested in directly using the package, you can skip this part and go to [this part below](#-the-glmdisc-package).
+
 In practice, the statistical modeler has historical data about each customer's characteristics. For obvious reasons, only data available at the time of inquiry must be used to build a future application scorecard. Those data often take the form of a well-structured table with one line per client alongside their performance (did they pay back their loan or not?) as can be seen in the following table:
 
 | Job | Habitation | Time in job | Children | Family status | Default |
 | --- | --- | --- | --- | --- | --- |
 | Craftsman | Owner | 10 | 0 | Divorced |  No |
-| Technician | Renter | 20 | 1 | Widower | No |
-| Executive | Starter | 5 | 2 | Single |  Yes |
+| Technician | Renter | **Missing** | 1 | Widower | No |
+| **Missing** | Starter | 5 | 2 | Single |  Yes |
 | Office employee | By family | 2 | 3 | Married | No |
 
 ## Notations
@@ -87,11 +104,12 @@ We are provided with an i.i.d. sample <a href="https://www.codecogs.com/eqnedit.
 
 The logistic regression model assumes the following relation between <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;X" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;X" title="X" /></a> and <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;Y" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;Y" title="Y" /></a> :
 
-<a href="https://www.codecogs.com/eqnedit.php?latex=\ln&space;\left(&space;\frac{p_\theta(Y=1|x)}{p_\theta(Y=0|x)}&space;\right)&space;=&space;\theta_0&space;&plus;&space;\sum_{j=1}^d&space;\theta_j*x_j" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\ln&space;\left(&space;\frac{p_\theta(Y=1|x)}{p_\theta(Y=0|x)}&space;\right)&space;=&space;\theta_0&space;&plus;&space;\sum_{j=1}^d&space;\theta_j*x_j" title="\ln \left( \frac{p_\theta(Y=1|x)}{p_\theta(Y=0|x)} \right) = \theta_0 + \sum_{j=1}^d \theta_j*x_j" /></a>
+<a href="https://www.codecogs.com/eqnedit.php?latex=\ln&space;\left(&space;\frac{p_\theta(Y=1|x)}{p_\theta(Y=0|x)}&space;\right)&space;=&space;\theta_0&space;&plus;&space;\sum_{j&space;\text{&space;if&space;}&space;X_j&space;\text{&space;continuous}}&space;\theta_j&space;x_j&space;&plus;&space;\sum_{j&space;\text{&space;if&space;}&space;X_j&space;\text{&space;categorical}}&space;\theta_j^{x_j}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\ln&space;\left(&space;\frac{p_\theta(Y=1|x)}{p_\theta(Y=0|x)}&space;\right)&space;=&space;\theta_0&space;&plus;&space;\sum_{j&space;\text{&space;if&space;}&space;X_j&space;\text{&space;continuous}}&space;\theta_j&space;x_j&space;&plus;&space;\sum_{j&space;\text{&space;if&space;}&space;X_j&space;\text{&space;categorical}}&space;\theta_j^{x_j}" title="\ln \left( \frac{p_\theta(Y=1|x)}{p_\theta(Y=0|x)} \right) = \theta_0 + \sum_{j \text{ if } X_j \text{ continuous}} \theta_j x_j + \sum_{j \text{ if } X_j \text{ categorical}} \theta_j^{x_j}" /></a>
 
-where <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;\theta&space;=&space;(\theta_j)_0^d" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;\theta&space;=&space;(\theta_j)_0^d" title="\theta = (\theta_j)_0^d" /></a> are estimated using <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;(\mathbf{x},\mathbf{y})" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;(\mathbf{x},\mathbf{y})" title="(\mathbf{x},\mathbf{y})" /></a>.
+where <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;\theta&space;=&space;(\theta_j)_0^d" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;\theta&space;=&space;(\theta_j)_0^d" title="\theta = (\theta_j)_0^d" /></a> are estimated using <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;(\mathbf{x},\mathbf{y})" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;(\mathbf{x},\mathbf{y})" title="(\mathbf{x},\mathbf{y})" /></a> (and <a href="https://www.codecogs.com/eqnedit.php?latex=\theta_j^h,&space;1&space;\leq&space;h&space;\leq&space;l_j" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\theta_j^h,&space;1&space;\leq&space;h&space;\leq&space;l_j" title="\theta_j^h, 1 \leq h \leq l_j" /></a> denotes the coefficients associated with a categorical feature <a href="https://www.codecogs.com/eqnedit.php?latex=x_j" target="_blank"><img src="https://latex.codecogs.com/gif.latex?x_j" title="x_j" /></a> being equal to <a href="https://www.codecogs.com/eqnedit.php?latex=h" target="_blank"><img src="https://latex.codecogs.com/gif.latex?h" title="h" /></a>).
 
-Clearly, the model assumes linearity of the logit transform of the response <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;Y" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;Y" title="Y" /></a> with respect to <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;X" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;X" title="X" /></a>.
+Clearly, for continuous features, the model assumes linearity of the logit transform of the response <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;Y" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;Y" title="Y" /></a> with respect to <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;X" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;X" title="X" /></a>.
+On the contrary, for categorical features, it might overfit if there are lots of levels (<a href="https://www.codecogs.com/eqnedit.php?latex=l_j&space;>>&space;1" target="_blank"><img src="https://latex.codecogs.com/gif.latex?l_j&space;>>&space;1" title="l_j >> 1" /></a>). It does not handle missing values. 
 
 ## Common problems with logistic regression on "raw" data
 
@@ -226,9 +244,9 @@ Note that we draw <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&sp
 
 ## The `glmdisc` class
 
+The documentation is available as a [Github Page](https://adimajo.github.io/glmdisc_python/).
+
 The `glmdisc` class implements the algorithm described in the previous section. Its parameters are described first, then its internals are briefly discussed. We finally focus on its ouptuts.
-
-
 
 ### Parameters
 
@@ -240,59 +258,50 @@ The `criterion` parameters lets the user choose between standard model selection
 
 The `m_start` parameter controls the maximum number of categories of <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;\mathfrak{q}_j" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;\mathfrak{q}_j" title="\mathfrak{q}_j" /></a> for <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;X_j" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;X_j" title="X_j" /></a> continuous. The SEM algorithm will start with random <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;\mathfrak{q}_j" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;\mathfrak{q}_j" title="\mathfrak{q}_j" /></a> taking values in <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;\{1,m_{\text{start}}\}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;\{1,m_{\text{start}}\}" title="\{1,m_{\text{start}}\}" /></a>. For qualitative features <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;X_j" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;X_j" title="X_j" /></a>, <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;\mathfrak{q}_j" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;\mathfrak{q}_j" title="\mathfrak{q}_j" /></a> is initialized with as many values as <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;X_j" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;X_j" title="X_j" /></a> so that `m_start` has no effect.
 
-Empirical studies show that with a reasonably small training dataset (< 100 000 rows) and a small `m_start` parameter (< 20), approximately 500 to 1500 iterations are largely sufficient to obtain a satisfactory model <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;p_\theta(y|e)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;p_\theta(y|e)" title="p_\theta(y|e)" /></a>.
-
-
-
+Empirical studies show that with a reasonably small training dataset (< 10,000 rows) and a small `m_start` parameter (< 20), approximately 500 to 1500 iterations are largely sufficient to obtain a satisfactory model <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;p_\theta(y|e)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;p_\theta(y|q(x))" title="p_\theta(y|q(x))" /></a>.
 
 ### The `fit` function
 
 The `fit` function of the `glmdisc` class is used to run the algorithm over the data provided to it. Subsequently, its parameters are: `predictors_cont` and `predictors_qual` which represent respectively the continuous features to be discretized and the categorical features which values are to be regrouped. They must be of type numpy array, filled with numeric and strings respectively. The last parameter is the class `labels`, of type numpy array as well, in binary form (0/1).
 
+### The `best_formula` function
 
+The `best_formula` function prints out in the console: the cut-points found for continuous features, the regroupments made for categorical features' values. It also returns it in a list.
 
+### The `discrete_data` function
 
-### The `bestFormula` function
-
-The `bestFormula` function prints out in the console: the cut-points found for continuous features, the regroupments made for categorical features' values. It also returns it in a list.
-
-
-
-### The `performance` function
-
-The `performance` function returns the best performance found by the MCMC so far (depending on your `criterion` argument).
-
-
-### The `discreteData` function
-
-The `discreteData` function returns the discretized / regrouped version of the `predictors_cont` and `predictors_qual` arguments using the best discretization scheme found so far.
-
-
-
-### The `contData` function
-
-The `discreteData` function returns the `predictors_cont`, `predictors_qual` and `labels` arguments in a list.
-
+The `discrete_data` function returns the discretized / regrouped version of the `predictors_cont` and `predictors_qual` arguments using the best discretization scheme found so far.
 
 ### The `discretize` function
 
 The `discretize` function discretizes a new input dataset in the `predictors_cont`, `predictors_qual` format using the best discretization scheme found so far. The result is a numpy array of the size of the original data.
 
+### The `discretize_dummy` function
 
-### The `discretizeDummy` function
-
-The `discretizeDummy` function discretizes a new input dataset in the `predictors_cont`, `predictors_qual` format using the best discretization scheme found so far. The result is a dummy (0/1) numpy array  corresponding to the One-Hot Encoding of the result provided by the `discretize` function.
-
-
+The `discretize_dummy` function discretizes a new input dataset in the `predictors_cont`, `predictors_qual` format using the best discretization scheme found so far. The result is a dummy (0/1) numpy array  corresponding to the One-Hot Encoding of the result provided by the `discretize` function.
 
 ### The `predict` function
 
 The `predict` function discretizes a new input dataset in the `predictors_cont`, `predictors_qual` format using the best discretization scheme found so far through the `discretizeDummy` function and then applies the corresponding best Logistic Regression model <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;p_\theta(y|e)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;p_\theta(y|e)" title="p_\theta(y|e)" /></a> found so far.
 
+### The attributes
 
-To see the package in action, please refer to the accompanying Jupyter Notebook.
+All parameters are stored as attributes: `test`, 
+`validation`, `criterion`, `iter`, `m_start` as well as:
 
+* `criterion_iter`: list of values of the criterion chosen;
+* `best_link`: link function of the best quantization;
+* `best_reglog`: logistic regression function of the best quantization;
+* `affectations`: list of label encoders for categorical features;
+* `best_encoder_emap`: one hot encoder of the best quantization;
+* `performance`: value of the chosen criterion for the best quantization;
+* `train`: array of row indices for training samples;
+* `validate`: array of row indices for validation samples;
+* `test_rows`: array of row indices for test samples;
 
+To see the package in action, please refer to [the accompanying Jupyter Notebook](examples/).
+
+- [ ] Do a notebook
 
 ## Authors
 
@@ -313,9 +322,9 @@ This research is supported by [Inria Lille - Nord-Europe](https://www.inria.fr/c
 
 ## References
 
-Ehrhardt, A. (2019), Formalization and study of ([PhD thesis](https://github.com/adimajo/manuscrit_these)).
+Ehrhardt, A. (2019), Formalization and study of statistical problems in Credit Scoring: Reject inference, discretization and pairwise interactions, logistic regression trees ([PhD thesis](https://github.com/adimajo/manuscrit_these)).
 
-Ehrhardt, A. (2019), Formalization and study of ([PhD thesis](https://github.com/adimajo/manuscrit_these)).
+Ehrhardt, A., et al. Feature quantization for parsimonious and interpretable predictive models. [arXiv preprint arXiv:1903.08920 (2019)](https://arxiv.org/abs/1903.08920).
 
 Celeux, G., Chauveau, D., Diebolt, J. (1995), On Stochastic Versions of the EM Algorithm. [Research Report] RR-2514, INRIA. 1995. <inria-00074164>
 
@@ -323,23 +332,11 @@ Agresti, A. (2002) **Categorical Data**. Second edition. Wiley.
 
 Ramírez‐Gallego, S., García, S., Mouriño‐Talín, H., Martínez‐Rego, D., Bolón‐Canedo, V., Alonso‐Betanzos, A. and Herrera, F. (2016). Data discretization: taxonomy and big data challenge. *Wiley Interdisciplinary Reviews: Data Mining and Knowledge Discovery*, 6(1), 5-21.
 
-- [ ] Do a notebook
-
-- [ ] Do tests
-
-- [ ] Do sphinx + readthedocs documentation
-
-
-
-
 ## Future development: integration of interaction discovery
 
 Very often, predictive features $X$ "interact" with each other with respect to the response feature. This is classical in the context of Credit Scoring or biostatistics (only the simultaneous presence of several features - genes, SNP, etc. is predictive of a disease).
 
 With the growing number of potential predictors and the time required to manually analyze if an interaction should be added or not, there is a strong need for automatic procedures that screen potential interaction variables. This will be the subject of future work.
-
-
-
 
 ## Future development: possibility of changing model assumptions
 
@@ -351,14 +348,7 @@ In the third section, we described two fundamental modelling hypotheses that wer
 
 These hypotheses are "building blocks" that could be changed at the modeller's will: discretization could optimize other models.
 
-
-
-
-
-
-
 - [ ] To delete when done with
-
 
 ```{r, echo=TRUE, results='asis'}
 x = matrix(runif(1000), nrow = 1000, ncol = 1)
@@ -372,7 +362,6 @@ pred_lin_logit <- predict(modele_lin,as.data.frame(x))
 ```{r, echo=FALSE}
 knitr::kable(head(data.frame(True_prob = p,Pred_lin = pred_lin)))
 ```
-
 
 ```{r, echo=TRUE, results='asis'}
 x_disc <- factor(cut(x,c(-Inf,0.5,0.7,0.8,0.9,+Inf)),labels = c(1,2,3,4,5))
@@ -391,12 +380,9 @@ lines(x,pred_disc_logit,type="p",col="blue")
 
 ```
 
-
-
 ```{r, echo=TRUE, results='asis'}
 x_disc_bad_idea <- factor(cut(x,c(-Inf,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,+Inf)),labels = c(1,2,3,4,5,6,7,8,9,10))
 ```
-
 
 ```{r, echo=FALSE, results='asis'}
 liste_coef <- list()
@@ -430,21 +416,6 @@ segments(as.numeric(row.names(stats_coef)), stats_coef[,1]-stats_coef[,2],as.num
 lines(row.names(stats_coef),rep(0,length(row.names(stats_coef))),col="red")
 ```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ### Results
 
 First we simulate a "true" underlying discrete model:
@@ -477,3 +448,28 @@ To compare the estimated and the true discretization schemes, we can represent t
 plot(x[,1],xd[,1])
 plot(discretization@cont.data[,1],discretization@disc.data[,1])
 ```
+
+## Contribute
+
+You can clone this project using:
+
+```PowerShell
+git clone https://github.com/adimajo/glmdisc_python.git
+```
+
+You can install all dependencies, including development dependencies, using (note that 
+this command requires `pipenv` which can be installed by typing `pip install pipenv`):
+
+```PowerShell
+pipenv install -d
+```
+
+You can build the documentation by going into the `docs` directory and typing `make html`.
+
+You can run the tests by typing `coverage run -m pytest`, which relies on packages 
+[coverage](https://coverage.readthedocs.io/en/coverage-5.2/) and [pytest](https://docs.pytest.org/en/latest/).
+
+To run the tests in different environments (one for each version of Python), install `pyenv` (see [the instructions here](https://github.com/pyenv/pyenv)),
+install all versions you want to test (see [tox.ini](tox.ini)), e.g. with `pyenv install 3.7.0` and run 
+`pipenv run pyenv local 3.7.0 [...]` (and all other versions) followed by `pipenv run tox`.
+ 

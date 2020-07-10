@@ -13,7 +13,7 @@ from math import log
 from glmdisc import vectorized_multinouilli
 
 
-def _check_args(predictors_cont, predictors_qual, labels):
+def _check_args(predictors_cont, predictors_qual, labels, check_labels=True):
     """
     Checks inputs
 
@@ -25,21 +25,27 @@ def _check_args(predictors_cont, predictors_qual, labels):
     :type labels: numpy.array
     """
     # Tester la présence de labels
-    if not isinstance(labels, np.ndarray):
+    if predictors_cont is not None and not isinstance(predictors_cont, np.ndarray):
         raise ValueError('glmdisc only supports numpy.ndarray inputs')
+    if predictors_qual is not None and not isinstance(predictors_qual, np.ndarray):
+        raise ValueError('glmdisc only supports numpy.ndarray inputs')
+    if check_labels:
+        if not isinstance(labels, np.ndarray):
+            raise ValueError('glmdisc only supports numpy.ndarray inputs')
 
     # Tester la présence d'au moins qual ou cont
     if predictors_cont is None and predictors_qual is None:
         raise ValueError(('You must provide either qualitative or quantitative '
                          'features'))
 
-    # Tester la présence de prédicteurs continus et de même longueur que labels
-    if predictors_cont is not None and predictors_cont.shape[0] != labels.shape[0]:
-        raise ValueError('Predictors and labels must be of same size')
+    if check_labels:
+        # Tester la présence de prédicteurs continus et de même longueur que labels
+        if predictors_cont is not None and predictors_cont.shape[0] != labels.shape[0]:
+            raise ValueError('Predictors and labels must be of same size')
 
-    # Tester la présence de prédicteurs catégoriels et de même longueur que labels
-    if predictors_qual is not None and predictors_qual.shape[0] != labels.shape[0]:
-        raise ValueError('Predictors and labels must be of same size')
+        # Tester la présence de prédicteurs catégoriels et de même longueur que labels
+        if predictors_qual is not None and predictors_qual.shape[0] != labels.shape[0]:
+            raise ValueError('Predictors and labels must be of same size')
 
 
 def _calculate_shape(self):
@@ -52,14 +58,14 @@ def _calculate_shape(self):
     """
     # Calculate shape of predictors (re-used multiple times)
     self.n = self.labels.shape[0]
-    try:
+    if self.predictors_cont is not None:
         self.d_cont = self.predictors_cont.shape[1]
-    except AttributeError:
+    else:
         self.d_cont = 0
 
-    try:
+    if self.predictors_qual is not None:
         self.d_qual = self.predictors_qual.shape[1]
-    except AttributeError:
+    else:
         self.d_qual = 0
 
     # Gérer les manquants des variables continues, dans un premier temps
@@ -178,14 +184,6 @@ def fit(self, predictors_cont, predictors_qual, labels):
 
     # Calcul des variables locales utilisées dans la suite
     continu_complete_case = self._calculate_shape()
-    # sum_continu_complete_case = np.zeros((self.n, self.d_cont))
-    #
-    # for j in range(self.d_cont):
-    #     sum_continu_complete_case[0, j] = continu_complete_case[0, j] * 1
-    #     for i in range(1, n):
-    #         sum_continu_complete_case[i, j] = \
-    #             sum_continu_complete_case[i - 1, j] + \
-    #             continu_complete_case[i, j] * 1
 
     # Initialization for following the performance of the discretization
     current_best = 0
@@ -234,23 +232,13 @@ def fit(self, predictors_cont, predictors_qual, labels):
         current_encoder_emap.fit(X=emap.astype(str))
 
         # Apprentissage p(y|e) et p(y|emap)
-        try:
-            model_edisc.fit(X=current_encoder_edisc.transform(
-                edisc[self.train, :].astype(str)),
-                y=self.labels[self.train])
-        except ValueError:
-            model_edisc.fit(X=current_encoder_edisc.transform(
-                edisc[self.train, :].astype(str)),
-                y=self.labels[self.train])
+        model_edisc.fit(X=current_encoder_edisc.transform(
+            edisc[self.train, :].astype(str)),
+            y=self.labels[self.train])
 
-        try:
-            model_emap.fit(X=current_encoder_emap.transform(
-                emap[self.train, :].astype(str)),
-                y=self.labels[self.train])
-        except ValueError:
-            model_emap.fit(X=current_encoder_emap.transform(
-                emap[self.train, :].astype(str)),
-                y=self.labels[self.train])
+        model_emap.fit(X=current_encoder_emap.transform(
+            emap[self.train, :].astype(str)),
+            y=self.labels[self.train])
 
         # Calcul du critère
         self.criterion_iter.append(self._calculate_criterion(emap,
@@ -258,7 +246,7 @@ def fit(self, predictors_cont, predictors_qual, labels):
                                                              current_encoder_emap))
 
         # Mise à jour éventuelle du meilleur critère
-        if self.criterion_iter[i] <= self.criterion_iter[current_best]:
+        if self.criterion_iter[i] >= self.criterion_iter[current_best]:
             # Update current best logistic regression
             self.best_reglog = model_emap
             self.best_link = link
@@ -327,8 +315,9 @@ def fit(self, predictors_cont, predictors_qual, labels):
             # Variables qualitatives
             else:
                 # On fait le tableau de contingence e^j | x^j
-                link[j] = Counter([tuple(element) for element in np.column_stack((predictors_trans[self.train, j - self.d_cont],
-                                                                                  edisc[self.train, j]))])
+                link[j] = Counter([tuple(element) for element in np.column_stack(
+                    (predictors_trans[self.train, j - self.d_cont],
+                     edisc[self.train, j]))])
 
                 y_p = np.zeros((self.n, len(m[j])))
 
@@ -359,14 +348,3 @@ def fit(self, predictors_cont, predictors_qual, labels):
                 t = t / (t.sum(axis=1)[:, None])
 
                 edisc[:, j] = vectorized_multinouilli(t, m[j])
-
-
-if __name__ == "__main__":
-    import glmdisc
-    n = 100
-    d = 2
-    x, y, theta = glmdisc.Glmdisc.generate_data(n, d)
-    model = glmdisc.Glmdisc()
-    cuts = ([0, 0.333, 0.666, 1])
-    xd = np.ndarray.copy(x)
-    model.fit(predictors_cont=x, predictors_qual=None, labels=y)

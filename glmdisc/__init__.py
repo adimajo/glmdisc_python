@@ -216,9 +216,9 @@ class Glmdisc:
 
         self.criterion_iter = []
         self.best_link = []
-        self.best_reglog = 0
+        self.best_reglog = None
         self.affectations = []
-        self.best_encoder_emap = []
+        self.best_encoder_emap = None
         self.performance = -np.inf
         self.train = np.array([])
         self.validate = np.array([])

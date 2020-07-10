@@ -7,6 +7,7 @@ from collections import Counter
 import sklearn as sk
 from scipy import stats
 import numpy as np
+import glmdisc
 
 
 def discretize(self, predictors_cont, predictors_qual):
@@ -23,31 +24,35 @@ def discretize(self, predictors_cont, predictors_qual):
         (also in a numpy "string" array). Can be provided
         either here or with the __init__ method.
     """
+    glmdisc._fit._check_args(predictors_cont=predictors_cont,
+                             predictors_qual=predictors_qual,
+                             labels=None,
+                             check_labels=False)
 
-    try:
+    if predictors_cont is not None:
         n = predictors_cont.shape[0]
-    except AttributeError:
+    else:
         n = predictors_qual.shape[0]
 
-    try:
+    if predictors_cont is not None:
         d_1 = predictors_cont.shape[1]
-    except AttributeError:
+    else:
         d_1 = 0
 
-    try:
+    if predictors_qual is not None:
         d_2 = predictors_qual.shape[1]
-    except AttributeError:
+    else:
         d_2 = 0
 
-    d_1bis = [isinstance(x, sk.linear_model.logistic.LogisticRegression) for x in self.best_link]
+    d_1bis = [isinstance(x, sk.linear_model.LogisticRegression) for x in self.best_link]
     d_2bis = [isinstance(x, Counter) for x in self.best_link]
 
-    if d_1 != sum(d_1bis):
-        raise ValueError('Shape of predictors1 does not match provided link function')
-    if d_2 != sum(d_2bis):
-        raise ValueError('Shape of predictors2 does not match provided link function')
+    if d_1 != sum(d_1bis) or d_1 != self.d_cont:
+        raise ValueError('Shape of predictors_cont does not match provided link function and/or training set.')
+    if d_2 != sum(d_2bis) or d_2 != self.d_qual:
+        raise ValueError('Shape of predictors_qual does not match provided link function and/or training set.')
 
-    emap = np.array([0] * n * (d_1 + d_2)).reshape(n, d_1 + d_2)
+    emap = np.zeros((n, d_1 + d_2))
 
     for j in range(d_1 + d_2):
         if d_1bis[j]:

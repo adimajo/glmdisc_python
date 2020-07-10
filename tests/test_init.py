@@ -14,7 +14,7 @@ def test_init():
     assert glmdisc_instance.m_start == 20
     assert glmdisc_instance.criterion_iter == []
     assert glmdisc_instance.best_link == []
-    assert glmdisc_instance.best_reglog == 0
+    assert glmdisc_instance.best_reglog is None
     assert glmdisc_instance.affectations == []
     assert glmdisc_instance.best_encoder_emap == []
     assert glmdisc_instance.performance == -np.inf
@@ -89,4 +89,3 @@ def test_validation_criterion(caplog):
 
     assert caplog.records[0].message == ('No need to penalize the log-likelihood when a validation set is used. '
                                          'Using log-likelihood instead.')
-

@@ -71,6 +71,9 @@ def test_calculate_shape_categorical():
     assert model.d_qual == d
     assert continu_complete_case is None
 
+    model = glmdisc.Glmdisc(iter=11, m_start=2)
+    model.fit(predictors_cont=None, predictors_qual=xd, labels=y)
+
 
 def test_calculate_criterion():
     n = 100
@@ -80,10 +83,9 @@ def test_calculate_criterion():
     random.seed(1)
     np.random.seed(1)
     model.fit(predictors_cont=x, predictors_qual=None, labels=y)
-    training = model.train
     emap = np.resize(np.array([np.where(
         np.random.multinomial(1,
-                              pvals=[0.33, 0.33, 0.34]))[0][0] + 1 for _ in range(n*d)]),
+                              pvals=[0.33, 0.33, 0.34]))[0][0] + 1 for _ in range(n * d)]),
                      (n, d))
 
     current_encoder_emap = sk.preprocessing.OneHotEncoder()
@@ -116,11 +118,18 @@ def test_calculate_criterion():
     random.seed(1)
     np.random.seed(1)
     model.fit(predictors_cont=x, predictors_qual=None, labels=y)
-    assert model._calculate_criterion(emap, model_emap, current_encoder_emap) == modele_bic + (log(model.n) - 2) * model_emap.coef_.shape[1]
+    assert model._calculate_criterion(emap,
+                                      model_emap,
+                                      current_encoder_emap) == modele_bic + (log(model.n) - 2) * model_emap.coef_.shape[
+        1]
 
     model = glmdisc.Glmdisc(iter=11, criterion="gini")
     model.fit(predictors_cont=x, predictors_qual=None, labels=y)
-    model._calculate_criterion(emap, model_emap, current_encoder_emap)
+    assert 0 <= model._calculate_criterion(emap, model_emap, current_encoder_emap) <= 1
+
+    model = glmdisc.Glmdisc(iter=11, criterion="gini", validation=False)
+    model.fit(predictors_cont=x, predictors_qual=None, labels=y)
+    assert 0 <= model._calculate_criterion(emap, model_emap, current_encoder_emap) <= 1
 
 
 def test_init_disc():
