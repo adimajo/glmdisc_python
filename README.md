@@ -73,6 +73,10 @@ pip --proxy=http://username:password@server:port install glmdisc
 
 where *username*, *password*, *server* and *port* should be replaced by your own values.
 
+If environment variables `http_proxy` and / or `https_proxy` and / or (unfortunately depending on applications...) 
+`HTTP_PROXY` and `HTTPS_PROXY` are set, the proxy settings should be picked up by `pip`.
+
+Over the years, I've found [CNTLM](http://cntlm.sourceforge.net/) to be a great tool in this regard.
 
 **What follows is a quick introduction to the problem of discretization and how this package answers the question.**
 
@@ -178,25 +182,24 @@ All intervals crossing 0 are non-significant! We should group factor values to g
 
 ## Notations
 
-Let <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;E=(\mathfrak{q}_j)_1^d" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;E=(\mathfrak{q}_j)_1^d" title="E=(\mathfrak{q}_j)_1^d" /></a> be the latent discretized transform of <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;X" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;X" title="X" /></a>, i.e. taking values in <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;\{0,\ldots,m_j\}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;\{0,\ldots,m_j\}" title="\{0,\ldots,m_j\}" /></a> where the number of values of each covariate <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;m_j" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;m_j" title="m_j" /></a> is also latent.
+Let <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;\mathfrak{q}=(\mathfrak{q}_j)_1^d" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;\mathfrak{q}=(\mathfrak{q}_j)_1^d" title="\mathfrak{q}=(\mathfrak{q}_j)_1^d" /></a> be the latent discretized transform of <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;X" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;X" title="X" /></a>, i.e. taking values in <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;\{0,\ldots,m_j\}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;\{0,\ldots,m_j\}" title="\{0,\ldots,m_j\}" /></a> where the number of values of each covariate <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;m_j" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;m_j" title="m_j" /></a> is also latent.
 
 The fitted logistic regression model is now:
-<a href="https://www.codecogs.com/eqnedit.php?latex=\ln&space;\left(&space;\frac{p_\theta(Y=1|e)}{p_\theta(Y=0|e)}&space;\right)&space;=&space;\theta_0&space;&plus;&space;\sum_{j=1}^d&space;\sum_{k=1}^{m_j}&space;\theta^j_k*{1}_{e^j=k}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\ln&space;\left(&space;\frac{p_\theta(Y=1|e)}{p_\theta(Y=0|e)}&space;\right)&space;=&space;\theta_0&space;&plus;&space;\sum_{j=1}^d&space;\sum_{k=1}^{m_j}&space;\theta^j_k*{1}_{e^j=k}" title="\ln \left( \frac{p_\theta(Y=1|e)}{p_\theta(Y=0|e)} \right) = \theta_0 + \sum_{j=1}^d \sum_{k=1}^{m_j} \theta^j_k*{1}_{e^j=k}" /></a>
+<a href="https://www.codecogs.com/eqnedit.php?latex=\ln&space;\left(&space;\frac{p_\theta(Y=1|e)}{p_\theta(Y=0|e)}&space;\right)&space;=&space;\theta_0&space;&plus;&space;\sum_{j=1}^d&space;\sum_{k=1}^{m_j}&space;\theta^j_k*{1}_{e^j=k}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\ln&space;\left(&space;\frac{p_\theta(Y=1|\mathfrak{q})}{p_\theta(Y=0|\mathfrak{q})}&space;\right)&space;=&space;\theta_0&space;&plus;&space;\sum_{j=1}^d&space;\sum_{k=1}^{m_j}&space;\theta^j_k*{1}_{\mathfrak{q}^j=k}" title="\ln \left( \frac{p_\theta(Y=1|\mathfrak{q})}{p_\theta(Y=0|\mathfrak{q})} \right) = \theta_0 + \sum_{j=1}^d \sum_{k=1}^{m_j} \theta^j_k*{1}_{\mathfrak{q}^j=k}" /></a>
 
-Clearly, the number of parameters has grown which allows for flexible approximation of the true underlying model <a href="https://www.codecogs.com/eqnedit.php?latex=p(Y|E)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?p(Y|E)" title="p(Y|E)" /></a>.
+Clearly, the number of parameters has grown which allows for flexible approximation of the true underlying model <a href="https://www.codecogs.com/eqnedit.php?latex=p(Y|\mathfrak{q})" target="_blank"><img src="https://latex.codecogs.com/gif.latex?p(Y|\mathfrak{q})" title="p(Y|\mathfrak{q})" /></a>.
 
 ## Best discretization?
 
-Our goal is to obtain the model <a href="https://www.codecogs.com/eqnedit.php?latex=p_\theta(Y|e)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?p_\theta(Y|e)" title="p_\theta(Y|e)" /></a> with best predictive power. As <a href="https://www.codecogs.com/eqnedit.php?latex=E" target="_blank"><img src="https://latex.codecogs.com/gif.latex?E" title="E" /></a> and <a href="https://www.codecogs.com/eqnedit.php?latex=\theta" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\theta" title="\theta" /></a> are both optimized, a formal goodness-of-fit criterion could be:
-<a href="https://www.codecogs.com/eqnedit.php?latex=(\hat{\theta},\hat{\mathbf{e}})&space;=&space;\arg&space;\max_{\theta,\mathbf{e}}&space;\text{AIC}(p_\theta(\mathbf{y}|\mathbf{e}))" target="_blank"><img src="https://latex.codecogs.com/gif.latex?(\hat{\theta},\hat{\mathbf{e}})&space;=&space;\arg&space;\max_{\theta,\mathbf{e}}&space;\text{AIC}(p_\theta(\mathbf{y}|\mathbf{e}))" title="(\hat{\theta},\hat{\mathbf{e}}) = \arg \max_{\theta,\mathbf{e}} \text{AIC}(p_\theta(\mathbf{y}|\mathbf{e}))" /></a>
+Our goal is to obtain the model <a href="https://www.codecogs.com/eqnedit.php?latex=p_\theta(Y|\mathfrak{q})" target="_blank"><img src="https://latex.codecogs.com/gif.latex?p_\theta(Y|\mathfrak{q})" title="p_\theta(Y|\mathfrak{q})" /></a> with best predictive power. As <a href="https://www.codecogs.com/eqnedit.php?latex=\mathfrak{q}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\mathfrak{q}" title="\mathfrak{q}" /></a> and <a href="https://www.codecogs.com/eqnedit.php?latex=\theta" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\theta" title="\theta" /></a> are both optimized, a formal goodness-of-fit criterion could be:
+<a href="https://www.codecogs.com/eqnedit.php?latex=(\hat{\theta},\hat{\mathfrak{q}})&space;=&space;\arg&space;\max_{\theta,\mathfrak{q}}&space;\text{AIC}(p_\theta(\mathbf{y}|\mathfrak{q}))" target="_blank"><img src="https://latex.codecogs.com/gif.latex?(\hat{\theta},\hat{\mathfrak{q}})&space;=&space;\arg&space;\max_{\theta,\mathfrak{q}}&space;\text{AIC}(p_\theta(\mathbf{y}|\mathfrak{q}))" title="(\hat{\theta},\hat{\mathfrak{q}}) = \arg \max_{\theta,\mathfrak{q}} \text{AIC}(p_\theta(\mathbf{y}|\mathfrak{q}))" /></a>
 where AIC stands for Akaike Information Criterion.
-
 
 ## Combinatorics
 
-The problem seems well-posed: if we were able to generate all discretization schemes transforming <a href="https://www.codecogs.com/eqnedit.php?latex=X" target="_blank"><img src="https://latex.codecogs.com/gif.latex?X" title="X" /></a> to <a href="https://www.codecogs.com/eqnedit.php?latex=E" target="_blank"><img src="https://latex.codecogs.com/gif.latex?E" title="E" /></a>, learn <a href="https://www.codecogs.com/eqnedit.php?latex=p_\theta(y|e)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?p_\theta(y|e)" title="p_\theta(y|e)" /></a> for each of them and compare their AIC values, the problem would be solved.
+The problem seems well-posed: if we were able to generate all discretization schemes transforming <a href="https://www.codecogs.com/eqnedit.php?latex=X" target="_blank"><img src="https://latex.codecogs.com/gif.latex?X" title="X" /></a> to <a href="https://www.codecogs.com/eqnedit.php?latex=\mathfrak{q}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\mathfrak{q}" title="\mathfrak{q}" /></a>, learn <a href="https://www.codecogs.com/eqnedit.php?latex=p_\theta(y|\mathfrak{q})" target="_blank"><img src="https://latex.codecogs.com/gif.latex?p_\theta(y|\mathfrak{q})" title="p_\theta(y|\mathfrak{q})" /></a> for each of them and compare their AIC values, the problem would be solved.
 
-Unfortunately, there are way too many candidates to follow this procedure. Suppose we want to construct k intervals of <a href="https://www.codecogs.com/eqnedit.php?latex=\mathfrak{q}_j" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\mathfrak{q}_j" title="\mathfrak{q}_j" /></a> given n distinct <a href="https://www.codecogs.com/eqnedit.php?latex=(x_j_i)_1^n" target="_blank"><img src="https://latex.codecogs.com/gif.latex?(x_j_i)_1^n" title="(x_j_i)_1^n" /></a>. There is <a href="https://www.codecogs.com/eqnedit.php?latex=n&space;\choose&space;k" target="_blank"><img src="https://latex.codecogs.com/gif.latex?n&space;\choose&space;k" title="n \choose k" /></a> models. The true value of k is unknown, so it must be looped over. Finally, as logistic regression is a multivariate model, the discretization of <a href="https://www.codecogs.com/eqnedit.php?latex=\mathfrak{q}_j" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\mathfrak{q}_j" title="\mathfrak{q}_j" /></a> can influence the discretization of <a href="https://www.codecogs.com/eqnedit.php?latex=E^k" target="_blank"><img src="https://latex.codecogs.com/gif.latex?E^k" title="E^k" /></a>, <a href="https://www.codecogs.com/eqnedit.php?latex=k&space;\neq&space;j" target="_blank"><img src="https://latex.codecogs.com/gif.latex?k&space;\neq&space;j" title="k \neq j" /></a>.
+Unfortunately, there are way too many candidates to follow this procedure. Suppose we want to construct k intervals of <a href="https://www.codecogs.com/eqnedit.php?latex=\mathfrak{q}_j" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\mathfrak{q}_j" title="\mathfrak{q}_j" /></a> given n distinct <a href="https://www.codecogs.com/eqnedit.php?latex=(x_j_i)_1^n" target="_blank"><img src="https://latex.codecogs.com/gif.latex?(x_j_i)_1^n" title="(x_j_i)_1^n" /></a>. There is <a href="https://www.codecogs.com/eqnedit.php?latex=n&space;\choose&space;k" target="_blank"><img src="https://latex.codecogs.com/gif.latex?n&space;\choose&space;k" title="n \choose k" /></a> models. The true value of k is unknown, so it must be looped over. Finally, as logistic regression is a multivariate model, the discretization of <a href="https://www.codecogs.com/eqnedit.php?latex=\mathfrak{q}_j" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\mathfrak{q}_j" title="\mathfrak{q}_j" /></a> can influence the discretization of <a href="https://www.codecogs.com/eqnedit.php?latex=\mathfrak{q}_k" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\mathfrak{q}_k" title="\mathfrak{q}_k" /></a>, <a href="https://www.codecogs.com/eqnedit.php?latex=k&space;\neq&space;j" target="_blank"><img src="https://latex.codecogs.com/gif.latex?k&space;\neq&space;j" title="k \neq j" /></a>.
 
 As a consequence, existing approaches to discretization (in particular discretization of continuous attributes) rely on strong assumptions to simplify the search of good candidates as can be seen in the review of Ramírez‐Gallego, S. et al. (2016) - see References section.
 
@@ -206,40 +209,34 @@ As a consequence, existing approaches to discretization (in particular discretiz
 
 ## Likelihood estimation
 
-<a href="https://www.codecogs.com/eqnedit.php?latex=E" target="_blank"><img src="https://latex.codecogs.com/gif.latex?E" title="E" /></a> can be introduced in <a href="https://www.codecogs.com/eqnedit.php?latex=p(Y|X)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?p(Y|X)" title="p(Y|X)" /></a>:
-<a href="https://www.codecogs.com/eqnedit.php?latex=\forall&space;\:&space;x,y,&space;\;&space;p(y|x)&space;=&space;\sum_e&space;p(y|x,e)p(e|x)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\forall&space;\:&space;x,y,&space;\;&space;p(y|x)&space;=&space;\sum_e&space;p(y|x,e)p(e|x)" title="\forall \: x,y, \; p(y|x) = \sum_e p(y|x,e)p(e|x)" /></a>
+<a href="https://www.codecogs.com/eqnedit.php?latex=\mathfrak{q}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\mathfrak{q}" title="\mathfrak{q}" /></a> can be introduced in <a href="https://www.codecogs.com/eqnedit.php?latex=p(Y|X)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?p(Y|X)" title="p(Y|X)" /></a>:
+<a href="https://www.codecogs.com/eqnedit.php?latex=\forall&space;\:&space;x,y,&space;\;&space;p(y|x)&space;=&space;\sum_\mathfrak{q}&space;p(y|x,\mathfrak{q})p(\mathfrak{q}|x)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\forall&space;\:&space;x,y,&space;\;&space;p(y|x)&space;=&space;\sum_\mathfrak{q}&space;p(y|x,\mathfrak{q})p(\mathfrak{q}|x)" title="\forall \: x,y, \; p(y|x) = \sum_\mathfrak{q} p(y|x,\mathfrak{q})p(\mathfrak{q}|x)" /></a>
 
-First, we assume that all information about <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;Y" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;Y" title="Y" /></a> in <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;X" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;X" title="X" /></a> is already contained in <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;E" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;E" title="E" /></a> so that:
-<a href="https://www.codecogs.com/eqnedit.php?latex=\forall&space;\:&space;x,y,e,&space;\;&space;p(y|x,e)=p(y|e)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\forall&space;\:&space;x,y,e,&space;\;&space;p(y|x,e)=p(y|e)" title="\forall \: x,y,e, \; p(y|x,e)=p(y|e)" /></a>
-Second, we assume the conditional independence of <a href="https://www.codecogs.com/eqnedit.php?latex=\mathfrak{q}_j" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\mathfrak{q}_j" title="\mathfrak{q}_j" /></a> given <a href="https://www.codecogs.com/eqnedit.php?latex=X_j" target="_blank"><img src="https://latex.codecogs.com/gif.latex?X_j" title="X_j" /></a>, i.e. knowing <a href="https://www.codecogs.com/eqnedit.php?latex=X_j" target="_blank"><img src="https://latex.codecogs.com/gif.latex?X_j" title="X_j" /></a>, the discretization <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;\mathfrak{q}_j" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;\mathfrak{q}_j" title="\mathfrak{q}_j" /></a> is independent of the other features <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;X^k" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;X^k" title="X^k" /></a> and <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;E^k" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;E^k" title="E^k" /></a> for all <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;k&space;\neq&space;j" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;k&space;\neq&space;j" title="k \neq j" /></a>:
-<a href="https://www.codecogs.com/eqnedit.php?latex=\forall&space;\:x,&space;k\neq&space;j,&space;\;&space;\mathfrak{q}_j&space;|&space;x_j&space;\perp&space;E^k&space;|&space;x^k" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\forall&space;\:x,&space;k\neq&space;j,&space;\;&space;\mathfrak{q}_j&space;|&space;x_j&space;\perp&space;E^k&space;|&space;x^k" title="\forall \:x, k\neq j, \; \mathfrak{q}_j | x_j \perp E^k | x^k" /></a>
+First, we assume that all information about <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;Y" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;Y" title="Y" /></a> in <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;X" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;X" title="X" /></a> is already contained in <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;\mathfrak{q}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;\mathfrak{q}" title="\mathfrak{q}" /></a> so that:
+<a href="https://www.codecogs.com/eqnedit.php?latex=\forall&space;\:&space;x,y,\mathfrak{q},&space;\;&space;p(y|x,\mathfrak{q})=p(y|\mathfrak{q})" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\forall&space;\:&space;x,y,\mathfrak{q},&space;\;&space;p(y|x,\mathfrak{q})=p(y|\mathfrak{q})" title="\forall \: x,y,\mathfrak{q}, \; p(y|x,\mathfrak{q})=p(y|\mathfrak{q})" /></a>
+Second, we assume the conditional independence of <a href="https://www.codecogs.com/eqnedit.php?latex=\mathfrak{q}_j" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\mathfrak{q}_j" title="\mathfrak{q}_j" /></a> given <a href="https://www.codecogs.com/eqnedit.php?latex=X_j" target="_blank"><img src="https://latex.codecogs.com/gif.latex?X_j" title="X_j" /></a>, i.e. knowing <a href="https://www.codecogs.com/eqnedit.php?latex=X_j" target="_blank"><img src="https://latex.codecogs.com/gif.latex?X_j" title="X_j" /></a>, the discretization <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;\mathfrak{q}_j" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;\mathfrak{q}_j" title="\mathfrak{q}_j" /></a> is independent of the other features <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;X_k" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;X_k" title="X_k" /></a> and <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;\mathfrak{q}_k" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;\mathfrak{q}_k" title="\mathfrak{q}_k" /></a> for all <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;k&space;\neq&space;j" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;k&space;\neq&space;j" title="k \neq j" /></a>:
+<a href="https://www.codecogs.com/eqnedit.php?latex=\forall&space;\:x,&space;k\neq&space;j,&space;\;&space;\mathfrak{q}_j&space;|&space;x_j&space;\perp&space;\mathfrak{q}_k&space;|&space;x_k" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\forall&space;\:x,&space;k\neq&space;j,&space;\;&space;\mathfrak{q}_j&space;|&space;x_j&space;\perp&space;\mathfrak{q}_k&space;|&space;x_k" title="\forall \:x, k\neq j, \; \mathfrak{q}_j | x_j \perp \mathfrak{q}_k | x_k" /></a>
 The first equation becomes:
-<a href="https://www.codecogs.com/eqnedit.php?latex=\forall&space;\:&space;x,y,&space;\;&space;p(y|x)&space;=&space;\sum_e&space;p(y|e)&space;\prod_{j=1}^d&space;p(e^j|x_j)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\forall&space;\:&space;x,y,&space;\;&space;p(y|x)&space;=&space;\sum_e&space;p(y|e)&space;\prod_{j=1}^d&space;p(e^j|x_j)" title="\forall \: x,y, \; p(y|x) = \sum_e p(y|e) \prod_{j=1}^d p(e^j|x_j)" /></a>
-As said earlier, we consider only logistic regression models on discretized data <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;p_\theta(y|e)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;p_\theta(y|e)" title="p_\theta(y|e)" /></a>. Additionnally, it seems like we have to make further assumptions on the nature of the relationship of <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;e^j" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;e^j" title="e^j" /></a> to <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;x_j" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;x_j" title="x_j" /></a>. We chose to use polytomous logistic regressions for continuous <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;X_j" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;X_j" title="X_j" /></a> and contengency tables for qualitative <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;X_j" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;X_j" title="X_j" /></a>. This is an arbitrary choice and future versions will include the possibility of plugging your own model.
+<a href="https://www.codecogs.com/eqnedit.php?latex=\forall&space;\:&space;x,y,&space;\;&space;p(y|x)&space;=&space;\sum_\mathfrak{q}&space;p(y|\mathfrak{q})&space;\prod_{j=1}^d&space;p(\mathfrak{q}_j|x_j)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\forall&space;\:&space;x,y,&space;\;&space;p(y|x)&space;=&space;\sum_\mathfrak{q}&space;p(y|\mathfrak{q})&space;\prod_{j=1}^d&space;p(\mathfrak{q}_j|x_j)" title="\forall \: x,y, \; p(y|x) = \sum_\mathfrak{q} p(y|\mathfrak{q}) \prod_{j=1}^d p(\mathfrak{q}_j|x_j)" /></a>
+As said earlier, we consider only logistic regression models on discretized data <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;p_\theta(y|\mathfrak{q})" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;p_\theta(y|\mathfrak{q})" title="p_\theta(y|\mathfrak{q})" /></a>. Additionnally, it seems like we have to make further assumptions on the nature of the relationship of <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;\mathfrak{q}_j" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;\mathfrak{q}_j" title="\mathfrak{q}_j" /></a> to <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;x_j" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;x_j" title="x_j" /></a>. We chose to use polytomous logistic regressions for continuous <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;X_j" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;X_j" title="X_j" /></a> and contengency tables for qualitative <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;X_j" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;X_j" title="X_j" /></a>. This is an arbitrary choice and future versions will include the possibility of plugging your own model.
 
 The first equation becomes:
-<a href="https://www.codecogs.com/eqnedit.php?latex=\forall&space;\:&space;x,y,&space;\;&space;p(y|x)&space;=&space;\sum_e&space;p_\theta(y|e)&space;\prod_{j=1}^d&space;p_{\alpha_j}(e^j|x_j)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\forall&space;\:&space;x,y,&space;\;&space;p(y|x)&space;=&space;\sum_e&space;p_\theta(y|e)&space;\prod_{j=1}^d&space;p_{\alpha_j}(e^j|x_j)" title="\forall \: x,y, \; p(y|x) = \sum_e p_\theta(y|e) \prod_{j=1}^d p_{\alpha_j}(e^j|x_j)" /></a>
-
+<a href="https://www.codecogs.com/eqnedit.php?latex=\forall&space;\:&space;x,y,&space;\;&space;p(y|x)&space;=&space;\sum_\mathfrak{q}&space;p_\theta(y|\mathfrak{q})&space;\prod_{j=1}^d&space;p_{\alpha_j}(\mathfrak{q}_j|x_j)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\forall&space;\:&space;x,y,&space;\;&space;p(y|x)&space;=&space;\sum_\mathfrak{q}&space;p_\theta(y|\mathfrak{q})&space;\prod_{j=1}^d&space;p_{\alpha_j}(\mathfrak{q}_j|x_j)" title="\forall \: x,y, \; p(y|x) = \sum_\mathfrak{q} p_\theta(y|\mathfrak{q}) \prod_{j=1}^d p_{\alpha_j}(\mathfrak{q}_j|x_j)" /></a>
 
 ## The SEM algorithm
 
 It is still hard to optimize over <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;p(y|x;\theta,\alpha)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;p(y|x;\theta,\alpha)" title="p(y|x;\theta,\alpha)" /></a> as the number of candidate discretizations is gigantic as said earlier.
 
-However, calculating <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;p(y,e|x)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;p(y,e|x)" title="p(y,e|x)" /></a> is easy:
-<a href="https://www.codecogs.com/eqnedit.php?latex=\forall&space;\:&space;x,y,&space;\;&space;p(y,e|x)&space;=&space;p_\theta(y|e)&space;\prod_{j=1}^d&space;p_{\alpha_j}(e^j|x_j)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\forall&space;\:&space;x,y,&space;\;&space;p(y,e|x)&space;=&space;p_\theta(y|e)&space;\prod_{j=1}^d&space;p_{\alpha_j}(e^j|x_j)" title="\forall \: x,y, \; p(y,e|x) = p_\theta(y|e) \prod_{j=1}^d p_{\alpha_j}(e^j|x_j)" /></a>
+However, calculating <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;p(y,\mathfrak{q}|x)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;p(y,\mathfrak{q}|x)" title="p(y,\mathfrak{q}|x)" /></a> is easy:
+<a href="https://www.codecogs.com/eqnedit.php?latex=\forall&space;\:&space;x,y,&space;\;&space;p(y,\mathfrak{q}|x)&space;=&space;p_\theta(y|\mathfrak{q})&space;\prod_{j=1}^d&space;p_{\alpha_j}(\mathfrak{q}_j|x_j)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\forall&space;\:&space;x,y,&space;\;&space;p(y,\mathfrak{q}|x)&space;=&space;p_\theta(y|\mathfrak{q})&space;\prod_{j=1}^d&space;p_{\alpha_j}(\mathfrak{q}_j|x_j)" title="\forall \: x,y, \; p(y,\mathfrak{q}|x) = p_\theta(y|\mathfrak{q}) \prod_{j=1}^d p_{\alpha_j}(\mathfrak{q}_j|x_j)" /></a>
 
-As a consequence, we will draw random candidates <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;e" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;e" title="e" /></a> approximately at the mode of the distribution <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;p(y,\cdot|x)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;p(y,\cdot|x)" title="p(y,\cdot|x)" /></a> using an SEM algorithm (see References section).
-
-
+As a consequence, we will draw random candidates <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;\mathfrak{q}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;\mathfrak{q}" title="\mathfrak{q}" /></a> approximately at the mode of the distribution <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;p(y,\cdot|x)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;p(y,\cdot|x)" title="p(y,\cdot|x)" /></a> using an SEM algorithm (see References section).
 
 ## Gibbs sampling
 
-To update, at each random draw, the parameters <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;\theta" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;\theta" title="\theta" /></a> and <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;\alpha" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;\alpha" title="\alpha" /></a> and propose a new discretization <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;e" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;e" title="e" /></a>, we use the following equation:
-<a href="https://www.codecogs.com/eqnedit.php?latex=p(e^j|x_j,y,e^{\{-j\}})&space;\propto&space;p_\theta(y|e)&space;p_{\alpha_j}(e^j|x_j)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?p(e^j|x_j,y,e^{\{-j\}})&space;\propto&space;p_\theta(y|e)&space;p_{\alpha_j}(e^j|x_j)" title="p(e^j|x_j,y,e^{\{-j\}}) \propto p_\theta(y|e) p_{\alpha_j}(e^j|x_j)" /></a>
-Note that we draw <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;e^j" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;e^j" title="e^j" /></a> knowing all other variables, especially <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;e^{-j}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;e^{-j}" title="e^{-j}" /></a> so that we introduced a Gibbs sampler (see References section).
-
-
-
+To update, at each random draw, the parameters <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;\theta" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;\theta" title="\theta" /></a> and <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;\alpha" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;\alpha" title="\alpha" /></a> and propose a new discretization <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;\mathfrak{q}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;\mathfrak{q}" title="\mathfrak{q}" /></a>, we use the following equation:
+<a href="https://www.codecogs.com/eqnedit.php?latex=p(\mathfrak{q}_j|x_j,y,\mathfrak{q}_{\{-j\}})&space;\propto&space;p_\theta(y|\mathfrak{q})&space;p_{\alpha_j}(\mathfrak{q}_j|x_j)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?p(\mathfrak{q}_j|x_j,y,\mathfrak{q}_{\{-j\}})&space;\propto&space;p_\theta(y|\mathfrak{q})&space;p_{\alpha_j}(\mathfrak{q}_j|x_j)" title="p(\mathfrak{q}_j|x_j,y,\mathfrak{q}_{\{-j\}}) \propto p_\theta(y|\mathfrak{q}) p_{\alpha_j}(\mathfrak{q}_j|x_j)" /></a>
+Note that we draw <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;\mathfrak{q}_j" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;\mathfrak{q}_j" title="\mathfrak{q}_j" /></a> knowing all other variables, especially <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;\mathfrak{q}_{-j}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;\mathfrak{q}_{-j}" title="\mathfrak{q}_{-j}" /></a> so that we introduced a Gibbs sampler (see References section).
 
 # The `glmdisc` package
 
@@ -259,31 +256,68 @@ The `criterion` parameters lets the user choose between standard model selection
 
 The `m_start` parameter controls the maximum number of categories of <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;\mathfrak{q}_j" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;\mathfrak{q}_j" title="\mathfrak{q}_j" /></a> for <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;X_j" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;X_j" title="X_j" /></a> continuous. The SEM algorithm will start with random <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;\mathfrak{q}_j" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;\mathfrak{q}_j" title="\mathfrak{q}_j" /></a> taking values in <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;\{1,m_{\text{start}}\}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;\{1,m_{\text{start}}\}" title="\{1,m_{\text{start}}\}" /></a>. For qualitative features <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;X_j" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;X_j" title="X_j" /></a>, <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;\mathfrak{q}_j" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;\mathfrak{q}_j" title="\mathfrak{q}_j" /></a> is initialized with as many values as <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;X_j" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;X_j" title="X_j" /></a> so that `m_start` has no effect.
 
-Empirical studies show that with a reasonably small training dataset (< 10,000 rows) and a small `m_start` parameter (< 20), approximately 500 to 1500 iterations are largely sufficient to obtain a satisfactory model <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;p_\theta(y|e)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;p_\theta(y|q(x))" title="p_\theta(y|q(x))" /></a>.
+Empirical studies show that with a reasonably small training dataset (< 10,000 rows) and a small `m_start` parameter (< 20), approximately 500 to 1500 iterations are largely sufficient to obtain a satisfactory model <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;p_\theta(y|\mathfraq{q})" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;p_\theta(y|q(x))" title="p_\theta(y|q(x))" /></a>.
+
+```python
+import glmdisc
+
+logreg_disc = glmdisc.Glmdisc(iter=100, validation=True, test=True, criterion="bic", m_start=10)
+```
 
 ### The `fit` function
 
 The `fit` function of the `glmdisc` class is used to run the algorithm over the data provided to it. Subsequently, its parameters are: `predictors_cont` and `predictors_qual` which represent respectively the continuous features to be discretized and the categorical features which values are to be regrouped. They must be of type numpy array, filled with numeric and strings respectively. The last parameter is the class `labels`, of type numpy array as well, in binary form (0/1).
 
+```python
+n = 100
+d = 2
+x, y, _ = glmdisc.Glmdisc.generate_data(n, d)
+
+logreg_disc.fit(predictors_cont=x, predictors_qual=None, labels=y)
+```
+
 ### The `best_formula` function
 
 The `best_formula` function prints out in the console: the cut-points found for continuous features, the regroupments made for categorical features' values. It also returns it in a list.
+
+```python
+logreg_disc.best_formula()
+```
 
 ### The `discrete_data` function
 
 The `discrete_data` function returns the discretized / regrouped version of the `predictors_cont` and `predictors_qual` arguments using the best discretization scheme found so far.
 
+```python
+logreg_disc.discrete_data()
+```
+
 ### The `discretize` function
 
 The `discretize` function discretizes a new input dataset in the `predictors_cont`, `predictors_qual` format using the best discretization scheme found so far. The result is a numpy array of the size of the original data.
+
+```python
+n_new = 100
+x_new, _, _ = glmdisc.Glmdisc.generate_data(n_new, d)
+
+logreg_disc.discretize(predictors_cont=x_new, predictors_qual=None)
+```
 
 ### The `discretize_dummy` function
 
 The `discretize_dummy` function discretizes a new input dataset in the `predictors_cont`, `predictors_qual` format using the best discretization scheme found so far. The result is a dummy (0/1) numpy array  corresponding to the One-Hot Encoding of the result provided by the `discretize` function.
 
+```python
+logreg_disc.discretize_dummy(predictors_cont=x_new, predictors_qual=None)
+```
+
 ### The `predict` function
 
 The `predict` function discretizes a new input dataset in the `predictors_cont`, `predictors_qual` format using the best discretization scheme found so far through the `discretizeDummy` function and then applies the corresponding best Logistic Regression model <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;p_\theta(y|e)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;p_\theta(y|e)" title="p_\theta(y|e)" /></a> found so far.
+
+```python
+logreg_disc.predict(predictors_cont=x_new, predictors_qual=None)
+```
 
 ### The attributes
 
@@ -291,14 +325,41 @@ All parameters are stored as attributes: `test`,
 `validation`, `criterion`, `iter`, `m_start` as well as:
 
 * `criterion_iter`: list of values of the criterion chosen;
+```python
+logreg_disc.criterion_iter
+```
 * `best_link`: link function of the best quantization;
+```python
+logreg_disc.best_link
+```
 * `best_reglog`: logistic regression function of the best quantization;
+```python
+logreg_disc.best_reglog
+```
 * `affectations`: list of label encoders for categorical features;
+```python
+logreg_disc.affectations
+```
 * `best_encoder_emap`: one hot encoder of the best quantization;
+```python
+logreg_disc.best_encoder_emap
+```
 * `performance`: value of the chosen criterion for the best quantization;
+```python
+logreg_disc.performance
+```
 * `train`: array of row indices for training samples;
+```python
+logreg_disc.train
+```
 * `validate`: array of row indices for validation samples;
+```python
+logreg_disc.validate
+```
 * `test_rows`: array of row indices for test samples;
+```python
+logreg_disc.test_rows
+```
 
 To see the package in action, please refer to [the accompanying Jupyter Notebook](examples/).
 
@@ -319,19 +380,19 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 This research has been financed by [Crédit Agricole Consumer Finance](https://www.ca-consumerfinance.com/en.html) through a CIFRE PhD.
 
-This research is supported by [Inria Lille - Nord-Europe](https://www.inria.fr/centre/lille) and [Lille University](https://www.univ-lille.fr/en/home/) as part of a PḧD.
+This research was supported by [Inria Lille - Nord-Europe](https://www.inria.fr/centre/lille) and [Lille University](https://www.univ-lille.fr/en/home/) as part of a PhD.
 
 ## References
 
-Ehrhardt, A. (2019), Formalization and study of statistical problems in Credit Scoring: Reject inference, discretization and pairwise interactions, logistic regression trees ([PhD thesis](https://github.com/adimajo/manuscrit_these)).
+Ehrhardt, A. (2019), [Formalization and study of statistical problems in Credit Scoring: Reject inference, discretization and pairwise interactions, logistic regression trees](https://hal.archives-ouvertes.fr/tel-02302691) ([PhD thesis](https://github.com/adimajo/manuscrit_these)).
 
-Ehrhardt, A., et al. Feature quantization for parsimonious and interpretable predictive models. [arXiv preprint arXiv:1903.08920 (2019)](https://arxiv.org/abs/1903.08920).
+Ehrhardt, A., et al. [Feature quantization for parsimonious and interpretable predictive models](https://arxiv.org/abs/1903.08920). arXiv preprint arXiv:1903.08920 (2019)].
 
-Celeux, G., Chauveau, D., Diebolt, J. (1995), On Stochastic Versions of the EM Algorithm. [Research Report] RR-2514, INRIA. 1995. <inria-00074164>
+Celeux, G., Chauveau, D., Diebolt, J. (1995), [On Stochastic Versions of the EM Algorithm](https://hal.inria.fr/inria-00074164/document). [Research Report] RR-2514, INRIA. 1995. <inria-00074164>
 
-Agresti, A. (2002) **Categorical Data**. Second edition. Wiley.
+Agresti, A. (2002) [**Categorical Data**](https://onlinelibrary.wiley.com/doi/book/10.1002/0471249688). Second edition. Wiley.
 
-Ramírez‐Gallego, S., García, S., Mouriño‐Talín, H., Martínez‐Rego, D., Bolón‐Canedo, V., Alonso‐Betanzos, A. and Herrera, F. (2016). Data discretization: taxonomy and big data challenge. *Wiley Interdisciplinary Reviews: Data Mining and Knowledge Discovery*, 6(1), 5-21.
+Ramírez‐Gallego, S., García, S., Mouriño‐Talín, H., Martínez‐Rego, D., Bolón‐Canedo, V., Alonso‐Betanzos, A. and Herrera, F. (2016). [Data discretization: taxonomy and big data challenge. *Wiley Interdisciplinary Reviews: Data Mining and Knowledge Discovery*](https://onlinelibrary.wiley.com/doi/abs/10.1002/widm.1173), 6(1), 5-21.
 
 ## Future development: integration of interaction discovery
 
@@ -351,71 +412,6 @@ These hypotheses are "building blocks" that could be changed at the modeller's w
 
 - [ ] To delete when done with
 
-```{r, echo=TRUE, results='asis'}
-x = matrix(runif(1000), nrow = 1000, ncol = 1)
-p = 1/(1+exp(-3*x^5))
-y = rbinom(1000,1,p)
-modele_lin <- glm(y ~ x, family = binomial(link="logit"))
-pred_lin <- predict(modele_lin,as.data.frame(x),type="response")
-pred_lin_logit <- predict(modele_lin,as.data.frame(x))
-```
-
-```{r, echo=FALSE}
-knitr::kable(head(data.frame(True_prob = p,Pred_lin = pred_lin)))
-```
-
-```{r, echo=TRUE, results='asis'}
-x_disc <- factor(cut(x,c(-Inf,0.5,0.7,0.8,0.9,+Inf)),labels = c(1,2,3,4,5))
-modele_disc <- glm(y ~ x_disc, family = binomial(link="logit"))
-pred_disc <- predict(modele_disc,as.data.frame(x_disc),type="response")
-pred_disc_logit <- predict(modele_disc,as.data.frame(x_disc))
-
-```
-
-```{r, echo=FALSE}
-
-knitr::kable(head(data.frame(True_prob = p,Pred_lin = pred_lin,Pred_disc = pred_disc)))
-plot(x,3*x^5,main = "Estimated logit transform of p(Y|X)", ylab = "p(Y|X) under different models")
-lines(x,pred_lin_logit,type="p",col="red")
-lines(x,pred_disc_logit,type="p",col="blue")
-
-```
-
-```{r, echo=TRUE, results='asis'}
-x_disc_bad_idea <- factor(cut(x,c(-Inf,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,+Inf)),labels = c(1,2,3,4,5,6,7,8,9,10))
-```
-
-```{r, echo=FALSE, results='asis'}
-liste_coef <- list()
-
-for (k in 1:10) {
-     x_part <- factor(x_disc_bad_idea[((k-1)*nrow(x)/10 +1) : (k/10*nrow(x))])
-     y_part <- y[((k-1)*length(y)/10 +1) : (k/10*length(y))]
-     modele_part <- glm(y_part ~ x_part, family=binomial(link = "logit"))
-     liste_coef[[k]] <- (modele_part$coefficients)
-}
-
-estim_coef <- matrix(NA, nrow = nlevels(x_disc_bad_idea), ncol = 10)
-
-for (i in 1:nlevels(x_disc_bad_idea)) {
-     estim_coef[i,] <- unlist(lapply(liste_coef,function(batch) batch[paste0("x_part",levels(factor(x_disc_bad_idea))[i])]))
-}
-
-stats_coef <- matrix(NA, nrow = nlevels(x_disc_bad_idea), ncol = 3)
-
-for (i in 1:nlevels(x_disc_bad_idea)) {
-     stats_coef[i,1] <- mean(estim_coef[i,], na.rm = TRUE)
-     stats_coef[i,2] <- sd(estim_coef[i,], na.rm = TRUE)
-     stats_coef[i,3] <- sum(is.na(estim_coef[i,]))
-}
-
-stats_coef <- stats_coef[-1,]
-row.names(stats_coef) <- levels(x_disc_bad_idea)[2:nlevels(x_disc_bad_idea)]
-
-plot (row.names(stats_coef), stats_coef[,1],ylab="Estimated coefficient",xlab="Factor value of x", ylim = c(-1,8))
-segments(as.numeric(row.names(stats_coef)), stats_coef[,1]-stats_coef[,2],as.numeric(row.names(stats_coef)),stats_coef[,1]+stats_coef[,2])
-lines(row.names(stats_coef),rep(0,length(row.names(stats_coef))),col="red")
-```
 
 ### Results
 
