@@ -15,13 +15,14 @@ Table of Contents
 * [Theory](#-use-case-example)
 * [Some examples](#-the-glmdisc-package)
 * [Open an issue](https://github.com/adimajo/glmdisc_python/issues/new/choose)
+* [References](#-references)
 * [Contribute](#-contribute)
 
 ## Motivation
 
 Credit institutions are interested in the refunding probability of a loan given the applicant’s characteristics in order to assess the worthiness of the credit. For regulatory and interpretability reasons, the logistic regression is still widely used to learn this probability from the data. Although logistic regression handles naturally both quantitative and qualitative data, three pre-processing steps are usually performed: firstly, continuous features are discretized by assigning factor levels to pre-determined intervals; secondly, qualitative features, if they take numerous values, are grouped; thirdly, interactions (products between two different predictors) are sparsely introduced. By reinterpreting discretized (resp. grouped) features as latent variables, we are able, through the use of a Stochastic Expectation-Maximization (SEM) algorithm and a Gibbs sampler to find the best discretization (resp. grouping) scheme w.r.t. the logistic regression loss. For detecting interacting features, the same scheme is used by replacing the Gibbs sampler by a Metropolis-Hastings algorithm. The good performances of this approach are illustrated on simulated and real data from Credit Agricole Consumer Finance.
 
-This repository is the implementation of [Ehrhardt Adrien, et al. "Feature quantization for parsimonious and interpretable predictive models." arXiv preprint arXiv:1903.08920 (2019)](https://arxiv.org/abs/1903.08920).
+This repository is the implementation of Ehrhardt Adrien, et al. [Feature quantization for parsimonious and interpretable predictive models](https://arxiv.org/abs/1903.08920), preprint arXiv:1903.08920 (2019).
 
 NOTE: for now, only "glmdisc-SEM" is available.
 
@@ -86,7 +87,7 @@ Over the years, I've found [CNTLM](http://cntlm.sourceforge.net/) to be a great 
 
 ## Use case example
 
-For a thorough exaplanation of the approach, see [this blog post](https://adimajo.github.io/discretization) or [this article](https://arxiv.org/abs/1903.08920).
+For a thorough explanation of the approach, see [this blog post](https://adimajo.github.io/discretization) or [this article](https://arxiv.org/abs/1903.08920).
 
 If you're interested in directly using the package, you can skip this part and go to [this part below](#-the-glmdisc-package).
 
@@ -132,7 +133,7 @@ There already exists methods and packages to perform feature selection, see for 
 
 `glmdisc` is not a feature selection tool but acts as such as a side-effect: when a continuous feature is discretized into only one interval, or when a categorical feature is regrouped into only one value, then this feature gets out of the model.
 
-For a thorough reference on feature selection, see e.g. Guyon, I., & Elisseeff, A. (2003). An introduction to variable and feature selection. *Journal of machine learning research, 3*(Mar), 1157-1182.
+For a thorough reference on feature selection, see e.g. Guyon, I., & Elisseeff, A. (2003). [An introduction to variable and feature selection](http://www.jmlr.org/papers/volume3/guyon03a/guyon03a.pdf). *Journal of machine learning research, 3*(Mar), 1157-1182.
 
 ### Linearity
 
@@ -201,7 +202,7 @@ The problem seems well-posed: if we were able to generate all discretization sch
 
 Unfortunately, there are way too many candidates to follow this procedure. Suppose we want to construct k intervals of <a href="https://www.codecogs.com/eqnedit.php?latex=\mathfrak{q}_j" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\mathfrak{q}_j" title="\mathfrak{q}_j" /></a> given n distinct <a href="https://www.codecogs.com/eqnedit.php?latex=(x_j_i)_1^n" target="_blank"><img src="https://latex.codecogs.com/gif.latex?(x_j_i)_1^n" title="(x_j_i)_1^n" /></a>. There is <a href="https://www.codecogs.com/eqnedit.php?latex=n&space;\choose&space;k" target="_blank"><img src="https://latex.codecogs.com/gif.latex?n&space;\choose&space;k" title="n \choose k" /></a> models. The true value of k is unknown, so it must be looped over. Finally, as logistic regression is a multivariate model, the discretization of <a href="https://www.codecogs.com/eqnedit.php?latex=\mathfrak{q}_j" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\mathfrak{q}_j" title="\mathfrak{q}_j" /></a> can influence the discretization of <a href="https://www.codecogs.com/eqnedit.php?latex=\mathfrak{q}_k" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\mathfrak{q}_k" title="\mathfrak{q}_k" /></a>, <a href="https://www.codecogs.com/eqnedit.php?latex=k&space;\neq&space;j" target="_blank"><img src="https://latex.codecogs.com/gif.latex?k&space;\neq&space;j" title="k \neq j" /></a>.
 
-As a consequence, existing approaches to discretization (in particular discretization of continuous attributes) rely on strong assumptions to simplify the search of good candidates as can be seen in the review of Ramírez‐Gallego, S. et al. (2016) - see References section.
+As a consequence, existing approaches to discretization (in particular discretization of continuous attributes) rely on strong assumptions to simplify the search of good candidates as can be seen in the review of Ramírez‐Gallego, S. et al. (2016) - see [References section](#-references).
 
 
 
@@ -230,7 +231,7 @@ It is still hard to optimize over <a href="https://www.codecogs.com/eqnedit.php?
 However, calculating <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;p(y,\mathfrak{q}|x)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;p(y,\mathfrak{q}|x)" title="p(y,\mathfrak{q}|x)" /></a> is easy:
 <a href="https://www.codecogs.com/eqnedit.php?latex=\forall&space;\:&space;x,y,&space;\;&space;p(y,\mathfrak{q}|x)&space;=&space;p_\theta(y|\mathfrak{q})&space;\prod_{j=1}^d&space;p_{\alpha_j}(\mathfrak{q}_j|x_j)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\forall&space;\:&space;x,y,&space;\;&space;p(y,\mathfrak{q}|x)&space;=&space;p_\theta(y|\mathfrak{q})&space;\prod_{j=1}^d&space;p_{\alpha_j}(\mathfrak{q}_j|x_j)" title="\forall \: x,y, \; p(y,\mathfrak{q}|x) = p_\theta(y|\mathfrak{q}) \prod_{j=1}^d p_{\alpha_j}(\mathfrak{q}_j|x_j)" /></a>
 
-As a consequence, we will draw random candidates <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;\mathfrak{q}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;\mathfrak{q}" title="\mathfrak{q}" /></a> approximately at the mode of the distribution <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;p(y,\cdot|x)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;p(y,\cdot|x)" title="p(y,\cdot|x)" /></a> using an SEM algorithm (see References section).
+As a consequence, we will draw random candidates <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;\mathfrak{q}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;\mathfrak{q}" title="\mathfrak{q}" /></a> approximately at the mode of the distribution <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;p(y,\cdot|x)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;p(y,\cdot|x)" title="p(y,\cdot|x)" /></a> using an SEM algorithm (see see [References section](#-references)).
 
 ## Gibbs sampling
 
@@ -259,9 +260,11 @@ The `m_start` parameter controls the maximum number of categories of <a href="ht
 Empirical studies show that with a reasonably small training dataset (< 10,000 rows) and a small `m_start` parameter (< 20), approximately 500 to 1500 iterations are largely sufficient to obtain a satisfactory model <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;p_\theta(y|\mathfraq{q})" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;p_\theta(y|q(x))" title="p_\theta(y|q(x))" /></a>.
 
 ```python
-import glmdisc
-
-logreg_disc = glmdisc.Glmdisc(iter=100, validation=True, test=True, criterion="bic", m_start=10)
+>>> import glmdisc
+>>> logreg_disc = glmdisc.Glmdisc(iter=100, validation=True, test=True, criterion="bic", m_start=10)
+```
+```PowerShell
+2020-07-16 18:11:03.087 | WARNING  | glmdisc:__init__:216 - No need to penalize the log-likelihood when a validation set is used. Using log-likelihood instead.
 ```
 
 ### The `fit` function
@@ -269,11 +272,10 @@ logreg_disc = glmdisc.Glmdisc(iter=100, validation=True, test=True, criterion="b
 The `fit` function of the `glmdisc` class is used to run the algorithm over the data provided to it. Subsequently, its parameters are: `predictors_cont` and `predictors_qual` which represent respectively the continuous features to be discretized and the categorical features which values are to be regrouped. They must be of type numpy array, filled with numeric and strings respectively. The last parameter is the class `labels`, of type numpy array as well, in binary form (0/1).
 
 ```python
-n = 100
-d = 2
-x, y, _ = glmdisc.Glmdisc.generate_data(n, d)
-
-logreg_disc.fit(predictors_cont=x, predictors_qual=None, labels=y)
+>>> n = 100
+>>> d = 2
+>>> x, y, _ = glmdisc.Glmdisc.generate_data(n, d)
+>>> logreg_disc.fit(predictors_cont=x, predictors_qual=None, labels=y)
 ```
 
 ### The `best_formula` function
@@ -281,7 +283,13 @@ logreg_disc.fit(predictors_cont=x, predictors_qual=None, labels=y)
 The `best_formula` function prints out in the console: the cut-points found for continuous features, the regroupments made for categorical features' values. It also returns it in a list.
 
 ```python
-logreg_disc.best_formula()
+>>> logreg_disc.best_formula()
+```
+```PowerShell
+2020-07-16 18:13:29.921 | INFO     | glmdisc._bestFormula:best_formula:29 - Cut-points found for continuous variable 0
+[0.9568289154869697, 0.6661178585993954, 0.49039089060451335, 0.33038638461067193, 0.7152644679549544]
+2020-07-16 18:13:29.922 | INFO     | glmdisc._bestFormula:best_formula:29 - Cut-points found for continuous variable 1
+[0.48684331022166916, 0.17904111281801316, 0.6603144758481163, 0.03838803248009037]
 ```
 
 ### The `discrete_data` function
@@ -289,7 +297,24 @@ logreg_disc.best_formula()
 The `discrete_data` function returns the discretized / regrouped version of the `predictors_cont` and `predictors_qual` arguments using the best discretization scheme found so far.
 
 ```python
-logreg_disc.discrete_data()
+>>> logreg_disc.discrete_data()
+```
+```PowerShell
+2020-07-16 18:14:57.261 | INFO     | glmdisc._discreteData:discrete_data:44 - Returning discretized test set.
+<20x11 sparse matrix of type '<class 'numpy.float64'>'
+	with 40 stored elements in Compressed Sparse Row format>
+```
+
+```python
+>>> logreg_disc.discrete_data().toarray()
+```
+```PowerShell
+2020-07-16 18:15:31.041 | INFO     | glmdisc._discreteData:discrete_data:44 - Returning discretized test set.
+array([[1., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0.],
+       [0., 0., 0., 0., 1., 0., 1., 0., 0., 0., 0.],
+       [0., 1., 0., 0., 0., 0., 1., 0., 0., 0., 0.],
+       [0., 0., 0., 1., 0., 0., 0., 1., 0., 0., 0.],
+[...]
 ```
 
 ### The `discretize` function
@@ -297,10 +322,18 @@ logreg_disc.discrete_data()
 The `discretize` function discretizes a new input dataset in the `predictors_cont`, `predictors_qual` format using the best discretization scheme found so far. The result is a numpy array of the size of the original data.
 
 ```python
-n_new = 100
-x_new, _, _ = glmdisc.Glmdisc.generate_data(n_new, d)
-
-logreg_disc.discretize(predictors_cont=x_new, predictors_qual=None)
+>>> n_new = 100
+>>> x_new, _, _ = glmdisc.Glmdisc.generate_data(n_new, d)
+>>> logreg_disc.discretize(predictors_cont=x_new, predictors_qual=None)
+```
+```PowerShell
+array([[4., 1.],
+       [5., 2.],
+       [4., 3.],
+       [4., 4.],
+       [3., 4.],
+       [0., 2.],
+[...]
 ```
 
 ### The `discretize_dummy` function
@@ -308,7 +341,23 @@ logreg_disc.discretize(predictors_cont=x_new, predictors_qual=None)
 The `discretize_dummy` function discretizes a new input dataset in the `predictors_cont`, `predictors_qual` format using the best discretization scheme found so far. The result is a dummy (0/1) numpy array  corresponding to the One-Hot Encoding of the result provided by the `discretize` function.
 
 ```python
-logreg_disc.discretize_dummy(predictors_cont=x_new, predictors_qual=None)
+>>> logreg_disc.discretize_dummy(predictors_cont=x_new, predictors_qual=None)
+```
+```PowerShell
+<100x11 sparse matrix of type '<class 'numpy.float64'>'
+	with 200 stored elements in Compressed Sparse Row format>
+```
+```python
+>>> logreg_disc.discretize_dummy(predictors_cont=x_new, predictors_qual=None).toarray()
+```
+```PowerShell
+array([[0., 0., 0., ..., 0., 0., 0.],
+       [0., 0., 0., ..., 1., 0., 0.],
+       [0., 0., 0., ..., 0., 1., 0.],
+       ...,
+       [1., 0., 0., ..., 1., 0., 0.],
+       [1., 0., 0., ..., 0., 0., 0.],
+       [1., 0., 0., ..., 0., 0., 0.]])
 ```
 
 ### The `predict` function
@@ -316,7 +365,15 @@ logreg_disc.discretize_dummy(predictors_cont=x_new, predictors_qual=None)
 The `predict` function discretizes a new input dataset in the `predictors_cont`, `predictors_qual` format using the best discretization scheme found so far through the `discretizeDummy` function and then applies the corresponding best Logistic Regression model <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;p_\theta(y|e)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;p_\theta(y|e)" title="p_\theta(y|e)" /></a> found so far.
 
 ```python
-logreg_disc.predict(predictors_cont=x_new, predictors_qual=None)
+>>> logreg_disc.predict(predictors_cont=x_new, predictors_qual=None)
+```
+```PowerShell
+array([[9.99394254e-01, 6.05745839e-04],
+       [9.99694576e-01, 3.05424466e-04],
+       [9.99817560e-01, 1.82439609e-04],
+       [9.99967791e-01, 3.22085041e-05],
+       [9.92296119e-01, 7.70388116e-03],
+[...]
 ```
 
 ### The attributes
@@ -326,39 +383,69 @@ All parameters are stored as attributes: `test`,
 
 * `criterion_iter`: list of values of the criterion chosen;
 ```python
-logreg_disc.criterion_iter
+>>> logreg_disc.criterion_iter
+```
+```PowerShell
+[-30.174443117243992, -26.182075441528603, -31.61227858514535, -19.70369464830396, -31.61997286396158, -25.99964499964587, ...]
 ```
 * `best_link`: link function of the best quantization;
 ```python
-logreg_disc.best_link
+>>> logreg_disc.best_link
+```
+```PowerShell
+[LogisticRegression(C=1e+40, max_iter=25, multi_class='multinomial',
+                   solver='newton-cg', tol=0.001), 
+LogisticRegression(C=1e+40, max_iter=25, multi_class='multinomial',
+                   solver='newton-cg', tol=0.001)]
 ```
 * `best_reglog`: logistic regression function of the best quantization;
 ```python
-logreg_disc.best_reglog
+>>> logreg_disc.best_reglog
+```
+```PowerShell
+LogisticRegression(C=1e+40, max_iter=25, solver='liblinear', tol=0.001)
 ```
 * `affectations`: list of label encoders for categorical features;
 ```python
-logreg_disc.affectations
+>>> logreg_disc.affectations
+```
+```PowerShell
+[None, None]
 ```
 * `best_encoder_emap`: one hot encoder of the best quantization;
 ```python
-logreg_disc.best_encoder_emap
+>>> logreg_disc.best_encoder_emap
+```
+```PowerShell
+OneHotEncoder(handle_unknown='ignore')
 ```
 * `performance`: value of the chosen criterion for the best quantization;
 ```python
-logreg_disc.performance
+>>> logreg_disc.performance
+```
+```PowerShell
+-14.924603930263428
 ```
 * `train`: array of row indices for training samples;
 ```python
-logreg_disc.train
+>>> logreg_disc.train
+```
+```PowerShell
+array([97, 39, 94,  5, 16, 77, 88, 54, 80, 99, 46, 43, 52, 37, 28,  0, 18, ...
 ```
 * `validate`: array of row indices for validation samples;
 ```python
-logreg_disc.validate
+>>> logreg_disc.validate
+```
+```PowerShell
+array([36, 45, 29, 62,  8, 82, 76, 96, 41, 83, 17, 49, 57, 31, 60, 64, 65, ...
 ```
 * `test_rows`: array of row indices for test samples;
 ```python
-logreg_disc.test_rows
+>>> logreg_disc.test_rows
+```
+```PowerShell
+array([ 3, 75, 51, 27, 21, 48,  4, 44, 72, 68, 34, 22, 23, 50, 47,  6, 42, ...
 ```
 
 To see the package in action, please refer to [the accompanying Jupyter Notebook](examples/).
