@@ -19,27 +19,29 @@ def _check_args(predictors_cont, predictors_qual, labels, check_labels=True):
     """
     Checks inputs
 
-    :param numpy.array predictors_cont: continuous predictors
-    :type predictors_cont: numpy.array
-    :param numpy.array predictors_qual: categorical predictors
-    :type predictors_qual: numpy.array
+    :param numpy.ndarray predictors_cont: continuous predictors
+    :type predictors_cont: numpy.ndarray
+    :param numpy.ndarray predictors_qual: categorical predictors
+    :type predictors_qual: numpy.ndarray
     :param labels: binary labels
-    :type labels: numpy.array
+    :type labels: numpy.ndarray
     """
-    # Tester la présence de labels
+    # Test if predictors_cont is provided and if it's a numpy array
     if predictors_cont is not None and not isinstance(predictors_cont, np.ndarray):
         raise ValueError(NUMPY_NDARRAY_INPUTS)
+    # Test if predictors_qual is provided and if it's a numpy array
     if predictors_qual is not None and not isinstance(predictors_qual, np.ndarray):
         raise ValueError(NUMPY_NDARRAY_INPUTS)
+    # Test if labels is provided and if it's a numpy array
     if check_labels and not isinstance(labels, np.ndarray):
         raise ValueError(NUMPY_NDARRAY_INPUTS)
 
-    # Tester la présence d'au moins qual ou cont
+    # Test if at least one of qual or cont is provided
     if predictors_cont is None and predictors_qual is None:
         raise ValueError(('You must provide either qualitative or quantitative '
                          'features'))
 
-    # Tester la présence de prédicteurs catégoriels et de même longueur que labels
+    # Test if labels and predictors have same number of samples
     if check_labels and ((predictors_cont is not None and predictors_cont.shape[0] != labels.shape[0]) or
                          (predictors_qual is not None and predictors_qual.shape[0] != labels.shape[0])):
         raise ValueError('Predictors and labels must be of same size')
@@ -65,8 +67,7 @@ def _calculate_shape(self):
     else:
         self.d_qual = 0
 
-    # Gérer les manquants des variables continues, dans un premier temps
-    # comme une modalité à part
+    # Store location of missing continuous predictors; treat them as a separate level
     if self.predictors_cont is not None:
         continu_complete_case = np.invert(np.isnan(self.predictors_cont))
     else:
@@ -75,6 +76,19 @@ def _calculate_shape(self):
 
 
 def _calculate_criterion(self, emap, model_emap, current_encoder_emap):
+    """
+    Calculate current value of optimised criterion
+
+    Parameters
+    ----------
+    emap: array of current discretization / grouping of size d_cont + d_qual
+    model_emap: current logistic regression
+    current_encoder_emap: one hot encoder of emap
+
+    Returns
+    -------
+    criterion value
+    """
     if self.criterion in ['aic', 'bic']:
         loglik = -sk.metrics.log_loss(self.labels[self.train],
                                       model_emap.predict_proba(
@@ -104,6 +118,19 @@ def _calculate_criterion(self, emap, model_emap, current_encoder_emap):
 
 
 def _init_disc(self, continu_complete_case):
+    """
+    Initializes :code:`affectations`, i.e. the list of label encoders for categorical features,
+    chooses random values for the initial quantization randomly given :code:`m_start` if, for
+    categorical features, :code:`m_start` is less than the number of levels. Otherwise, decrease by one.
+
+    Parameters
+    ----------
+    continu_complete_case: array of missing inputs in contiuous features.
+
+    Returns
+    -------
+    initial quantization and transformation of categorical features to integers
+    """
     self.affectations = [None] * (self.d_cont + self.d_qual)
     edisc = np.random.choice(list(range(self.m_start)), size=(self.n, self.d_cont + self.d_qual))
 
@@ -131,6 +158,9 @@ def _init_disc(self, continu_complete_case):
 
 
 def _split(self):
+    """
+    Splits the dataset in train, validation and test given user-chosen parameters.
+    """
     if self.validation and self.test:
         self.train, self.validate, self.test_rows = np.split(np.random.choice(self.n,
                                                                               self.n,
@@ -150,7 +180,7 @@ def _split(self):
         self.test_rows = None
 
 
-def fit(self, predictors_cont, predictors_qual, labels):
+def fit(self, predictors_cont, predictors_qual, labels, iter=100):
     """
     Fits the Glmdisc object.
 
@@ -160,19 +190,29 @@ def fit(self, predictors_cont, predictors_qual, labels):
 
     .. todo:: Add glmdisc-NN
 
-    :param numpy.array predictors_cont:
+    :param numpy.ndarray predictors_cont:
         Continuous predictors to be discretized in a numpy
         "numeric" array. Can be provided either here or with
         the __init__ method.
-    :param numpy.array predictors_qual:
+    :param numpy.ndarray predictors_qual:
         Categorical features which levels are to be merged
         (also in a numpy "string" array). Can be provided
         either here or with the __init__ method.
-    :param numpy.array labels:
+    :param numpy.ndarray labels:
         Boolean (0/1) labels of the observations. Must be of
         the same length as predictors_qual and predictors_cont
         (numpy "numeric" array).
     """
+    # iter doit être suffisamment grand
+    if iter <= 10:
+        raise ValueError('iter is too low / negative. Please set 10 < iter < 100 000')
+
+    # iter doit être suffisamment petit
+    if iter >= 100000:
+        raise ValueError('iter is too high, it will take years to finish! Please set 10 < iter < 100 000')
+
+    self.iter = iter
+
     _check_args(predictors_cont, predictors_qual, labels)
 
     self.predictors_cont = predictors_cont
@@ -206,7 +246,7 @@ def fit(self, predictors_cont, predictors_qual, labels):
 
     current_encoder_emap = sk.preprocessing.OneHotEncoder()
 
-    # Initialisation link et m
+    # Initializing links and m (list of number of levels)
     link = [None] * (self.d_cont + self.d_qual)
     m = [None] * (self.d_cont + self.d_qual)
 
@@ -221,14 +261,14 @@ def fit(self, predictors_cont, predictors_qual, labels):
     # Random splitting
     self._split()
 
-    # Itérations MCMC
+    # MCMC iterations
     for i in range(self.iter):
 
-        # Recalcul des matrices disjonctives
+        # Disjonctive matrices
         current_encoder_edisc.fit(X=edisc.astype(str))
         current_encoder_emap.fit(X=emap.astype(str))
 
-        # Apprentissage p(y|e) et p(y|emap)
+        # Learning p(y|q) et p(y|q(x))
         model_edisc.fit(X=current_encoder_edisc.transform(
             edisc[self.train, :].astype(str)),
             y=self.labels[self.train])
@@ -237,7 +277,7 @@ def fit(self, predictors_cont, predictors_qual, labels):
             emap[self.train, :].astype(str)),
             y=self.labels[self.train])
 
-        # Calcul du critère
+        # Criterion calculation
         self.criterion_iter.append(self._calculate_criterion(emap,
                                                              model_emap,
                                                              current_encoder_emap))

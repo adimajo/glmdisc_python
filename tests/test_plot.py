@@ -15,8 +15,8 @@ def test_plot():
     for i in range(d):
         xd[:, i] = pd.cut(x[:, i], bins=cuts, labels=[0, 1, 2])
 
-    model = glmdisc.Glmdisc(validation=False, test=False, iter=50)
-    model.fit(predictors_cont=x, predictors_qual=xd, labels=y)
+    model = glmdisc.Glmdisc(validation=False, test=False)
+    model.fit(predictors_cont=x, predictors_qual=xd, labels=y, iter=50)
     model.plot()
     plt.close('all')
 
@@ -36,8 +36,8 @@ def test_plot_log(caplog):
     for i in range(d):
         xd[:, i] = pd.cut(x[:, i], bins=cuts, labels=[0, 1, 2])
 
-    model = glmdisc.Glmdisc(validation=False, test=False, iter=50)
-    model.fit(predictors_cont=x, predictors_qual=xd, labels=y)
+    model = glmdisc.Glmdisc(validation=False, test=False)
+    model.fit(predictors_cont=x, predictors_qual=xd, labels=y, iter=50)
     model.plot(predictors_cont_number=0, predictors_qual_number=0)
     assert caplog.records[0].message == ("A single int (more than 0 and less than the "
                                          "number of columns in predictors_cont) must be "

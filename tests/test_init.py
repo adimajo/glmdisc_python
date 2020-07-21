@@ -10,7 +10,6 @@ def test_init():
     assert glmdisc_instance.test
     assert glmdisc_instance.validation
     assert glmdisc_instance.criterion == "bic"
-    assert glmdisc_instance.iter == 100
     assert glmdisc_instance.m_start == 20
     assert glmdisc_instance.criterion_iter == []
     assert glmdisc_instance.best_link == []
@@ -52,16 +51,6 @@ def test_validation():
 
     with pytest.raises(ValueError):
         glmdisc.Glmdisc(validation=12)
-
-
-def test_iter():
-    glmdisc.Glmdisc(iter=100)
-
-    with pytest.raises(ValueError):
-        glmdisc.Glmdisc(iter=-12)
-
-    with pytest.raises(ValueError):
-        glmdisc.Glmdisc(iter=100000000)
 
 
 def test_m_start():

@@ -147,7 +147,7 @@ class Glmdisc:
         :type: list
     """
 
-    def __init__(self, test=True, validation=True, criterion="bic", iter=100, m_start=20):
+    def __init__(self, test=True, validation=True, criterion="bic", m_start=20):
         """
         Initializes self by checking if its arguments are appropriately specified.
 
@@ -197,14 +197,6 @@ class Glmdisc:
         if not type(validation) is bool:
             raise ValueError('validation must be boolean')
 
-        # iter doit être suffisamment grand
-        if iter <= 10:
-            raise ValueError('iter is too low / negative. Please set 10 < iter < 100 000')
-
-        # iter doit être suffisamment petit
-        if iter >= 100000:
-            raise ValueError('iter is too high, it will take years to finish! Please set 10 < iter < 100 000')
-
         # m_start doit être pas déconnant
         if not 2 <= m_start <= 50:
             raise ValueError('Please set 2 <= m_start <= 50')
@@ -220,7 +212,6 @@ class Glmdisc:
         self.test = test
         self.validation = validation
         self.criterion = criterion
-        self.iter = iter
         self.m_start = m_start
 
         # Attributes from fit

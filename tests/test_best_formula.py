@@ -15,8 +15,8 @@ def test_best_formula(caplog):
     for i in range(d):
         xd[:, i] = pd.cut(x[:, i], bins=cuts, labels=[0, 1, 2])
 
-    model = glmdisc.Glmdisc(validation=False, test=False, iter=11)
-    model.fit(predictors_cont=x, predictors_qual=xd, labels=y)
+    model = glmdisc.Glmdisc(validation=False, test=False)
+    model.fit(predictors_cont=x, predictors_qual=xd, labels=y, iter=11)
     formula = model.best_formula()
     assert isinstance(formula, list)
     assert len(formula) == 2 * d
