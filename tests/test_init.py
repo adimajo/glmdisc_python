@@ -7,6 +7,9 @@ import glmdisc
 
 def test_init():
     glmdisc_instance = glmdisc.Glmdisc()
+    assert glmdisc_instance.algorithm == "SEM"
+    glmdisc_instance = glmdisc.Glmdisc(algorithm="NN")
+    assert glmdisc_instance.algorithm == "NN"
     assert glmdisc_instance.test
     assert glmdisc_instance.validation
     assert glmdisc_instance.criterion == "bic"
@@ -20,6 +23,8 @@ def test_init():
     np.testing.assert_array_equal(glmdisc_instance.train, np.array([]))
     np.testing.assert_array_equal(glmdisc_instance.validate, np.array([]))
     np.testing.assert_array_equal(glmdisc_instance.test_rows, np.array([]))
+    with pytest.raises(ValueError):
+        glmdisc.Glmdisc(algorithm="toto")
 
 
 def test_criterion():

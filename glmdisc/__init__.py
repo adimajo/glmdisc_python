@@ -147,9 +147,11 @@ class Glmdisc:
         :type: list
     """
 
-    def __init__(self, test=True, validation=True, criterion="bic", m_start=20):
+    def __init__(self, algorithm="SEM", test=True, validation=True, criterion="bic", m_start=20):
         """
         Initializes self by checking if its arguments are appropriately specified.
+
+        :param str algorithm: Algorithm to use (SEM or NN).
 
         :param bool test: Boolean specifying if a test set is required.
                             If True, the provided data is split to provide 20%
@@ -184,22 +186,35 @@ class Glmdisc:
         """
 
         # Tests des variables d'entrée
+        # L'algorithme doit être SEM ou NN
+        if algorithm not in ['SEM', 'NN']:
+            msg = 'Algorithm must be one of SEM, NN'
+            logger.error(msg)
+            raise ValueError(msg)
 
         # Le critère doit être un des trois de la liste
         if criterion not in ['gini', 'aic', 'bic']:
-            raise ValueError('Criterion must be one of Gini, Aic, Bic')
+            msg = 'Criterion must be one of Gini, Aic, Bic'
+            logger.error(msg)
+            raise ValueError(msg)
 
         # test est bool
         if not type(test) is bool:
-            raise ValueError('test must be boolean')
+            msg = 'test must be boolean'
+            logger.error(msg)
+            raise ValueError(msg)
 
         # validation est bool
         if not type(validation) is bool:
-            raise ValueError('validation must be boolean')
+            msg = 'validation must be boolean'
+            logger.error(msg)
+            raise ValueError(msg)
 
         # m_start doit être pas déconnant
         if not 2 <= m_start <= 50:
-            raise ValueError('Please set 2 <= m_start <= 50')
+            msg = 'Please set 2 <= m_start <= 50'
+            logger.error(msg)
+            raise ValueError(msg)
 
         if not validation and criterion == 'gini':
             logger.warning('Using Gini index on training set might yield an overfitted model')
@@ -209,6 +224,7 @@ class Glmdisc:
                            'Using log-likelihood instead.')
 
         # Attributes from parameters from __init__
+        self.algorithm = algorithm
         self.test = test
         self.validation = validation
         self.criterion = criterion

@@ -8,6 +8,9 @@ recursive-include glmdisc *
 # Exclude the docs
 recursive-exclude docs *
 
+# Exclude the examples
+recursive-exclude examples *
+
 # Include the tests
 recursive-include tests *
 
