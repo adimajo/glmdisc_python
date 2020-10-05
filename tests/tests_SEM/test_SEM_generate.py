@@ -11,7 +11,7 @@ def test_generate_theta_provided():
     theta[1, :] = 2
     theta[2, :] = -2
 
-    x, y, theta2 = glmdisc.Glmdisc.generate_data(n=800, d=d, theta=theta, seed=1)
+    x, y, theta2 = glmdisc.Glmdisc.generate_data(n=800, d=d, theta=theta)
     assert x.shape[0] == 800
     assert x.shape[1] == 2
     assert len(x.shape) == 2
@@ -21,7 +21,7 @@ def test_generate_theta_provided():
 def test_generate_theta_generated():
     d = 2
 
-    x, y, theta = glmdisc.Glmdisc.generate_data(n=800, d=d, theta=None, seed=1)
+    x, y, theta = glmdisc.Glmdisc.generate_data(n=800, d=d, theta=None)
     assert x.shape[0] == 800
     assert x.shape[1] == 2
     assert len(x.shape) == 2
@@ -33,4 +33,4 @@ def test_generate_theta_error():
     theta = "blabla"
 
     with pytest.raises(ValueError):
-        glmdisc.Glmdisc.generate_data(n=800, d=d, theta=theta, seed=1)
+        glmdisc.Glmdisc.generate_data(n=800, d=d, theta=theta)

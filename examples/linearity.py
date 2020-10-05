@@ -34,7 +34,11 @@ print(np.concatenate([p, logreg_cont_pred.reshape(-1, 1), logreg_true_pred.resha
 logreg_disc = glmdisc.Glmdisc(iter=100)
 logreg_disc.fit(predictors_cont=x, predictors_qual=None, labels=y.ravel())
 logreg_disc_pred = logreg_disc.predict(predictors_cont=x, predictors_qual=None)[:, 1]
-print(np.concatenate([p, logreg_cont_pred.reshape(-1, 1), logreg_true_pred.reshape(-1, 1), logreg_disc_pred.reshape(-1, 1)], axis=1))
+print(np.concatenate([p,
+                      logreg_cont_pred.reshape(-1, 1),
+                      logreg_true_pred.reshape(-1, 1),
+                      logreg_disc_pred.reshape(-1, 1)],
+                     axis=1))
 
 # Plots
 fig, ax = plt.subplots()

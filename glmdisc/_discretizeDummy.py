@@ -20,8 +20,12 @@ def discretize_dummy(self, predictors_cont, predictors_qual):
     :returns: array of discretized features as dummy variables
     :rtype: numpy.array
     """
-
-    return self.best_encoder_emap.transform(
+    if self.algorithm == "SEM":
+        emap_dummy = self.best_encoder_emap.transform(
         self.discretize(
             predictors_cont,
             predictors_qual).astype(int).astype(str))
+    else:
+        emap_dummy = None
+
+    return emap_dummy

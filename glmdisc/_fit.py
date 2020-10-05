@@ -95,25 +95,28 @@ def _calculate_criterion(self, emap, model_emap, current_encoder_emap):
                                               emap[self.train, :].astype(str))),
                                       normalize=False)
         if self.validation:
-            return loglik
+            performance = loglik
 
     if self.criterion == 'aic' and not self.validation:
-        return -(2 * model_emap.coef_.shape[1] - 2 * loglik)
+        performance = -(2 * model_emap.coef_.shape[1] - 2 * loglik)
 
     if self.criterion == 'bic' and not self.validation:
-        return -(log(self.n) * model_emap.coef_.shape[1] - 2 * loglik)
+        performance = -(log(self.n) * model_emap.coef_.shape[1] - 2 * loglik)
 
     if self.criterion == 'gini' and self.validation:
-        return sk.metrics.roc_auc_score(
+        performance = sk.metrics.roc_auc_score(
             self.labels[self.validate], model_emap.predict_proba(
                 X=current_encoder_emap.transform(
                     emap[self.validate, :].astype(str)))[:, 1:])
 
     if self.criterion == 'gini' and not self.validation:
-        return sk.metrics.roc_auc_score(
+        performance = sk.metrics.roc_auc_score(
             self.labels[self.train], model_emap.predict_proba(
                 X=current_encoder_emap.transform(
                     emap[self.train, :].astype(str)))[:, 1:])
+
+    logger.info("Performance: " + str(performance))
+    return performance
 
 
 def _init_disc(self, continu_complete_case):

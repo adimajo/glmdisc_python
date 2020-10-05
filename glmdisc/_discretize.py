@@ -6,10 +6,12 @@ from collections import Counter
 import sklearn as sk
 from scipy import stats
 import numpy as np
+from loguru import logger
 import glmdisc
+from glmdisc._fitNN import from_weights_to_proba_test
 
 
-def discretize(self, predictors_cont, predictors_qual):
+def discretizeSEM(self, predictors_cont, predictors_qual):
     """
     Discretizes new continuous and categorical features using a previously
     fitted glmdisc object.
@@ -23,13 +25,6 @@ def discretize(self, predictors_cont, predictors_qual):
         (also in a numpy "string" array). Can be provided
         either here or with the __init__ method.
     """
-    self.check_is_fitted()
-
-    glmdisc._fit._check_args(predictors_cont=predictors_cont,
-                             predictors_qual=predictors_qual,
-                             labels=None,
-                             check_labels=False)
-
     if predictors_cont is not None:
         n = predictors_cont.shape[0]
     else:
@@ -80,3 +75,86 @@ def discretize(self, predictors_cont, predictors_qual):
             raise ValueError('Loophole: please open an issue at https://github.com/adimajo/glmdisc_python/issues')
 
     return emap
+
+
+def discretizeNN(self, predictors_cont, predictors_qual):
+    """
+
+    Parameters
+    ----------
+    self
+    predictors_cont
+    predictors_qual
+
+    Returns
+    -------
+
+    """
+    predictors_trans = np.zeros((self.n, self.d_qual))
+    predictors_qual_dummy = []
+
+    for j in range(self.d_qual):
+        # Label encoding of qualitative input
+        predictors_trans[:, j] = (self.affectations[j + self.d_cont].transform(
+            predictors_qual[:, j])).astype(int)
+        predictors_qual_dummy.append(np.squeeze(np.asarray(
+            self.one_hot_encoder_nn[j].transform(predictors_trans[:, j].reshape(-1, 1)).todense())))
+
+    if self.predictors_cont is not None:
+        if self.predictors_qual is not None:
+            list_predictors = list(self.predictors_cont[self.train, :].T) + predictors_qual_dummy
+        else:
+            list_predictors = list(self.predictors_cont[self.train, :].T)
+    else:
+        if self.predictors_qual is not None:
+            list_predictors = list(predictors_qual_dummy[self.train, :].T)
+        else:
+            logger.error("No training data provided.")
+
+    proba = from_weights_to_proba_test(self.d_cont,
+                                       self.d_qual,
+                                       [self.m_start] * self.d_cont,
+                                       self.callbacks[1],
+                                       predictors_cont,
+                                       predictors_trans,
+                                       predictors_cont.shape[0])
+
+    results = [None] * (self.d_cont + self.d_qual)
+    X_transformed = np.ones((predictors_cont.shape[0], 1))
+    for j in range(self.d_cont + self.d_qual):
+        results[j] = np.argmax(proba[j], axis=1)
+        print(results[j])
+        X_transformed = np.concatenate(
+            (X_transformed,
+             sk.preprocessing.OneHotEncoder(categories='auto', sparse=False, handle_unknown="ignore").fit_transform(
+                 X=results[j].reshape(-1, 1))),
+            axis=1)
+
+    return X_transformed
+
+
+def discretize(self, predictors_cont, predictors_qual):
+    """
+
+    Parameters
+    ----------
+    self
+    predictors_cont
+    predictors_qual
+
+    Returns
+    -------
+
+    """
+
+    self.check_is_fitted()
+
+    glmdisc._fit._check_args(predictors_cont=predictors_cont,
+                             predictors_qual=predictors_qual,
+                             labels=None,
+                             check_labels=False)
+
+    if self.algorithm == "SEM":
+        return discretizeSEM(self, predictors_cont, predictors_qual)
+    else:
+        return discretizeNN(self, predictors_cont, predictors_qual)

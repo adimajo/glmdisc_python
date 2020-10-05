@@ -8,15 +8,18 @@ import glmdisc
 
 
 def test_discretize_new():
-    n = 200
+    n = 400
     d = 2
-    x, y, theta = glmdisc.Glmdisc.generate_data(n, d)
-    model = glmdisc.Glmdisc(algorithm="NN", validation=False, test=False)
+    theta = np.array([[1] * d] * 3)
+    theta[1, :] = 2
+    theta[2, :] = -2
+
+    x, y, theta = glmdisc.Glmdisc.generate_data(n, d, theta)
+    model = glmdisc.Glmdisc(algorithm="NN", validation=False, test=False, m_start=3)
     random.seed(1)
     np.random.seed(1)
-    model.fit(predictors_cont=x[0:100], predictors_qual=None, labels=y[0:100], iter=11)
-    emap = model.discretize(predictors_cont=x[100:200], predictors_qual=None)
-    model.best_encoder_emap.transform(emap.astype(int).astype(str))
+    model.fit(predictors_cont=x[0:200], predictors_qual=None, labels=y[0:200], iter=200)
+    emap = model.discretize(predictors_cont=x[0:200], predictors_qual=None)
 
 
 def test_discretize_cont():
@@ -28,7 +31,6 @@ def test_discretize_cont():
     np.random.seed(1)
     model.fit(predictors_cont=x, predictors_qual=None, labels=y, iter=11)
     emap = model.discretize(predictors_cont=x, predictors_qual=None)
-    model.best_encoder_emap.transform(emap.astype(int).astype(str))
 
 
 def test_discretize_qual():
@@ -46,7 +48,6 @@ def test_discretize_qual():
     np.random.seed(1)
     model.fit(predictors_cont=None, predictors_qual=xd, labels=y, iter=50)
     emap = model.discretize(predictors_cont=None, predictors_qual=xd)
-    model.best_encoder_emap.transform(emap.astype(int).astype(str))
 
 
 def test_discretize_wrong():

@@ -257,14 +257,21 @@ class Glmdisc:
         This utility is meant to be used internally by estimators themselves,
         typically in their own predict / transform methods.
         """
-        try:
-            sk.utils.validation.check_is_fitted(self.best_reglog)
-            for link in self.best_link:
-                if isinstance(link, sk.linear_model.LogisticRegression):
-                    sk.utils.validation.check_is_fitted(link)
-        except sk.exceptions.NotFittedError as e:
-            raise NotFittedError(str(e) + " If you did call fit, try increasing iter: "
-                                          "it means it did not find a better solution than the random initialization.")
+        if self.algorithm == "SEM":
+            try:
+                sk.utils.validation.check_is_fitted(self.best_reglog)
+                for link in self.best_link:
+                    if isinstance(link, sk.linear_model.LogisticRegression):
+                        sk.utils.validation.check_is_fitted(link)
+            except sk.exceptions.NotFittedError as e:
+                raise NotFittedError(str(e) + " If you did call fit, try increasing iter: "
+                                              "it means it did not find a better solution than the random initialization.")
+        else:
+            try:
+                self.neural_net
+            except KeyError as e:
+                raise NotFittedError(str(e) + " If you did call fit, try increasing iter: "
+                                              "it means it did not find a better solution than the random initialization.")
 
     # Imported methods
     from ._bestFormula import best_formula

@@ -32,12 +32,12 @@ xd_significant_dummy = sk.preprocessing.OneHotEncoder().fit_transform(np.reshape
 
 # Coefficient estimation with cross validation
 K = 10
-taille = len(xd_not_significant)/K
+taille = len(xd_not_significant) / K
 list_coef = []
 for k in range(10):
     lr = sk.linear_model.LogisticRegression(fit_intercept=False)
-    xd_train = xd_not_significant_dummy[int(taille*k):int(taille*(k+1)), :]
-    y_train = y[int(taille*k):int(taille*(k+1))]
+    xd_train = xd_not_significant_dummy[int(taille * k):int(taille * (k + 1)), :]
+    y_train = y[int(taille * k):int(taille * (k + 1))]
     lr.fit(X=xd_train, y=y_train)
     list_coef.append(lr.coef_)
 
@@ -69,8 +69,8 @@ logreg_disc.fit(predictors_cont=None,
 
 list_coef_glmdisc = []
 for k in range(10):
-    xd_train = xd_not_significant.to_numpy().reshape((-1, 1))[int(taille*k):int(taille*(k+1)), :]
-    y_train = y[int(taille*k):int(taille*(k+1))]
+    xd_train = xd_not_significant.to_numpy().reshape((-1, 1))[int(taille * k):int(taille * (k + 1)), :]
+    y_train = y[int(taille * k):int(taille * (k + 1))]
     xd_train_glmdisc = logreg_disc.discretize_dummy(predictors_cont=None, predictors_qual=xd_train)
     lr = sk.linear_model.LogisticRegression(fit_intercept=False)
     lr.fit(X=xd_train_glmdisc, y=y_train)

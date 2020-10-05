@@ -8,7 +8,6 @@ from scipy import stats
 import sklearn as sk
 import sklearn.preprocessing
 import tensorflow as tf
-from tensorflow import keras
 from tensorflow.keras.layers import Input
 from tensorflow.keras.layers import Dense
 from tensorflow.keras.layers import concatenate
@@ -25,6 +24,7 @@ class LossHistory(Callback):
         self.d_cont = d_cont
         self.d_qual = d_qual
         self.neural_net = neural_net
+        self.best_weights = None
         self.losses = None
         self.best_criterion = None
         self.best_outputs = None
@@ -36,22 +36,23 @@ class LossHistory(Callback):
 
     def on_epoch_end(self, batch, logs={}):
         self.losses.append(evaluate_disc("train", self.d_cont, self.d_qual, self.neural_net)[0])
-        if self.losses[-1] < self.best_criterion:
-            self.best_weights = []
-            self.best_outputs = []
-            self.best_criterion = self.losses[-1]
-            for j in range(self.d_cont):
-                self.best_weights.append(self.neural_net["liste_layers_quant"][j].get_weights())
-                self.best_outputs.append(
-                    tf.keras.backend.function([self.neural_net["liste_layers_quant"][j].input],
-                                              [self.neural_net["liste_layers_quant"][j].output])(
-                        [self.neural_net["predictors_cont"][:, j, np.newaxis]]))
-            for j in range(self.d_qual):
-                self.best_weights.append(self.neural_net["liste_layers_qual[j]"].get_weights())
-                self.best_outputs.append(
-                    tf.keras.backend.function([self.neural_net["liste_layers_qual"][j].input],
-                                              [self.neural_net["liste_layers_qual"][j].output])(
-                        [self.neural_net["liste_qual_arrays"][j]]))
+        if len(self.losses) > 5:
+            if self.losses[-1] < self.best_criterion:
+                self.best_weights = []
+                self.best_outputs = []
+                self.best_criterion = self.losses[-1]
+                for j in range(self.d_cont):
+                    self.best_weights.append(self.neural_net["liste_layers_quant"][j].get_weights())
+                    self.best_outputs.append(
+                        tf.keras.backend.function([self.neural_net["liste_layers_quant"][j].input],
+                                                  [self.neural_net["liste_layers_quant"][j].output])(
+                            [self.neural_net["predictors_cont"][:, j, np.newaxis]]))
+                for j in range(self.d_qual):
+                    self.best_weights.append(self.neural_net["liste_layers_qual"][j].get_weights())
+                    self.best_outputs.append(
+                        tf.keras.backend.function([self.neural_net["liste_layers_qual"][j].input],
+                                                  [self.neural_net["liste_layers_qual"][j].output])(
+                            [self.neural_net["predictors_qual_dummy"][j]]))
 
 
 def initialize_neural_net(self, predictors_qual_dummy):
@@ -106,6 +107,10 @@ def initialize_neural_net(self, predictors_qual_dummy):
         "labels": self.labels,
         "predictors_cont": self.predictors_cont,
         "predictors_qual_dummy": predictors_qual_dummy,
+        "train": self.train,
+        "validate": self.validate,
+        "validation": self.validation,
+        "criterion": self.criterion,
         "liste_inputs_quant": liste_inputs_quant,
         "liste_layers_quant": liste_layers_quant,
         "liste_layers_quant_inputs": liste_layers_quant_inputs,
@@ -122,7 +127,7 @@ def from_layers_to_proba_training(d_cont, d_qual, neural_net):
     for j in range(d_cont):
         results[j] = tf.keras.backend.function([neural_net["liste_layers_quant"][j].input],
                                                [neural_net["liste_layers_quant"][j].output])(
-            [neural_net["predictors_cont"][:, j, np.newaxis]])
+            [neural_net["predictors_cont"][neural_net["train"], j, np.newaxis]])
 
     for j in range(d_qual):
         results[j + d_cont] = tf.keras.backend.function([neural_net["liste_layers_qual"][j].input],
@@ -132,7 +137,7 @@ def from_layers_to_proba_training(d_cont, d_qual, neural_net):
     return results
 
 
-def from_weights_to_proba_test(d1, d2, m_cont, m_qual, history, x_quant_test, x_qual_test, n_test):
+def from_weights_to_proba_test(d1, d2, m_cont, history, x_quant_test, x_qual_test, n_test):
 
     results = [None] * (d1 + d2)
 
@@ -181,29 +186,45 @@ def evaluate_disc(type, d_cont, d_qual, neural_net):
         fit_intercept=False, solver="lbfgs", C=1e20, tol=1e-8, max_iter=50)
 
     if type == "train":
-        proposed_logistic_regression.fit(X=X_transformed, y=neural_net["labels"].reshape((neural_net["n"],)))
-        performance = 2 * sk.metrics.log_loss(
-            neural_net["labels"],
-            proposed_logistic_regression.predict_proba(X=X_transformed)[:, 1],
-            normalize=False
-        ) + proposed_logistic_regression.coef_.shape[1] * np.log(neural_net["n"])
+        proposed_logistic_regression.fit(X=X_transformed, y=neural_net["labels"][neural_net["train"]].reshape(
+            (neural_net["train"].shape[0],)))
+        if neural_net["criterion"] in ['aic', 'bic']:
+            loglik = sk.metrics.log_loss(
+                neural_net["labels"],
+                proposed_logistic_regression.predict_proba(X=X_transformed)[:, 1],
+                normalize=False
+            )
+            if neural_net["validation"]:
+                performance = 2 * loglik
+            elif neural_net["criterion"] == "bic":
+                performance = 2 * loglik + proposed_logistic_regression.coef_.shape[1] * np.log(neural_net["n"])
+            else:
+                performance = 2 * loglik + 2 * proposed_logistic_regression.coef_.shape[1]
+        else:
+            raise NotImplementedError
         predicted = proposed_logistic_regression.predict_proba(X_transformed)[:, 1]
 
     else:
         raise NotImplementedError
         # proposed_logistic_regression.fit(X=X_transformed, y=y_test.reshape((n_test,)))
         # performance = 2 * sk.metrics.roc_auc_score(y_test,
-        #                                            proposed_logistic_regression.predict_proba(X_transformed)[:, 1]) - 1
+        #                                            proposed_logistic_regression.predict_proba(
+        #                                               X_transformed)[:, 1]) - 1
         # predicted = proposed_logistic_regression.predict_proba(X_transformed)[:, 1]
 
     return performance, predicted
 
 
 def fitNN(self, predictors_trans):
-    one_hot_encoder = sk.preprocessing.OneHotEncoder()
 
     if self.predictors_qual is not None:
-        predictors_qual_dummy = one_hot_encoder.fit_transform(predictors_trans)
+        self.one_hot_encoders_nn = []
+        predictors_qual_dummy = []
+        for j in range(self.d_qual):
+            one_hot_encoder = sk.preprocessing.OneHotEncoder()
+            predictors_qual_dummy.append(np.squeeze(np.asarray(
+                one_hot_encoder.fit_transform(predictors_trans[:, j].reshape(-1, 1)).todense())))
+            self.one_hot_encoders_nn.append(one_hot_encoder)
     else:
         predictors_qual_dummy = None
 
@@ -215,14 +236,15 @@ def fitNN(self, predictors_trans):
                 [self.neural_net["liste_layers_quant_inputs"],
                  self.neural_net["liste_layers_qual_inputs"]])))
     output = Dense(1, activation='sigmoid')(full_hidden)
-    model = Model(
+    self.model_nn = Model(
         inputs=list(chain.from_iterable([self.neural_net["liste_inputs_quant"],
                                          self.neural_net["liste_inputs_qual"]])),
         outputs=[output])
 
     # adam = tensorflow.keras.optimizers.Adam(lr={{choice([10 ** -3, 10 ** -2, 10 ** -1])}})
-    adam = tensorflow.keras.optimizers.Adam(lr=10 ** -3)
+    # adam = tensorflow.keras.optimizers.Adam(lr=10 ** -2)
     # rmsprop = tensorflow.keras.optimizers.RMSprop(lr={{choice([10 ** -3, 10 ** -2, 10 ** -1])}})
+    rmsprop = tensorflow.keras.optimizers.RMSprop(lr=10 ** -3)
     # sgd = tensorflow.keras.optimizers.SGD(lr={{choice([10 ** -3, 10 ** -2, 10 ** -1])}})
 
     # choiceval = {{choice(['adam', 'sgd', 'rmsprop'])}}
@@ -231,13 +253,13 @@ def fitNN(self, predictors_trans):
     # elif choiceval == 'rmsprop':
     #     optim = rmsprop
     # else:
-    optim = adam
+    optim = rmsprop
 
-    model.compile(loss='binary_crossentropy', optimizer=optim, metrics=['accuracy'])
+    self.model_nn.compile(loss='binary_crossentropy', optimizer=optim, metrics=['accuracy'])
 
     history = LossHistory(d_cont=self.d_cont, d_qual=self.d_qual, neural_net=self.neural_net)
 
-    callbacks = [
+    self.callbacks = [
         ReduceLROnPlateau(
             monitor='loss',
             factor=0.5,
@@ -252,21 +274,20 @@ def fitNN(self, predictors_trans):
 
     if self.predictors_cont is not None:
         if self.predictors_qual is not None:
-            list_predictors = list(chain.from_iterable([list(self.predictors_cont.T), list(predictors_qual_dummy.T)]))
+            list_predictors = list(self.predictors_cont[self.train, :].T) + predictors_qual_dummy
         else:
-            list_predictors = list(self.predictors_cont.T)
+            list_predictors = list(self.predictors_cont[self.train, :].T)
     else:
         if self.predictors_qual is not None:
-            list_predictors = list(predictors_qual_dummy.T)
+            list_predictors = list(predictors_qual_dummy[self.train, :].T)
         else:
             logger.error("No training data provided.")
 
-    model.fit(
+    self.model_nn.fit(
         list_predictors,
-        self.labels,
-        epochs=500,
-        # batch_size={{choice([64,128,256])}},
+        self.labels[self.train],
+        epochs=self.iter,
         batch_size=128,
         verbose=1,
-        callbacks=callbacks
+        callbacks=self.callbacks
     )
