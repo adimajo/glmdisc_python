@@ -16,6 +16,8 @@ from tensorflow.keras.callbacks import Callback, ReduceLROnPlateau
 import tensorflow.keras.optimizers
 from itertools import chain
 from loguru import logger
+import matplotlib.pyplot as plt
+import pandas as pd
 
 
 class LossHistory(Callback):
@@ -34,25 +36,36 @@ class LossHistory(Callback):
         self.best_criterion = float("inf")
         self.best_outputs = []
 
-    def on_epoch_end(self, batch, logs={}):
+    def on_epoch_end(self, batch, logs={}, plot=True):
         self.losses.append(evaluate_disc("train", self.d_cont, self.d_qual, self.neural_net)[0])
-        if len(self.losses) > 5:
-            if self.losses[-1] < self.best_criterion:
-                self.best_weights = []
-                self.best_outputs = []
-                self.best_criterion = self.losses[-1]
-                for j in range(self.d_cont):
-                    self.best_weights.append(self.neural_net["liste_layers_quant"][j].get_weights())
-                    self.best_outputs.append(
-                        tf.keras.backend.function([self.neural_net["liste_layers_quant"][j].input],
-                                                  [self.neural_net["liste_layers_quant"][j].output])(
-                            [self.neural_net["predictors_cont"][:, j, np.newaxis]]))
-                for j in range(self.d_qual):
-                    self.best_weights.append(self.neural_net["liste_layers_qual"][j].get_weights())
-                    self.best_outputs.append(
-                        tf.keras.backend.function([self.neural_net["liste_layers_qual"][j].input],
-                                                  [self.neural_net["liste_layers_qual"][j].output])(
-                            [self.neural_net["predictors_qual_dummy"][j]]))
+        if len(self.losses) > 5:  # and self.losses[-1] < self.best_criterion:
+            self.best_weights = []
+            self.best_outputs = []
+            self.best_criterion = self.losses[-1]
+            for j in range(self.d_cont):
+                self.best_weights.append(self.neural_net["liste_layers_quant"][j].get_weights())
+                self.best_outputs.append(
+                    tf.keras.backend.function([self.neural_net["liste_layers_quant"][j].input],
+                                              [self.neural_net["liste_layers_quant"][j].output])(
+                        [self.neural_net["predictors_cont"][:, j, np.newaxis]]))
+            for j in range(self.d_qual):
+                self.best_weights.append(self.neural_net["liste_layers_qual"][j].get_weights())
+                self.best_outputs.append(
+                    tf.keras.backend.function([self.neural_net["liste_layers_qual"][j].input],
+                                              [self.neural_net["liste_layers_qual"][j].output])(
+                        [self.neural_net["predictors_qual_dummy"][j]]))
+
+            if plot:
+                plt.xlim((0, 1))
+                plt.ylim((0, 1))
+                print(self.best_outputs)
+                print(self.best_outputs[0])
+                print(self.best_outputs[0][0])
+                print(self.best_outputs[0][0].shape)
+                for k in range(self.best_outputs[0][0].shape[1]):
+                    plt.plot(np.sort(self.neural_net["predictors_cont"][:, 0]), self.best_outputs[0][0][np.argsort(self.neural_net["predictors_cont"][:, 0]), k],
+                             color=['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w'][k + 2])
+                plt.show()
 
 
 def initialize_neural_net(self, predictors_qual_dummy):
@@ -212,10 +225,12 @@ def evaluate_disc(type, d_cont, d_qual, neural_net):
         #                                               X_transformed)[:, 1]) - 1
         # predicted = proposed_logistic_regression.predict_proba(X_transformed)[:, 1]
 
+    print('\n')
+    print(performance)
     return performance, predicted
 
 
-def fitNN(self, predictors_trans):
+def _fitNN(self, predictors_trans):
 
     if self.predictors_qual is not None:
         self.one_hot_encoders_nn = []
@@ -244,7 +259,7 @@ def fitNN(self, predictors_trans):
     # adam = tensorflow.keras.optimizers.Adam(lr={{choice([10 ** -3, 10 ** -2, 10 ** -1])}})
     # adam = tensorflow.keras.optimizers.Adam(lr=10 ** -2)
     # rmsprop = tensorflow.keras.optimizers.RMSprop(lr={{choice([10 ** -3, 10 ** -2, 10 ** -1])}})
-    rmsprop = tensorflow.keras.optimizers.RMSprop(lr=10 ** -3)
+    rmsprop = tensorflow.keras.optimizers.RMSprop(lr=0.5, rho=0.9, epsilon=None, decay=0.0)
     # sgd = tensorflow.keras.optimizers.SGD(lr={{choice([10 ** -3, 10 ** -2, 10 ** -1])}})
 
     # choiceval = {{choice(['adam', 'sgd', 'rmsprop'])}}

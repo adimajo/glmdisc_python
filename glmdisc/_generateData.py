@@ -2,13 +2,13 @@
 # -*- coding: utf-8 -*-
 """generate_data method for class glmdisc.
 """
-import random
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
 
 @staticmethod
-def generate_data(n, d, theta=None):
+def generate_data(n, d, theta=None, plot=False):
     """
     Generates some toy continuous data that gets discretized, and a label
     is drawn from a logistic regression given the discretized features.
@@ -19,6 +19,8 @@ def generate_data(n, d, theta=None):
         Number of features to draw.
     :param numpy.array theta:
         Logistic regression coefficient to use (if None, drawn from N(0,2)).
+    :param bool plot:
+        If true, plot the two first x axes with y as color.
     """
     cuts = ([0, 0.333, 0.666, 1])
 
@@ -40,5 +42,8 @@ def generate_data(n, d, theta=None):
 
     p = 1 / (1 + np.exp(- log_odd))
     y = np.random.binomial(1, p)
+
+    if plot:
+        plt.scatter(x[:, 0], x[:, 1], c=y, s=[1 for _ in range(len(x))])
 
     return [x, y, theta]

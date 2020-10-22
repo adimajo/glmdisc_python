@@ -12,7 +12,7 @@ from collections import Counter
 from loguru import logger
 
 
-def fitSEM(self, edisc, predictors_trans, continu_complete_case):
+def _fitSEM(self, edisc, predictors_trans, continu_complete_case):
     """
     fit function for SEM algorithm
 

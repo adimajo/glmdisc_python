@@ -11,7 +11,7 @@ import glmdisc
 from glmdisc._fitNN import from_weights_to_proba_test
 
 
-def discretizeSEM(self, predictors_cont, predictors_qual):
+def _discretizeSEM(self, predictors_cont, predictors_qual):
     """
     Discretizes new continuous and categorical features using a previously
     fitted glmdisc object.
@@ -77,18 +77,19 @@ def discretizeSEM(self, predictors_cont, predictors_qual):
     return emap
 
 
-def discretizeNN(self, predictors_cont, predictors_qual):
+def _discretizeNN(self, predictors_cont, predictors_qual):
     """
+    Discretizes new continuous and categorical features using a previously
+    fitted glmdisc object.
 
-    Parameters
-    ----------
-    self
-    predictors_cont
-    predictors_qual
-
-    Returns
-    -------
-
+    :param numpy.array predictors_cont:
+        Continuous predictors to be discretized in a numpy
+        "numeric" array. Can be provided either here or with
+        the __init__ method.
+    :param numpy.array predictors_qual:
+        Categorical features which levels are to be merged
+        (also in a numpy "string" array). Can be provided
+        either here or with the __init__ method.
     """
     predictors_trans = np.zeros((self.n, self.d_qual))
     predictors_qual_dummy = []
@@ -98,7 +99,7 @@ def discretizeNN(self, predictors_cont, predictors_qual):
         predictors_trans[:, j] = (self.affectations[j + self.d_cont].transform(
             predictors_qual[:, j])).astype(int)
         predictors_qual_dummy.append(np.squeeze(np.asarray(
-            self.one_hot_encoder_nn[j].transform(predictors_trans[:, j].reshape(-1, 1)).todense())))
+            self.one_hot_encoders_nn[j].transform(predictors_trans[:, j].reshape(-1, 1)).todense())))
 
     if self.predictors_cont is not None:
         if self.predictors_qual is not None:
@@ -120,17 +121,11 @@ def discretizeNN(self, predictors_cont, predictors_qual):
                                        predictors_cont.shape[0])
 
     results = [None] * (self.d_cont + self.d_qual)
-    X_transformed = np.ones((predictors_cont.shape[0], 1))
+
     for j in range(self.d_cont + self.d_qual):
         results[j] = np.argmax(proba[j], axis=1)
-        print(results[j])
-        X_transformed = np.concatenate(
-            (X_transformed,
-             sk.preprocessing.OneHotEncoder(categories='auto', sparse=False, handle_unknown="ignore").fit_transform(
-                 X=results[j].reshape(-1, 1))),
-            axis=1)
 
-    return X_transformed
+    return np.vstack(results).T
 
 
 def discretize(self, predictors_cont, predictors_qual):
@@ -155,6 +150,6 @@ def discretize(self, predictors_cont, predictors_qual):
                              check_labels=False)
 
     if self.algorithm == "SEM":
-        return discretizeSEM(self, predictors_cont, predictors_qual)
+        return _discretizeSEM(self, predictors_cont, predictors_qual)
     else:
-        return discretizeNN(self, predictors_cont, predictors_qual)
+        return _discretizeNN(self, predictors_cont, predictors_qual)

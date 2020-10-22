@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 """discretizeDummy module for the glmdisc class.
 """
+import numpy as np
+import sklearn as sk
 
 
 def discretize_dummy(self, predictors_cont, predictors_qual):
@@ -26,6 +28,13 @@ def discretize_dummy(self, predictors_cont, predictors_qual):
             predictors_cont,
             predictors_qual).astype(int).astype(str))
     else:
-        emap_dummy = None
+        results = self.discretize(predictors_cont, predictors_qual)
+        emap_dummy = np.ones((predictors_cont.shape[0], 1))
+        for j in range(self.d_cont + self.d_qual):
+            emap_dummy = np.concatenate(
+                (emap_dummy,
+                 sk.preprocessing.OneHotEncoder(categories='auto', sparse=False, handle_unknown="ignore").fit_transform(
+                     X=results[j].reshape(-1, 1))),
+                axis=1)
 
     return emap_dummy
