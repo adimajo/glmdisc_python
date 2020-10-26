@@ -7,7 +7,7 @@ import numpy as np
 import sklearn as sk
 import sklearn.linear_model
 from copy import deepcopy
-from glmdisc import vectorized_multinouilli
+from glmdisc import _vectorized_multinouilli
 from collections import Counter
 from loguru import logger
 
@@ -140,7 +140,7 @@ def _fitSEM(self, edisc, predictors_trans, continu_complete_case):
                 t = t / (t.sum(axis=1)[:, None])
 
                 # On met à jour q_j
-                edisc[continu_complete_case[:, j], j] = vectorized_multinouilli(t, m[j])
+                edisc[continu_complete_case[:, j], j] = _vectorized_multinouilli(t, m[j])
                 edisc[np.invert(continu_complete_case[:, j]), j] = max(m[j])
 
             # Variables qualitatives
@@ -178,4 +178,4 @@ def _fitSEM(self, edisc, predictors_trans, continu_complete_case):
                 t = t * y_p
                 t = t / (t.sum(axis=1)[:, None])
 
-                edisc[:, j] = vectorized_multinouilli(t, m[j])
+                edisc[:, j] = _vectorized_multinouilli(t, m[j])

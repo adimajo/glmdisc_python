@@ -130,16 +130,17 @@ def _discretizeNN(self, predictors_cont, predictors_qual):
 
 def discretize(self, predictors_cont, predictors_qual):
     """
+    Discretizes new continuous and categorical features using a previously
+    fitted glmdisc object.
 
-    Parameters
-    ----------
-    self
-    predictors_cont
-    predictors_qual
-
-    Returns
-    -------
-
+    :param numpy.array predictors_cont:
+        Continuous predictors to be discretized in a numpy
+        "numeric" array. Can be provided either here or with
+        the __init__ method.
+    :param numpy.array predictors_qual:
+        Categorical features which levels are to be merged
+        (also in a numpy "string" array). Can be provided
+        either here or with the __init__ method.
     """
 
     self.check_is_fitted()

@@ -17,11 +17,23 @@ import tensorflow.keras.optimizers
 from itertools import chain
 from loguru import logger
 import matplotlib.pyplot as plt
-import pandas as pd
 
 
 class LossHistory(Callback):
+    """
+    Custom Callback to evaluate current quantization scheme as a logistic regression
+    """
     def __init__(self, d_cont, d_qual, neural_net):
+        """
+        Copying useful objects in self for function :code:`on_train_begin` and
+        :code:`on_epoch_end` to which only self is provided.
+
+        Parameters
+        ----------
+        d_cont: number of quantitative features
+        d_qual: number of qualitative features
+        neural_net: dictionary of neural net structure
+        """
         super().__init__()
         self.d_cont = d_cont
         self.d_qual = d_qual
@@ -31,14 +43,41 @@ class LossHistory(Callback):
         self.best_criterion = None
         self.best_outputs = None
 
-    def on_train_begin(self, logs={}):
+    def on_train_begin(self, logs=None):
+        """
+        Initializes losses and best_outputs as empty lists, best_criterion as infinite.
+
+        Parameters
+        ----------
+        logs
+
+        """
+        if logs is None:
+            logs = {}
         self.losses = []
         self.best_criterion = float("inf")
         self.best_outputs = []
 
-    def on_epoch_end(self, batch, logs={}, plot=True):
-        self.losses.append(evaluate_disc("train", self.d_cont, self.d_qual, self.neural_net)[0])
-        if len(self.losses) > 5:  # and self.losses[-1] < self.best_criterion:
+    def on_epoch_end(self, batch, logs=None, plot=True):
+        """
+        Evaluates the proposed quantization scheme by going back to a "hard" quantization
+        and fitting a logistic regression.
+
+        .. todo:: parametrize burn in phase + don't bother evaluating disc for that phase
+
+        .. todo:: only first feature is plotted (what happens if it's qualitative?)
+
+        Parameters
+        ----------
+        batch
+        logs
+        plot: whether to plot the activation functions
+        """
+        burn_in = 5
+        if logs is None:
+            logs = {}
+        self.losses.append(_evaluate_disc("train", self.d_cont, self.d_qual, self.neural_net)[0])
+        if len(self.losses) > burn_in and self.losses[-1] < self.best_criterion:
             self.best_weights = []
             self.best_outputs = []
             self.best_criterion = self.losses[-1]
@@ -70,10 +109,10 @@ class LossHistory(Callback):
 
 def initialize_neural_net(self, predictors_qual_dummy):
     """
+    Constructs the neural network
 
+    .. todo:: shouldn't predictors_qual_dummy be stored in self?
     """
-    #
-
     m_cont = [self.m_start] * self.d_cont
     m_qual = [self.m_start] * (self.d_cont + self.d_qual)
 
@@ -134,7 +173,19 @@ def initialize_neural_net(self, predictors_qual_dummy):
 
 
 def from_layers_to_proba_training(d_cont, d_qual, neural_net):
+    """
+    Calculates the probability of each level for each feature from the provided neural net for the training set.
 
+    Parameters
+    ----------
+    d_cont: number of quantitative features
+    d_qual: number of qualitative features
+    neural_net: neural net
+
+    Returns
+    -------
+    list of size d_cont + d_qual of numpy.ndarray of probabilities for each level of each feature
+    """
     results = [None] * (d_cont + d_qual)
 
     for j in range(d_cont):
@@ -150,25 +201,41 @@ def from_layers_to_proba_training(d_cont, d_qual, neural_net):
     return results
 
 
-def from_weights_to_proba_test(d1, d2, m_cont, history, x_quant_test, x_qual_test, n_test):
+def from_weights_to_proba_test(d_cont, d_qual, m_cont, history, x_quant_test, x_qual_test, n_test):
+    """
+    Calculates the probability of each level for each feature from the provided neural net for a test set.
 
-    results = [None] * (d1 + d2)
+    Parameters
+    ----------
+    d_cont: number of quantitative features
+    d_qual: number of qualitative features
+    m_cont
+    history
+    x_quant_test
+    x_qual_test
+    n_test: number of test samples
 
-    for j in range(d1):
+    Returns
+    -------
+    list of size d_cont + d_qual of numpy.ndarray of probabilities for each level of each feature
+    """
+    results = [None] * (d_cont + d_qual)
+
+    for j in range(d_cont):
         results[j] = np.zeros((n_test, m_cont[j]))
         for i in range(m_cont[j]):
             results[j][:, i] = history.best_weights[j][1][i] + history.best_weights[j][0][0][i] * x_quant_test[:, j]
 
-    for j in range(d2):
-        results[j + d1] = np.zeros((n_test, history.best_weights[j + d1][0].shape[1]))
-        for i in range(history.best_weights[j + d1][0].shape[1]):
+    for j in range(d_qual):
+        results[j + d_cont] = np.zeros((n_test, history.best_weights[j + d_cont][0].shape[1]))
+        for i in range(history.best_weights[j + d_cont][0].shape[1]):
             for k in range(n_test):
-                results[j + d1][k, i] = history.best_weights[j + d1][0][x_qual_test[k, j], i]
+                results[j + d_cont][k, i] = history.best_weights[j + d_cont][0][x_qual_test[k, j], i]
 
     return results
 
 
-def evaluate_disc(type, d_cont, d_qual, neural_net):
+def _evaluate_disc(type, d_cont, d_qual, neural_net):
     if type == "train":
         proba = from_layers_to_proba_training(d_cont, d_qual, neural_net)
     else:

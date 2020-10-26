@@ -33,7 +33,9 @@ def discretize_dummy(self, predictors_cont, predictors_qual):
         for j in range(self.d_cont + self.d_qual):
             emap_dummy = np.concatenate(
                 (emap_dummy,
-                 sk.preprocessing.OneHotEncoder(categories='auto', sparse=False, handle_unknown="ignore").fit_transform(
+                 sk.preprocessing.OneHotEncoder(categories='auto',
+                                                sparse=False,
+                                                handle_unknown="ignore").fit_transform(
                      X=results[j].reshape(-1, 1))),
                 axis=1)
 

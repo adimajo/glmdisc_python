@@ -26,24 +26,32 @@ def _check_args(predictors_cont, predictors_qual, labels, check_labels=True):
     :type labels: numpy.ndarray
     """
     # Test if predictors_cont is provided and if it's a numpy array
+    raise_ndarray = False
     if predictors_cont is not None and not isinstance(predictors_cont, np.ndarray):
-        raise ValueError(NUMPY_NDARRAY_INPUTS)
+        raise_ndarray = True
     # Test if predictors_qual is provided and if it's a numpy array
     if predictors_qual is not None and not isinstance(predictors_qual, np.ndarray):
-        raise ValueError(NUMPY_NDARRAY_INPUTS)
+        raise_ndarray = True
     # Test if labels is provided and if it's a numpy array
     if check_labels and not isinstance(labels, np.ndarray):
+        raise_ndarray = True
+    if raise_ndarray:
+        logger.error(NUMPY_NDARRAY_INPUTS)
         raise ValueError(NUMPY_NDARRAY_INPUTS)
 
     # Test if at least one of qual or cont is provided
     if predictors_cont is None and predictors_qual is None:
-        raise ValueError(('You must provide either qualitative or quantitative '
-                         'features'))
+        msg = ('You must provide either qualitative or quantitative '
+               'features')
+        logger.error(msg)
+        raise ValueError(msg)
 
     # Test if labels and predictors have same number of samples
     if check_labels and ((predictors_cont is not None and predictors_cont.shape[0] != labels.shape[0]) or
                          (predictors_qual is not None and predictors_qual.shape[0] != labels.shape[0])):
-        raise ValueError('Predictors and labels must be of same size')
+        msg = 'Predictors and labels must be of same size'
+        logger.error(msg)
+        raise ValueError(msg)
 
 
 def _calculate_shape(self):
@@ -205,11 +213,15 @@ def fit(self, predictors_cont, predictors_qual, labels, iter=100):
     """
     # iter doit être suffisamment grand
     if iter <= 10:
-        raise ValueError('iter is too low / negative. Please set 10 < iter < 100 000')
+        msg = 'iter is too low / negative. Please set 10 < iter < 100 000'
+        logger.error(msg)
+        raise ValueError(msg)
 
     # iter doit être suffisamment petit
     if iter >= 100000:
-        raise ValueError('iter is too high, it will take years to finish! Please set 10 < iter < 100 000')
+        msg = 'iter is too high, it will take years to finish! Please set 10 < iter < 100 000'
+        logger.error(msg)
+        raise ValueError(msg)
 
     self.iter = iter
 

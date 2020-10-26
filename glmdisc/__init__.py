@@ -30,7 +30,7 @@ class NotFittedError(sk.exceptions.NotFittedError):
     """
 
 
-def vectorized_multinouilli(prob_matrix, items):
+def _vectorized_multinouilli(prob_matrix, items):
     """
     A vectorized version of multinouilli sampling.
 

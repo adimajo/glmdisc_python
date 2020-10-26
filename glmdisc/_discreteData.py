@@ -20,7 +20,7 @@ def discrete_data(self):
     """
     Returns the best discrete data (train, validation or test) found by the MCMC.
 
-    :rtype: numpy.array
+    :rtype: numpy.ndarray
     """
     if self.predictors_cont is not None and self.predictors_qual is not None:
         if self.test:
