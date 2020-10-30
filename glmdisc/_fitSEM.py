@@ -67,7 +67,7 @@ def _calculate_criterion(self, emap, model_emap, current_encoder_emap):
     return performance
 
 
-def _fitSEM(self, edisc, predictors_trans, continu_complete_case, **kwargs):
+def _fit_sem(self, edisc, predictors_trans, continu_complete_case, **kwargs):
     """
     fit function for SEM algorithm
 

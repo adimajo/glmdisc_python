@@ -11,7 +11,7 @@ import glmdisc
 from glmdisc._fitNN import from_weights_to_proba_test
 
 
-def _discretizeSEM(self, predictors_cont, predictors_qual):
+def _discretize_sem(self, predictors_cont, predictors_qual):
     """
     Discretizes new continuous and categorical features using a previously
     fitted glmdisc object.
@@ -83,7 +83,7 @@ def _discretizeSEM(self, predictors_cont, predictors_qual):
     return emap
 
 
-def _discretizeNN(self, predictors_cont, predictors_qual):
+def _discretize_nn(self, predictors_cont, predictors_qual):
     """
     Discretizes new continuous and categorical features using a previously
     fitted glmdisc object.
@@ -146,6 +146,6 @@ def discretize(self, predictors_cont, predictors_qual):
                              check_labels=False)
 
     if self.algorithm == "SEM":
-        return _discretizeSEM(self, predictors_cont, predictors_qual)
+        return _discretize_sem(self, predictors_cont, predictors_qual)
     else:
-        return _discretizeNN(self, predictors_cont, predictors_qual)
+        return _discretize_nn(self, predictors_cont, predictors_qual)

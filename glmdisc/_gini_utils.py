@@ -63,14 +63,14 @@ def compute_midrank_weight(x, sample_weight):
     return T2
 
 
-def fastDeLong(predictions_sorted_transposed, label_1_count, sample_weight):
+def fast_de_long(predictions_sorted_transposed, label_1_count, sample_weight):
     if sample_weight is None:
-        return fastDeLong_no_weights(predictions_sorted_transposed, label_1_count)
+        return fast_de_long_no_weights(predictions_sorted_transposed, label_1_count)
     else:
-        return fastDeLong_weights(predictions_sorted_transposed, label_1_count, sample_weight)
+        return fast_de_long_weights(predictions_sorted_transposed, label_1_count, sample_weight)
 
 
-def fastDeLong_weights(predictions_sorted_transposed, label_1_count, sample_weight):
+def fast_de_long_weights(predictions_sorted_transposed, label_1_count, sample_weight):
     """
     The fast version of DeLong's method for computing the covariance of
     unadjusted AUC.
@@ -119,7 +119,7 @@ def fastDeLong_weights(predictions_sorted_transposed, label_1_count, sample_weig
     return aucs, delongcov
 
 
-def fastDeLong_no_weights(predictions_sorted_transposed, label_1_count):
+def fast_de_long_no_weights(predictions_sorted_transposed, label_1_count):
     """
     The fast version of DeLong's method for computing the covariance of
     unadjusted AUC.
@@ -200,6 +200,6 @@ def delong_roc_variance(ground_truth, predictions, sample_weight=None):
     order, label_1_count, ordered_sample_weight = compute_ground_truth_statistics(
         ground_truth, sample_weight)
     predictions_sorted_transposed = predictions[np.newaxis, order]
-    aucs, delongcov = fastDeLong(predictions_sorted_transposed, label_1_count, ordered_sample_weight)
+    aucs, delongcov = fast_de_long(predictions_sorted_transposed, label_1_count, ordered_sample_weight)
     assert len(aucs) == 1, "There is a bug in the code, please forward this to the developers"
     return aucs[0], delongcov

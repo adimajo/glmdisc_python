@@ -6,8 +6,8 @@ import numpy as np
 import sklearn as sk
 from scipy import stats
 from loguru import logger
-from glmdisc._fitSEM import _fitSEM
-from glmdisc._fitNN import _fitNN
+from glmdisc._fitSEM import _fit_sem
+from glmdisc._fitNN import _fit_nn
 
 
 NUMPY_NDARRAY_INPUTS = 'glmdisc only supports numpy.ndarray inputs'
@@ -193,8 +193,8 @@ def fit(self, predictors_cont, predictors_qual, labels, iter=100, **kwargs):
     self._split()
 
     if self.algorithm == "SEM":
-        _fitSEM(self, edisc, predictors_trans, continu_complete_case, **kwargs)
+        _fit_sem(self, edisc, predictors_trans, continu_complete_case, **kwargs)
     elif self.algorithm == "NN":
-        _fitNN(self, predictors_trans, **kwargs)
+        _fit_nn(self, predictors_trans, **kwargs)
     else:
         logger.error("Unknown algorithm supplied.")

@@ -322,7 +322,7 @@ def _evaluate_disc(type, d_cont, d_qual, neural_net):
     return performance, predicted
 
 
-def _fitNN(self, predictors_trans, **kwargs):
+def _fit_nn(self, predictors_trans, **kwargs):
 
     if 'plot' in kwargs:
         if not isinstance(kwargs['plot'], bool):
@@ -383,7 +383,7 @@ def _fitNN(self, predictors_trans, **kwargs):
             cooldown=0,
             min_lr=0),
         history,
-
+        other_callbacks
     ]
 
     if self.predictors_cont is not None:
