@@ -16,14 +16,13 @@ def test_best_formula(caplog):
         xd[:, i] = pd.cut(x[:, i], bins=cuts, labels=[0, 1, 2])
 
     model = glmdisc.Glmdisc(algorithm="NN", validation=False, test=False)
-    model.fit(predictors_cont=x, predictors_qual=xd, labels=y, iter=11)
+    model.fit(predictors_cont=x, predictors_qual=xd, labels=y, iter=50)
     formula = model.best_formula()
     assert isinstance(formula, list)
     assert len(formula) == 2 * d
     for j in range(2 * d):
         assert isinstance(formula[j], list)
-    assert len(caplog.records) == 4
-    assert "Cut-points found for continuous variable" in caplog.records[0].message
-    assert "Cut-points found for continuous variable" in caplog.records[1].message
-    assert "Regroupments made for categorical variable" in caplog.records[2].message
-    assert "Regroupments made for categorical variable" in caplog.records[3].message
+    assert "No cut-points found for continuous variable 0" in caplog.records[-4].message
+    assert "No cut-points found for continuous variable 1" in caplog.records[-3].message
+    # assert "No regroupments made for categorical variable 0" in caplog.records[-2].message
+    # assert "No regroupments made for categorical variable 1" in caplog.records[-1].message

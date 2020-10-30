@@ -5,7 +5,6 @@
 import numpy as np
 import sklearn as sk
 from scipy import stats
-from math import log
 from loguru import logger
 from glmdisc._fitSEM import _fitSEM
 from glmdisc._fitNN import _fitNN
@@ -82,51 +81,6 @@ def _calculate_shape(self):
     return continu_complete_case
 
 
-def _calculate_criterion(self, emap, model_emap, current_encoder_emap):
-    """
-    Calculate current value of optimised criterion
-
-    Parameters
-    ----------
-    emap: array of current discretization / grouping of size d_cont + d_qual
-    model_emap: current logistic regression
-    current_encoder_emap: one hot encoder of emap
-
-    Returns
-    -------
-    criterion value
-    """
-    if self.criterion in ['aic', 'bic']:
-        loglik = -sk.metrics.log_loss(self.labels[self.train],
-                                      model_emap.predict_proba(
-                                          X=current_encoder_emap.transform(
-                                              emap[self.train, :].astype(str))),
-                                      normalize=False)
-        if self.validation:
-            performance = loglik
-
-    if self.criterion == 'aic' and not self.validation:
-        performance = -(2 * model_emap.coef_.shape[1] - 2 * loglik)
-
-    if self.criterion == 'bic' and not self.validation:
-        performance = -(log(self.n) * model_emap.coef_.shape[1] - 2 * loglik)
-
-    if self.criterion == 'gini' and self.validation:
-        performance = sk.metrics.roc_auc_score(
-            self.labels[self.validate], model_emap.predict_proba(
-                X=current_encoder_emap.transform(
-                    emap[self.validate, :].astype(str)))[:, 1:])
-
-    if self.criterion == 'gini' and not self.validation:
-        performance = sk.metrics.roc_auc_score(
-            self.labels[self.train], model_emap.predict_proba(
-                X=current_encoder_emap.transform(
-                    emap[self.train, :].astype(str)))[:, 1:])
-
-    logger.info("Performance: " + str(performance))
-    return performance
-
-
 def _init_disc(self, continu_complete_case):
     """
     Initializes :code:`affectations`, i.e. the list of label encoders for categorical features,
@@ -190,13 +144,11 @@ def _split(self):
         self.test_rows = None
 
 
-def fit(self, predictors_cont, predictors_qual, labels, iter=100):
+def fit(self, predictors_cont, predictors_qual, labels, iter=100, **kwargs):
     """
     Fits the Glmdisc object.
 
     .. todo:: On regarde si des modalités sont présentes dans validation et pas dans train
-
-    .. todo:: Refactor due to complexity
 
     :param numpy.ndarray predictors_cont:
         Continuous predictors to be discretized in a numpy
@@ -241,8 +193,8 @@ def fit(self, predictors_cont, predictors_qual, labels, iter=100):
     self._split()
 
     if self.algorithm == "SEM":
-        _fitSEM(self, edisc, predictors_trans, continu_complete_case)
+        _fitSEM(self, edisc, predictors_trans, continu_complete_case, **kwargs)
     elif self.algorithm == "NN":
-        _fitNN(self, predictors_trans)
+        _fitNN(self, predictors_trans, **kwargs)
     else:
         logger.error("Unknown algorithm supplied.")

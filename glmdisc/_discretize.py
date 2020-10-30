@@ -44,13 +44,17 @@ def _discretizeSEM(self, predictors_cont, predictors_qual):
     d_2bis = [isinstance(x, Counter) for x in self.best_link]
 
     if d_1 != sum(d_1bis) or d_1 != self.d_cont:
-        raise ValueError('Shape of ' + str(d_1)
-                         + ' for predictors_cont does not match provided link function '
-                         'of size ' + str(sum(d_1bis)) + ' and/or training set of size ' + str(self.d_cont) + '.')
+        msg = ('Shape of ' + str(d_1) +
+               ' for predictors_cont does not match provided link function '
+               'of size ' + str(sum(d_1bis)) + ' and/or training set of size ' + str(self.d_cont) + '.')
+        logger.error(msg)
+        raise ValueError(msg)
     if d_2 != sum(d_2bis) or d_2 != self.d_qual:
-        raise ValueError('Shape of ' + str(d_2)
-                         + ' for predictors_cont does not match provided link function '
-                         'of size ' + str(sum(d_2bis)) + ' and/or training set of size ' + str(self.d_qual) + '.')
+        msg = ('Shape of ' + str(d_2) +
+               ' for predictors_cont does not match provided link function '
+               'of size ' + str(sum(d_2bis)) + ' and/or training set of size ' + str(self.d_qual) + '.')
+        logger.error(msg)
+        raise ValueError(msg)
 
     emap = np.zeros((n, d_1 + d_2))
 
@@ -72,7 +76,9 @@ def _discretizeSEM(self, predictors_cont, predictors_qual):
             emap[:, j] = np.argmax(t, axis=1)
 
         else:  # pragma: no cover
-            raise ValueError('Loophole: please open an issue at https://github.com/adimajo/glmdisc_python/issues')
+            msg = 'Loophole: please open an issue at https://github.com/adimajo/glmdisc_python/issues'
+            logger.error(msg)
+            raise ValueError(msg)
 
     return emap
 
@@ -100,17 +106,6 @@ def _discretizeNN(self, predictors_cont, predictors_qual):
             predictors_qual[:, j])).astype(int)
         predictors_qual_dummy.append(np.squeeze(np.asarray(
             self.one_hot_encoders_nn[j].transform(predictors_trans[:, j].reshape(-1, 1)).todense())))
-
-    if self.predictors_cont is not None:
-        if self.predictors_qual is not None:
-            list_predictors = list(self.predictors_cont[self.train, :].T) + predictors_qual_dummy
-        else:
-            list_predictors = list(self.predictors_cont[self.train, :].T)
-    else:
-        if self.predictors_qual is not None:
-            list_predictors = list(predictors_qual_dummy[self.train, :].T)
-        else:
-            logger.error("No training data provided.")
 
     proba = from_weights_to_proba_test(self.d_cont,
                                        self.d_qual,

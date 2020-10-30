@@ -10,9 +10,64 @@ from copy import deepcopy
 from glmdisc import _vectorized_multinouilli
 from collections import Counter
 from loguru import logger
+from math import log
 
 
-def _fitSEM(self, edisc, predictors_trans, continu_complete_case):
+def _calculate_criterion(self, emap, model_emap, current_encoder_emap):
+    """
+    Calculate current value of optimised criterion
+
+    Parameters
+    ----------
+    emap: array of current discretization / grouping of size d_cont + d_qual
+    model_emap: current logistic regression
+    current_encoder_emap: one hot encoder of emap
+
+    Returns
+    -------
+    criterion value
+    """
+    if self.criterion in ['aic', 'bic']:
+        loglik = -sk.metrics.log_loss(self.labels[self.train],
+                                      model_emap.predict_proba(
+                                          X=current_encoder_emap.transform(
+                                              emap[self.train, :].astype(str))),
+                                      normalize=False)
+        if self.validation:
+            performance = loglik
+            logger.info("Current likelihood on validation set: " + str(performance))
+
+    if self.criterion == 'aic' and not self.validation:
+        performance = -(2 * model_emap.coef_.shape[1] - 2 * loglik)
+        logger.info("Current AIC on train set: " + str(- performance))
+
+    if self.criterion == 'bic' and not self.validation:
+        performance = -(log(self.n) * model_emap.coef_.shape[1] - 2 * loglik)
+        logger.info("Current BIC on train set: " + str(- performance))
+
+    if self.criterion == 'gini' and self.validation:
+        performance = sk.metrics.roc_auc_score(
+            self.labels[self.validate], model_emap.predict_proba(
+                X=current_encoder_emap.transform(
+                    emap[self.validate, :].astype(str)))[:, 1:])
+        logger.info("Current Gini on validation set: " + str(performance))
+
+    if self.criterion == 'gini' and not self.validation:
+        performance = sk.metrics.roc_auc_score(
+            self.labels[self.train], model_emap.predict_proba(
+                X=current_encoder_emap.transform(
+                    emap[self.train, :].astype(str)))[:, 1:])
+        logger.info("Current Gini on training set: " + str(performance))
+
+    if performance is None:
+        msg = "Bug encountered, please open an issue at https://github.com/adimajo/glmdisc_python."
+        logger.error(msg)
+        raise ValueError(msg)
+
+    return performance
+
+
+def _fitSEM(self, edisc, predictors_trans, continu_complete_case, **kwargs):
     """
     fit function for SEM algorithm
 
@@ -20,6 +75,8 @@ def _fitSEM(self, edisc, predictors_trans, continu_complete_case):
     :param numpy.ndarray edisc: initial random assignment to factor levels
     :param numpy.ndarray predictors_trans: transformation of categorical features to integers
     """
+    if kwargs != {}:
+        logger.warning("**kwargs not used for algorithm = 'SEM'")
     # Initialization for following the performance of the discretization
     current_best = 0
 
@@ -70,9 +127,10 @@ def _fitSEM(self, edisc, predictors_trans, continu_complete_case):
             y=self.labels[self.train])
 
         # Criterion calculation
-        self.criterion_iter.append(self._calculate_criterion(emap,
-                                                             model_emap,
-                                                             current_encoder_emap))
+        self.criterion_iter.append(_calculate_criterion(self,
+                                                        emap,
+                                                        model_emap,
+                                                        current_encoder_emap))
 
         # Mise à jour éventuelle du meilleur critère
         if self.criterion_iter[i] >= self.criterion_iter[current_best]:

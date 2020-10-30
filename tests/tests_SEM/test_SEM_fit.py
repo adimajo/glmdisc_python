@@ -7,6 +7,7 @@ import sklearn as sk
 import math
 import random
 import glmdisc
+import glmdisc._fitSEM
 
 
 def test_args_fit():
@@ -123,37 +124,35 @@ def test_calculate_criterion():
     model_emap.fit(X=current_encoder_emap.transform(emap.astype(str)),
                    y=y)
 
-    modele_bic = model._calculate_criterion(emap, model_emap, current_encoder_emap)
+    modele_bic = glmdisc._fitSEM._calculate_criterion(model, emap, model_emap, current_encoder_emap)
     assert modele_bic < 0
 
     model = glmdisc.Glmdisc(criterion="aic")
     random.seed(1)
     np.random.seed(1)
     model.fit(predictors_cont=x, predictors_qual=None, labels=y, iter=11)
-    assert math.isclose(model._calculate_criterion(emap, model_emap, current_encoder_emap), modele_bic)
+    assert math.isclose(glmdisc._fitSEM._calculate_criterion(model, emap, model_emap, current_encoder_emap), modele_bic)
 
     model = glmdisc.Glmdisc(validation=False)
     random.seed(1)
     np.random.seed(1)
     model.fit(predictors_cont=x, predictors_qual=None, labels=y, iter=11)
-    modele_bic = model._calculate_criterion(emap, model_emap, current_encoder_emap)
+    modele_bic = glmdisc._fitSEM._calculate_criterion(model, emap, model_emap, current_encoder_emap)
 
     model = glmdisc.Glmdisc(criterion="aic", validation=False)
     random.seed(1)
     np.random.seed(1)
     model.fit(predictors_cont=x, predictors_qual=None, labels=y, iter=11)
-    assert math.isclose(model._calculate_criterion(emap,
-                                                   model_emap,
-                                                   current_encoder_emap), modele_bic + (
-        math.log(model.n) - 2) * model_emap.coef_.shape[1])
+    assert math.isclose(glmdisc._fitSEM._calculate_criterion(model, emap, model_emap, current_encoder_emap),
+                        modele_bic + (math.log(model.n) - 2) * model_emap.coef_.shape[1])
 
     model = glmdisc.Glmdisc(criterion="gini")
     model.fit(predictors_cont=x, predictors_qual=None, labels=y, iter=11)
-    assert 0 <= model._calculate_criterion(emap, model_emap, current_encoder_emap) <= 1
+    assert 0 <= glmdisc._fitSEM._calculate_criterion(model, emap, model_emap, current_encoder_emap) <= 1
 
     model = glmdisc.Glmdisc(criterion="gini", validation=False)
     model.fit(predictors_cont=x, predictors_qual=None, labels=y, iter=11)
-    assert 0 <= model._calculate_criterion(emap, model_emap, current_encoder_emap) <= 1
+    assert 0 <= glmdisc._fitSEM._calculate_criterion(model, emap, model_emap, current_encoder_emap) <= 1
 
 
 def test_nan():

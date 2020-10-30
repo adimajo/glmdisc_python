@@ -278,7 +278,7 @@ class Glmdisc:
     from ._discreteData import discrete_data
     from ._discretize import discretize
     from ._discretizeDummy import discretize_dummy
-    from ._fit import fit, _calculate_shape, _calculate_criterion, _init_disc, _split
+    from ._fit import fit, _calculate_shape, _init_disc, _split
     from ._plot import plot
     from ._predict import predict
     from ._generateData import generate_data

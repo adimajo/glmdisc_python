@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 import pandas as pd
-import scipy
 import random
 import glmdisc
 
@@ -16,7 +15,7 @@ def test_discrete_data_cont():
     np.random.seed(1)
     model.fit(predictors_cont=x, predictors_qual=None, labels=y, iter=50)
     result = model.discrete_data()
-    assert isinstance(result, scipy.sparse.csr.csr_matrix)
+    assert isinstance(result, np.ndarray)
     assert result.shape[0] == 500
 
 
@@ -35,7 +34,7 @@ def test_discrete_data_qual():
     np.random.seed(1)
     model.fit(predictors_cont=None, predictors_qual=xd, labels=y, iter=50)
     result = model.discrete_data()
-    assert isinstance(result, scipy.sparse.csr.csr_matrix)
+    assert isinstance(result, np.ndarray)
     assert result.shape[0] == 500
 
 
@@ -48,7 +47,7 @@ def test_discrete_data_val_cont():
     np.random.seed(1)
     model.fit(predictors_cont=x, predictors_qual=None, labels=y, iter=80)
     result = model.discrete_data()
-    assert isinstance(result, scipy.sparse.csr.csr_matrix)
+    assert isinstance(result, np.ndarray)
     assert result.shape[0] == 400
 
 
@@ -67,7 +66,7 @@ def test_discrete_data_val_qual():
     np.random.seed(1)
     model.fit(predictors_cont=None, predictors_qual=xd, labels=y, iter=50)
     result = model.discrete_data()
-    assert isinstance(result, scipy.sparse.csr.csr_matrix)
+    assert isinstance(result, np.ndarray)
     assert result.shape[0] == 200
 
 
@@ -80,7 +79,7 @@ def test_discrete_data_test_cont():
     np.random.seed(1)
     model.fit(predictors_cont=x, predictors_qual=None, labels=y, iter=50)
     result = model.discrete_data()
-    assert isinstance(result, scipy.sparse.csr.csr_matrix)
+    assert isinstance(result, np.ndarray)
     assert result.shape[0] == 200
 
 
@@ -99,7 +98,7 @@ def test_discrete_data_test_qual():
     np.random.seed(1)
     model.fit(predictors_cont=None, predictors_qual=xd, labels=y, iter=50)
     result = model.discrete_data()
-    assert isinstance(result, scipy.sparse.csr.csr_matrix)
+    assert isinstance(result, np.ndarray)
     assert result.shape[0] == 200
 
 
@@ -118,7 +117,7 @@ def test_discrete_data_both():
     np.random.seed(1)
     model.fit(predictors_cont=x, predictors_qual=xd, labels=y, iter=50)
     result = model.discrete_data()
-    assert isinstance(result, scipy.sparse.csr.csr_matrix)
+    assert isinstance(result, np.ndarray)
     assert result.shape[0] == 500
 
 
@@ -137,7 +136,7 @@ def test_discrete_data_val_both():
     np.random.seed(1)
     model.fit(predictors_cont=x, predictors_qual=xd, labels=y, iter=100)
     result = model.discrete_data()
-    assert isinstance(result, scipy.sparse.csr.csr_matrix)
+    assert isinstance(result, np.ndarray)
     assert result.shape[0] == 400
 
 
@@ -156,5 +155,5 @@ def test_discrete_data_test_both():
     np.random.seed(1)
     model.fit(predictors_cont=x, predictors_qual=xd, labels=y, iter=50)
     result = model.discrete_data()
-    assert isinstance(result, scipy.sparse.csr.csr_matrix)
+    assert isinstance(result, np.ndarray)
     assert result.shape[0] == 200
