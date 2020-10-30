@@ -19,6 +19,21 @@ from loguru import logger
 import matplotlib.pyplot as plt
 
 
+def _plot_cont_soft_quant(self):
+    for j in range(self.neural_net["d_cont"]):
+        plt.xlim((np.nanmin(self.neural_net["predictors_cont"][:, j]),
+                  (np.nanmax(self.neural_net["predictors_cont"][:, j]))))
+        plt.ylim((0, 1))
+        self.ax[j].clear()
+        for k in range(self.best_outputs[j][0].shape[1]):
+            self.ax[j].plot(np.sort(self.neural_net["predictors_cont"][:, j]),
+                            self.best_outputs[j][0][np.argsort(
+                                self.neural_net["predictors_cont"][:, j]), k],
+                            color=['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w'][(k + 2) % 8])
+        self.fig.canvas.draw()
+        plt.pause(0.05)
+
+
 class LossHistory(Callback):
     """
     Custom Callback to evaluate current quantization scheme as a logistic regression
@@ -77,11 +92,8 @@ class LossHistory(Callback):
         ----------
         batch
         logs
-        plot: whether to plot the activation functions
         """
         burn_in = 5
-        if logs is None:
-            logs = {}
         self.losses.append(_evaluate_disc("train", self.d_cont, self.d_qual, self.neural_net)[0])
         if len(self.losses) > burn_in and self.losses[-1] < self.best_criterion:
             self.best_weights = []
@@ -101,21 +113,10 @@ class LossHistory(Callback):
                         [self.neural_net["predictors_qual_dummy"][j]]))
 
             if self.plot:
-                for j in range(self.neural_net["d_cont"]):
-                    plt.xlim((np.nanmin(self.neural_net["predictors_cont"][:, j]),
-                              (np.nanmax(self.neural_net["predictors_cont"][:, j]))))
-                    plt.ylim((0, 1))
-                    self.ax[j].clear()
-                    for k in range(self.best_outputs[j][0].shape[1]):
-                        self.ax[j].plot(np.sort(self.neural_net["predictors_cont"][:, j]),
-                                        self.best_outputs[j][0][np.argsort(
-                                            self.neural_net["predictors_cont"][:, j]), k],
-                                        color=['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w'][(k + 2) % 8])
-                    self.fig.canvas.draw()
-                    plt.pause(0.05)
+                _plot_cont_soft_quant(self)
 
 
-def initialize_neural_net(self, predictors_qual_dummy):
+def _initialize_neural_net(self, predictors_qual_dummy):
     """
     Constructs the neural network
 
@@ -183,7 +184,7 @@ def initialize_neural_net(self, predictors_qual_dummy):
     }
 
 
-def from_layers_to_proba_training(d_cont, d_qual, neural_net):
+def _from_layers_to_proba_training(d_cont, d_qual, neural_net):
     """
     Calculates the probability of each level for each feature from the provided neural net for the training set.
 
@@ -212,7 +213,7 @@ def from_layers_to_proba_training(d_cont, d_qual, neural_net):
     return results
 
 
-def from_weights_to_proba_test(d_cont, d_qual, m_cont, history, x_quant_test, x_qual_test, n_test):
+def _from_weights_to_proba_test(d_cont, d_qual, m_cont, history, x_quant_test, x_qual_test, n_test):
     """
     Calculates the probability of each level for each feature from the provided neural net for a test set.
 
@@ -248,41 +249,20 @@ def from_weights_to_proba_test(d_cont, d_qual, m_cont, history, x_quant_test, x_
 
 def _evaluate_disc(type, d_cont, d_qual, neural_net):
     if type == "train":
-        proba = from_layers_to_proba_training(d_cont, d_qual, neural_net)
-    else:
-        msg = "Test evaluation for NN not implemented."
-        logger.error(msg)
-        raise NotImplementedError(msg)
-        # proba = from_weights_to_proba_test(d1, d2, misc[0], misc[1], misc[2], misc[3], misc[4], misc[5])
-
-    results = [None] * (d_cont + d_qual)
-
-    if type == "train":
+        proba = _from_layers_to_proba_training(d_cont, d_qual, neural_net)
+        results = [None] * (d_cont + d_qual)
         X_transformed = np.ones((neural_net["n"], 1))
-    else:
-        msg = "Test evaluation for NN not implemented"
-        logger.error(msg)
-        raise NotImplementedError(msg)
-        # X_transformed = np.ones((n_test, 1))
-
-    for j in range(d_cont + d_qual):
-        if type == "train":
+        for j in range(d_cont + d_qual):
             results[j] = np.argmax(proba[j][0], axis=1)
-        else:
-            msg = "Test evaluation for NN not implemented"
-            logger.error(msg)
-            raise NotImplementedError(msg)
-            # results[j] = np.argmax(proba[j], axis=1)
-        X_transformed = np.concatenate(
-            (X_transformed,
-             sk.preprocessing.OneHotEncoder(categories='auto', sparse=False, handle_unknown="ignore").fit_transform(
-                 X=results[j].reshape(-1, 1))),
-            axis=1)
+            X_transformed = np.concatenate(
+                (X_transformed,
+                 sk.preprocessing.OneHotEncoder(categories='auto', sparse=False, handle_unknown="ignore").fit_transform(
+                     X=results[j].reshape(-1, 1))),
+                axis=1)
 
-    proposed_logistic_regression = sk.linear_model.LogisticRegression(
-        fit_intercept=False, solver="lbfgs", C=1e20, tol=1e-8, max_iter=50)
+        proposed_logistic_regression = sk.linear_model.LogisticRegression(
+            fit_intercept=False, solver="lbfgs", C=1e20, tol=1e-8, max_iter=50)
 
-    if type == "train":
         proposed_logistic_regression.fit(X=X_transformed, y=neural_net["labels"][neural_net["train"]].reshape(
             (neural_net["train"].shape[0],)))
         if neural_net["criterion"] in ['aic', 'bic']:
@@ -313,27 +293,11 @@ def _evaluate_disc(type, d_cont, d_qual, neural_net):
         msg = "Test evaluation for NN not implemented"
         logger.error(msg)
         raise NotImplementedError(msg)
-        # proposed_logistic_regression.fit(X=X_transformed, y=y_test.reshape((n_test,)))
-        # performance = 2 * sk.metrics.roc_auc_score(y_test,
-        #                                            proposed_logistic_regression.predict_proba(
-        #                                               X_transformed)[:, 1]) - 1
-        # predicted = proposed_logistic_regression.predict_proba(X_transformed)[:, 1]
 
     return performance, predicted
 
 
-def _fit_nn(self, predictors_trans, **kwargs):
-
-    if 'plot' in kwargs:
-        if not isinstance(kwargs['plot'], bool):
-            msg = "plot parameter provided but not boolean"
-            logger.error(msg)
-            raise ValueError(msg)
-        else:
-            self.plot = kwargs['plot']
-    else:
-        self.plot = False
-
+def _prepare_inputs(self, predictors_trans):
     if self.predictors_qual is not None:
         self.one_hot_encoders_nn = []
         predictors_qual_dummy = []
@@ -344,47 +308,6 @@ def _fit_nn(self, predictors_trans, **kwargs):
             self.one_hot_encoders_nn.append(one_hot_encoder)
     else:
         predictors_qual_dummy = None
-
-    initialize_neural_net(self, predictors_qual_dummy)
-
-    full_hidden = concatenate(
-        list(
-            chain.from_iterable(
-                [self.neural_net["liste_layers_quant_inputs"],
-                 self.neural_net["liste_layers_qual_inputs"]])))
-    output = Dense(1, activation='sigmoid')(full_hidden)
-    self.model_nn = Model(
-        inputs=list(chain.from_iterable([self.neural_net["liste_inputs_quant"],
-                                         self.neural_net["liste_inputs_qual"]])),
-        outputs=[output])
-
-    if "optimizer" in kwargs:
-        optim = kwargs['optimizer']
-    else:
-        optim = tensorflow.keras.optimizers.RMSprop(lr=0.5, rho=0.9, epsilon=None, decay=0.0)
-
-    self.model_nn.compile(loss='binary_crossentropy', optimizer=optim, metrics=['accuracy'])
-
-    history = LossHistory(d_cont=self.d_cont, d_qual=self.d_qual, neural_net=self.neural_net)
-
-    if "callbacks" in kwargs:
-        other_callbacks = kwargs['callbacks']
-    else:
-        other_callbacks = None
-
-    self.callbacks = [
-        ReduceLROnPlateau(
-            monitor='loss',
-            factor=0.5,
-            patience=10,
-            verbose=0,
-            mode='auto',
-            min_delta=0.0001,
-            cooldown=0,
-            min_lr=0),
-        history,
-        other_callbacks
-    ]
 
     if self.predictors_cont is not None:
         if self.predictors_qual is not None:
@@ -399,6 +322,24 @@ def _fit_nn(self, predictors_trans, **kwargs):
             logger.error(msg)
             raise ValueError(msg)
 
+    return predictors_qual_dummy, list_predictors
+
+
+def _compile_and_fit_neural_net(self, optim, list_predictors):
+
+    full_hidden = concatenate(
+        list(
+            chain.from_iterable(
+                [self.neural_net["liste_layers_quant_inputs"],
+                 self.neural_net["liste_layers_qual_inputs"]])))
+    output = Dense(1, activation='sigmoid')(full_hidden)
+    self.model_nn = Model(
+        inputs=list(chain.from_iterable([self.neural_net["liste_inputs_quant"],
+                                         self.neural_net["liste_inputs_qual"]])),
+        outputs=[output])
+
+    self.model_nn.compile(loss='binary_crossentropy', optimizer=optim, metrics=['accuracy'])
+
     self.model_nn.fit(
         list_predictors,
         self.labels[self.train],
@@ -407,3 +348,47 @@ def _fit_nn(self, predictors_trans, **kwargs):
         verbose=1,
         callbacks=self.callbacks
     )
+
+
+def _parse_kwargs(self, **kwargs):
+    if 'plot' in kwargs:
+        if not isinstance(kwargs['plot'], bool):
+            msg = "plot parameter provided but not boolean"
+            logger.error(msg)
+            raise ValueError(msg)
+        else:
+            self.plot = kwargs['plot']
+    else:
+        self.plot = False
+
+    if "optimizer" in kwargs:
+        optim = kwargs['optimizer']
+    else:
+        optim = tensorflow.keras.optimizers.RMSprop(lr=0.5, rho=0.9, epsilon=None, decay=0.0)
+
+    self.callbacks = [
+        ReduceLROnPlateau(
+            monitor='loss',
+            factor=0.5,
+            patience=10,
+            verbose=0,
+            mode='auto',
+            min_delta=0.0001,
+            cooldown=0,
+            min_lr=0),
+        LossHistory(d_cont=self.d_cont, d_qual=self.d_qual, neural_net=self.neural_net)]
+
+    if "callbacks" in kwargs:
+        self.callbacks.append(kwargs['callbacks'])
+
+    return optim
+
+
+def _fit_nn(self, predictors_trans, **kwargs):
+    predictors_qual_dummy, list_predictors = _prepare_inputs(self=self, predictors_trans=predictors_trans)
+
+    _initialize_neural_net(self=self, predictors_qual_dummy=predictors_qual_dummy)
+
+    optim = _parse_kwargs(self=self, **kwargs)
+
+    _compile_and_fit_neural_net(self=self, optim=optim, list_predictors=list_predictors)

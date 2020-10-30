@@ -173,8 +173,8 @@ def calc_pvalue(aucs, sigma):
     Returns:
        log10(pvalue)
     """
-    l = np.array([[1, -1]])
-    z = np.abs(np.diff(aucs)) / np.sqrt(np.dot(np.dot(l, sigma), l.T))
+    x = np.array([[1, -1]])
+    z = np.abs(np.diff(aucs)) / np.sqrt(np.dot(np.dot(x, sigma), x.T))
     return np.log10(2) + scipy.stats.norm.logsf(z, loc=0, scale=1) / np.log(10)
 
 

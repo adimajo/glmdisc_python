@@ -24,9 +24,9 @@ def discretize_dummy(self, predictors_cont, predictors_qual):
     """
     if self.algorithm == "SEM":
         emap_dummy = self.best_encoder_emap.transform(
-        self.discretize(
-            predictors_cont,
-            predictors_qual).astype(int).astype(str))
+            self.discretize(
+                predictors_cont,
+                predictors_qual).astype(int).astype(str))
     else:
         results = self.discretize(predictors_cont, predictors_qual)
         emap_dummy = np.ones((predictors_cont.shape[0], 1))

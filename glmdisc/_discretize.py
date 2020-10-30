@@ -8,23 +8,10 @@ from scipy import stats
 import numpy as np
 from loguru import logger
 import glmdisc
-from glmdisc._fitNN import from_weights_to_proba_test
+from glmdisc._fitNN import _from_weights_to_proba_test
 
 
-def _discretize_sem(self, predictors_cont, predictors_qual):
-    """
-    Discretizes new continuous and categorical features using a previously
-    fitted glmdisc object.
-
-    :param numpy.array predictors_cont:
-        Continuous predictors to be discretized in a numpy
-        "numeric" array. Can be provided either here or with
-        the __init__ method.
-    :param numpy.array predictors_qual:
-        Categorical features which levels are to be merged
-        (also in a numpy "string" array). Can be provided
-        either here or with the __init__ method.
-    """
+def _check_args_discretize_sem(self, predictors_cont, predictors_qual):
     if predictors_cont is not None:
         n = predictors_cont.shape[0]
     else:
@@ -55,6 +42,25 @@ def _discretize_sem(self, predictors_cont, predictors_qual):
                'of size ' + str(sum(d_2bis)) + ' and/or training set of size ' + str(self.d_qual) + '.')
         logger.error(msg)
         raise ValueError(msg)
+
+    return n, d_1, d_2, d_1bis, d_2bis
+
+
+def _discretize_sem(self, predictors_cont, predictors_qual):
+    """
+    Discretizes new continuous and categorical features using a previously
+    fitted glmdisc object.
+
+    :param numpy.array predictors_cont:
+        Continuous predictors to be discretized in a numpy
+        "numeric" array. Can be provided either here or with
+        the __init__ method.
+    :param numpy.array predictors_qual:
+        Categorical features which levels are to be merged
+        (also in a numpy "string" array). Can be provided
+        either here or with the __init__ method.
+    """
+    n, d_1, d_2, d_1bis, d_2bis = _check_args_discretize_sem(self, predictors_cont, predictors_qual)
 
     emap = np.zeros((n, d_1 + d_2))
 
@@ -107,13 +113,13 @@ def _discretize_nn(self, predictors_cont, predictors_qual):
         predictors_qual_dummy.append(np.squeeze(np.asarray(
             self.one_hot_encoders_nn[j].transform(predictors_trans[:, j].reshape(-1, 1)).todense())))
 
-    proba = from_weights_to_proba_test(self.d_cont,
-                                       self.d_qual,
-                                       [self.m_start] * self.d_cont,
-                                       self.callbacks[1],
-                                       predictors_cont,
-                                       predictors_trans,
-                                       predictors_cont.shape[0])
+    proba = _from_weights_to_proba_test(self.d_cont,
+                                        self.d_qual,
+                                        [self.m_start] * self.d_cont,
+                                        self.callbacks[1],
+                                        predictors_cont,
+                                        predictors_trans,
+                                        predictors_cont.shape[0])
 
     results = [None] * (self.d_cont + self.d_qual)
 

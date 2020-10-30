@@ -265,13 +265,15 @@ class Glmdisc:
                         sk.utils.validation.check_is_fitted(link)
             except sk.exceptions.NotFittedError as e:
                 raise NotFittedError(str(e) + " If you did call fit, try increasing iter: "
-                                              "it means it did not find a better solution than the random initialization.")
+                                              "it means it did not find a better solution than "
+                                              "the random initialization.")
         else:
             try:
                 self.neural_net
             except KeyError as e:
                 raise NotFittedError(str(e) + " If you did call fit, try increasing iter: "
-                                              "it means it did not find a better solution than the random initialization.")
+                                              "it means it did not find a better solution than "
+                                              "the random initialization.")
 
     # Imported methods
     from ._bestFormula import best_formula

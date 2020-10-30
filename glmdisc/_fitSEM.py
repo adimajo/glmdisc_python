@@ -67,16 +67,7 @@ def _calculate_criterion(self, emap, model_emap, current_encoder_emap):
     return performance
 
 
-def _fit_sem(self, edisc, predictors_trans, continu_complete_case, **kwargs):
-    """
-    fit function for SEM algorithm
-
-    :param self: Glmdisc class instance
-    :param numpy.ndarray edisc: initial random assignment to factor levels
-    :param numpy.ndarray predictors_trans: transformation of categorical features to integers
-    """
-    if kwargs != {}:
-        logger.warning("**kwargs not used for algorithm = 'SEM'")
+def _init_fit_sem(self, edisc):
     # Initialization for following the performance of the discretization
     current_best = 0
 
@@ -109,6 +100,24 @@ def _fit_sem(self, edisc, predictors_trans, continu_complete_case, **kwargs):
                                                      max_iter=25,
                                                      tol=0.001,
                                                      warm_start=False)
+
+    return current_best, emap, model_edisc, model_emap, current_encoder_edisc, current_encoder_emap, link, m
+
+
+def _fit_sem(self, edisc, predictors_trans, continu_complete_case, **kwargs):
+    """
+    fit function for SEM algorithm
+
+    :param self: Glmdisc class instance
+    :param numpy.ndarray edisc: initial random assignment to factor levels
+    :param numpy.ndarray predictors_trans: transformation of categorical features to integers
+    """
+    if kwargs != {}:
+        logger.warning("**kwargs not used for algorithm = 'SEM'")
+
+    current_best, emap, model_edisc, model_emap, current_encoder_edisc, current_encoder_emap, link, m = _init_fit_sem(
+        self,
+        edisc)
 
     # MCMC iterations
     for i in range(self.iter):
