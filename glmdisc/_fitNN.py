@@ -358,7 +358,7 @@ def _fitNN(self, predictors_trans, **kwargs):
                                          self.neural_net["liste_inputs_qual"]])),
         outputs=[output])
 
-    if "optimizer" is kwargs:
+    if "optimizer" in kwargs:
         optim = kwargs['optimizer']
     else:
         optim = tensorflow.keras.optimizers.RMSprop(lr=0.5, rho=0.9, epsilon=None, decay=0.0)
@@ -367,7 +367,7 @@ def _fitNN(self, predictors_trans, **kwargs):
 
     history = LossHistory(d_cont=self.d_cont, d_qual=self.d_qual, neural_net=self.neural_net)
 
-    if "callbacks" is kwargs:
+    if "callbacks" in kwargs:
         other_callbacks = kwargs['callbacks']
     else:
         other_callbacks = None
