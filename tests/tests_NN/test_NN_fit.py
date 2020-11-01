@@ -7,6 +7,25 @@ import sklearn as sk
 import math
 import random
 import glmdisc
+import tensorflow
+from tensorflow.keras.optimizers import Adagrad
+from tensorflow.keras.callbacks import EarlyStopping
+
+
+def test_kwargs():
+    n = 100
+    d = 2
+    x, y, theta = glmdisc.Glmdisc.generate_data(n, d)
+    model = glmdisc.Glmdisc(algorithm="NN", validation=False, test=False)
+
+    model.fit(predictors_cont=x,
+              predictors_qual=None,
+              labels=y,
+              plot=True,
+              optim=Adagrad(),
+              callbacks=EarlyStopping())
+    assert isinstance(model.model_nn.optimizer, tensorflow.python.keras.optimizer_v2.adam.Adam)
+    assert isinstance(model.callbacks[-1], tensorflow.python.keras.callbacks.EarlyStopping)
 
 
 def test_args_fit():
@@ -83,8 +102,8 @@ def test_calculate_shape_categorical():
     n = 100
     d = 2
     x, y, theta = glmdisc.Glmdisc.generate_data(n, d)
-    model = glmdisc.Glmdisc(algorithm="NN")
-    cuts = ([0, 0.333, 0.666, 1])
+    model = glmdisc.Glmdisc(algorithm="NN", m_start=3)
+    cuts = ([0, 0.16, 0.333, 0.5, 0.666, 0.85, 1])
     xd = np.ndarray.copy(x)
     for i in range(d):
         xd[:, i] = pd.cut(x[:, i], bins=cuts, labels=[0, 1, 2])
@@ -94,9 +113,6 @@ def test_calculate_shape_categorical():
     assert model.d_cont == 0
     assert model.d_qual == d
     assert continu_complete_case is None
-
-    model = glmdisc.Glmdisc(algorithm="NN", m_start=2)
-    model.fit(predictors_cont=None, predictors_qual=xd, labels=y, iter=11)
 
 
 def test_calculate_criterion():

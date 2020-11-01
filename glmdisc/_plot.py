@@ -85,7 +85,7 @@ def plot(self,
     Plots the stepwise function associating the continuous features to their
     discretization, the groupings made and the interactions.
 
-    .. todo:: explain this function better + clean + test args
+    .. todo:: explain this function better
 
     :param predictors_cont_number:
         Which continuous variable(s) should be plotted

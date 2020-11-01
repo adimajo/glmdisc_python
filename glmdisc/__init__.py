@@ -270,7 +270,7 @@ class Glmdisc:
         else:
             try:
                 self.neural_net
-            except KeyError as e:
+            except AttributeError as e:
                 raise NotFittedError(str(e) + " If you did call fit, try increasing iter: "
                                               "it means it did not find a better solution than "
                                               "the random initialization.")

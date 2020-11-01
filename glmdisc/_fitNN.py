@@ -50,8 +50,8 @@ class LossHistory(Callback):
         neural_net: dictionary of neural net structure
         """
         super().__init__()
-        self.plot = neural_net['plot']
-        if self.plot:
+        self.plot_fit = neural_net['plot_fit']
+        if self.plot_fit:
             self.fig, self.ax = plt.subplots(neural_net["d_cont"])
             self.fig.show()
             self.fig.canvas.draw()
@@ -73,8 +73,6 @@ class LossHistory(Callback):
         logs
 
         """
-        if logs is None:
-            logs = {}
         self.losses = []
         self.best_criterion = float("inf")
         self.best_outputs = []
@@ -112,7 +110,7 @@ class LossHistory(Callback):
                                               [self.neural_net["liste_layers_qual"][j].output])(
                         [self.neural_net["predictors_qual_dummy"][j]]))
 
-            if self.plot:
+            if self.plot_fit:
                 _plot_cont_soft_quant(self)
 
 
@@ -164,7 +162,6 @@ def _initialize_neural_net(self, predictors_qual_dummy):
             liste_inputs_qual[i])
 
     self.neural_net = {
-        "plot": self.plot,
         "n": self.n,
         "d_cont": self.d_cont,
         "d_qual": self.d_qual,
@@ -248,10 +245,10 @@ def _from_weights_to_proba_test(d_cont, d_qual, m_cont, history, x_quant_test, x
 
 
 def _evaluate_disc(type, d_cont, d_qual, neural_net):
-    if type == "train":
+    if type == "train" and not neural_net['validation']:
         proba = _from_layers_to_proba_training(d_cont, d_qual, neural_net)
         results = [None] * (d_cont + d_qual)
-        X_transformed = np.ones((neural_net["n"], 1))
+        X_transformed = np.ones((len(neural_net['train']), 1))
         for j in range(d_cont + d_qual):
             results[j] = np.argmax(proba[j][0], axis=1)
             X_transformed = np.concatenate(
@@ -311,12 +308,13 @@ def _prepare_inputs(self, predictors_trans):
 
     if self.predictors_cont is not None:
         if self.predictors_qual is not None:
-            list_predictors = list(self.predictors_cont[self.train, :].T) + predictors_qual_dummy
+            list_predictors = list(self.predictors_cont[self.train, :].T) + \
+                              [x[self.train, :] for x in predictors_qual_dummy]
         else:
             list_predictors = list(self.predictors_cont[self.train, :].T)
     else:
         if self.predictors_qual is not None:
-            list_predictors = list(predictors_qual_dummy[self.train, :].T)
+            list_predictors = [x[self.train, :] for x in predictors_qual_dummy]
         else:
             msg = "No training data provided."
             logger.error(msg)
@@ -357,9 +355,9 @@ def _parse_kwargs(self, **kwargs):
             logger.error(msg)
             raise ValueError(msg)
         else:
-            self.plot = kwargs['plot']
+            self.neural_net['plot_fit'] = kwargs['plot']
     else:
-        self.plot = False
+        self.neural_net['plot_fit'] = False
 
     if "optimizer" in kwargs:
         optim = kwargs['optimizer']
@@ -376,7 +374,9 @@ def _parse_kwargs(self, **kwargs):
             min_delta=0.0001,
             cooldown=0,
             min_lr=0),
-        LossHistory(d_cont=self.d_cont, d_qual=self.d_qual, neural_net=self.neural_net)]
+        LossHistory(d_cont=self.d_cont,
+                    d_qual=self.d_qual,
+                    neural_net=self.neural_net)]
 
     if "callbacks" in kwargs:
         self.callbacks.append(kwargs['callbacks'])

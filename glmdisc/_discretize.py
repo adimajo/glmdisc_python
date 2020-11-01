@@ -11,6 +11,36 @@ import glmdisc
 from glmdisc._fitNN import _from_weights_to_proba_test
 
 
+def _check_args_discretize_nn(self, predictors_cont, predictors_qual):
+    if predictors_cont is not None:
+        n_test = predictors_cont.shape[0]
+    else:
+        n_test = predictors_qual.shape[0]
+
+    if predictors_cont is not None:
+        d_1 = predictors_cont.shape[1]
+    else:
+        d_1 = 0
+
+    if predictors_qual is not None:
+        d_2 = predictors_qual.shape[1]
+    else:
+        d_2 = 0
+
+    if d_1 != self.d_cont:
+        msg = ('Shape of ' + str(d_1) +
+               ' for predictors_cont does not match training set of size ' + str(self.d_cont) + '.')
+        logger.error(msg)
+        raise ValueError(msg)
+    if d_2 != self.d_qual:
+        msg = ('Shape of ' + str(d_2) +
+               ' for predictors_cont does not match training set of size ' + str(self.d_qual) + '.')
+        logger.error(msg)
+        raise ValueError(msg)
+
+    return n_test
+
+
 def _check_args_discretize_sem(self, predictors_cont, predictors_qual):
     if predictors_cont is not None:
         n = predictors_cont.shape[0]
@@ -113,13 +143,17 @@ def _discretize_nn(self, predictors_cont, predictors_qual):
         predictors_qual_dummy.append(np.squeeze(np.asarray(
             self.one_hot_encoders_nn[j].transform(predictors_trans[:, j].reshape(-1, 1)).todense())))
 
+    n_test = _check_args_discretize_nn(self,
+                                       predictors_cont,
+                                       predictors_qual)
+
     proba = _from_weights_to_proba_test(self.d_cont,
                                         self.d_qual,
                                         [self.m_start] * self.d_cont,
                                         self.callbacks[1],
                                         predictors_cont,
                                         predictors_trans,
-                                        predictors_cont.shape[0])
+                                        n_test)
 
     results = [None] * (self.d_cont + self.d_qual)
 

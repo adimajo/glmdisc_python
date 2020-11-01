@@ -29,7 +29,7 @@ def discretize_dummy(self, predictors_cont, predictors_qual):
                 predictors_qual).astype(int).astype(str))
     else:
         results = self.discretize(predictors_cont, predictors_qual)
-        emap_dummy = np.ones((predictors_cont.shape[0], 1))
+        emap_dummy = np.ones((results.shape[0], 1))
         for j in range(self.d_cont + self.d_qual):
             results_dummy = sk.preprocessing.OneHotEncoder(categories='auto',
                                                            sparse=False,

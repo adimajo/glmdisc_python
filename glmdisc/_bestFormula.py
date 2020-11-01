@@ -18,8 +18,11 @@ def _best_formula_cont_sem(self, emap_best):
             best_disc[j].append(
                 np.nanmin(self.predictors_cont[emap_best[:, j] == k, j]))
         del best_disc[j][np.where(best_disc[j] == np.nanmin(best_disc[j]))[0][0]]
-        logger.info("Cut-points found for continuous variable " + str(j) + " are "
-                    + str(best_disc[j]))
+        if len(best_disc[j]) < 1:
+            logger.info("No cut-points found for continuous variable " + str(j) + ".")
+        else:
+            logger.info("Cut-points found for continuous variable " + str(j) + " are "
+                        + str(best_disc[j]))
 
     return best_disc
 
@@ -50,7 +53,7 @@ def _best_formula_cont_nn(self, emap_best):
 
         logger.info("Cut-points found for continuous variable " + str(j) + " are "
                     + str(best_disc[j]))
-        return best_disc
+    return best_disc
 
 
 def best_formula(self):
@@ -65,11 +68,14 @@ def best_formula(self):
     """
     emap_best = self.discretize(self.predictors_cont, self.predictors_qual)
 
-    if self.algorithm == "SEM":
-        best_disc = _best_formula_cont_sem(self, emap_best)
+    if self.d_cont > 0:
+        if self.algorithm == "SEM":
+            best_disc = _best_formula_cont_sem(self, emap_best)
 
-    elif self.algorithm == "NN":
-        best_disc = _best_formula_cont_nn(self, emap_best)
+        elif self.algorithm == "NN":
+            best_disc = _best_formula_cont_nn(self, emap_best)
+    else:
+        best_disc = []
 
     for j in range(self.d_qual):
         best_disc.append([])
