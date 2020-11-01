@@ -9,12 +9,6 @@ glmdisc
 
    
    
-   .. rubric:: Functions
-
-   .. autosummary::
-   
-      vectorized_multinouilli
-   
    
 
    

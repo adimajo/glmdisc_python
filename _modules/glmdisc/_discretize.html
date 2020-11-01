@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>glmdisc._discretize &mdash; glmdisc 0.1.1 documentation</title>
+  <title>glmdisc._discretize &mdash; glmdisc 0.1.2 documentation</title>
   
 
   
@@ -59,7 +59,7 @@
             
             
               <div class="version">
-                0.1.1
+                0.1.2
               </div>
             
           
@@ -160,30 +160,42 @@
 <span class="kn">import</span> <span class="nn">sklearn</span> <span class="k">as</span> <span class="nn">sk</span>
 <span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">stats</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">loguru</span> <span class="kn">import</span> <span class="n">logger</span>
 <span class="kn">import</span> <span class="nn">glmdisc</span>
+<span class="kn">from</span> <span class="nn">glmdisc._fitNN</span> <span class="kn">import</span> <span class="n">_from_weights_to_proba_test</span>
 
 
-<span class="k">def</span> <span class="nf">discretize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">predictors_cont</span><span class="p">,</span> <span class="n">predictors_qual</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Discretizes new continuous and categorical features using a previously</span>
-<span class="sd">    fitted glmdisc object.</span>
+<span class="k">def</span> <span class="nf">_check_args_discretize_nn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">predictors_cont</span><span class="p">,</span> <span class="n">predictors_qual</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">predictors_cont</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">n_test</span> <span class="o">=</span> <span class="n">predictors_cont</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">n_test</span> <span class="o">=</span> <span class="n">predictors_qual</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
-<span class="sd">    :param numpy.array predictors_cont:</span>
-<span class="sd">        Continuous predictors to be discretized in a numpy</span>
-<span class="sd">        &quot;numeric&quot; array. Can be provided either here or with</span>
-<span class="sd">        the __init__ method.</span>
-<span class="sd">    :param numpy.array predictors_qual:</span>
-<span class="sd">        Categorical features which levels are to be merged</span>
-<span class="sd">        (also in a numpy &quot;string&quot; array). Can be provided</span>
-<span class="sd">        either here or with the __init__ method.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">check_is_fitted</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">predictors_cont</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">d_1</span> <span class="o">=</span> <span class="n">predictors_cont</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">d_1</span> <span class="o">=</span> <span class="mi">0</span>
 
-    <span class="n">glmdisc</span><span class="o">.</span><span class="n">_fit</span><span class="o">.</span><span class="n">_check_args</span><span class="p">(</span><span class="n">predictors_cont</span><span class="o">=</span><span class="n">predictors_cont</span><span class="p">,</span>
-                             <span class="n">predictors_qual</span><span class="o">=</span><span class="n">predictors_qual</span><span class="p">,</span>
-                             <span class="n">labels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                             <span class="n">check_labels</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">predictors_qual</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">d_2</span> <span class="o">=</span> <span class="n">predictors_qual</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">d_2</span> <span class="o">=</span> <span class="mi">0</span>
 
+    <span class="k">if</span> <span class="n">d_1</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_cont</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Shape of &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">d_1</span><span class="p">)</span> <span class="o">+</span>
+               <span class="s1">&#39; for predictors_cont does not match training set of size &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_cont</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">d_2</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_qual</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Shape of &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">d_2</span><span class="p">)</span> <span class="o">+</span>
+               <span class="s1">&#39; for predictors_cont does not match training set of size &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_qual</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">n_test</span>
+
+
+<span class="k">def</span> <span class="nf">_check_args_discretize_sem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">predictors_cont</span><span class="p">,</span> <span class="n">predictors_qual</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">predictors_cont</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">n</span> <span class="o">=</span> <span class="n">predictors_cont</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
@@ -203,13 +215,36 @@
     <span class="n">d_2bis</span> <span class="o">=</span> <span class="p">[</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">Counter</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">best_link</span><span class="p">]</span>
 
     <span class="k">if</span> <span class="n">d_1</span> <span class="o">!=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">d_1bis</span><span class="p">)</span> <span class="ow">or</span> <span class="n">d_1</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_cont</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Shape of &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">d_1</span><span class="p">)</span>
-                         <span class="o">+</span> <span class="s1">&#39; for predictors_cont does not match provided link function &#39;</span>
-                         <span class="s1">&#39;of size &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">d_1bis</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39; and/or training set of size &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_cont</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span><span class="p">)</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Shape of &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">d_1</span><span class="p">)</span> <span class="o">+</span>
+               <span class="s1">&#39; for predictors_cont does not match provided link function &#39;</span>
+               <span class="s1">&#39;of size &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">d_1bis</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39; and/or training set of size &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_cont</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">d_2</span> <span class="o">!=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">d_2bis</span><span class="p">)</span> <span class="ow">or</span> <span class="n">d_2</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_qual</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Shape of &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">d_2</span><span class="p">)</span>
-                         <span class="o">+</span> <span class="s1">&#39; for predictors_cont does not match provided link function &#39;</span>
-                         <span class="s1">&#39;of size &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">d_2bis</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39; and/or training set of size &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_qual</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span><span class="p">)</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Shape of &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">d_2</span><span class="p">)</span> <span class="o">+</span>
+               <span class="s1">&#39; for predictors_cont does not match provided link function &#39;</span>
+               <span class="s1">&#39;of size &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">d_2bis</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39; and/or training set of size &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_qual</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">n</span><span class="p">,</span> <span class="n">d_1</span><span class="p">,</span> <span class="n">d_2</span><span class="p">,</span> <span class="n">d_1bis</span><span class="p">,</span> <span class="n">d_2bis</span>
+
+
+<span class="k">def</span> <span class="nf">_discretize_sem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">predictors_cont</span><span class="p">,</span> <span class="n">predictors_qual</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Discretizes new continuous and categorical features using a previously</span>
+<span class="sd">    fitted glmdisc object.</span>
+
+<span class="sd">    :param numpy.array predictors_cont:</span>
+<span class="sd">        Continuous predictors to be discretized in a numpy</span>
+<span class="sd">        &quot;numeric&quot; array. Can be provided either here or with</span>
+<span class="sd">        the __init__ method.</span>
+<span class="sd">    :param numpy.array predictors_qual:</span>
+<span class="sd">        Categorical features which levels are to be merged</span>
+<span class="sd">        (also in a numpy &quot;string&quot; array). Can be provided</span>
+<span class="sd">        either here or with the __init__ method.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">n</span><span class="p">,</span> <span class="n">d_1</span><span class="p">,</span> <span class="n">d_2</span><span class="p">,</span> <span class="n">d_1bis</span><span class="p">,</span> <span class="n">d_2bis</span> <span class="o">=</span> <span class="n">_check_args_discretize_sem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">predictors_cont</span><span class="p">,</span> <span class="n">predictors_qual</span><span class="p">)</span>
 
     <span class="n">emap</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n</span><span class="p">,</span> <span class="n">d_1</span> <span class="o">+</span> <span class="n">d_2</span><span class="p">))</span>
 
@@ -231,9 +266,83 @@
             <span class="n">emap</span><span class="p">[:,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
         <span class="k">else</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Loophole: please open an issue at https://github.com/adimajo/glmdisc_python/issues&#39;</span><span class="p">)</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;Loophole: please open an issue at https://github.com/adimajo/glmdisc_python/issues&#39;</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">emap</span>
+
+
+<span class="k">def</span> <span class="nf">_discretize_nn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">predictors_cont</span><span class="p">,</span> <span class="n">predictors_qual</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Discretizes new continuous and categorical features using a previously</span>
+<span class="sd">    fitted glmdisc object.</span>
+
+<span class="sd">    :param numpy.array predictors_cont:</span>
+<span class="sd">        Continuous predictors to be discretized in a numpy</span>
+<span class="sd">        &quot;numeric&quot; array. Can be provided either here or with</span>
+<span class="sd">        the __init__ method.</span>
+<span class="sd">    :param numpy.array predictors_qual:</span>
+<span class="sd">        Categorical features which levels are to be merged</span>
+<span class="sd">        (also in a numpy &quot;string&quot; array). Can be provided</span>
+<span class="sd">        either here or with the __init__ method.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">predictors_trans</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_qual</span><span class="p">))</span>
+    <span class="n">predictors_qual_dummy</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_qual</span><span class="p">):</span>
+        <span class="c1"># Label encoding of qualitative input</span>
+        <span class="n">predictors_trans</span><span class="p">[:,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">affectations</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_cont</span><span class="p">]</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span>
+            <span class="n">predictors_qual</span><span class="p">[:,</span> <span class="n">j</span><span class="p">]))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+        <span class="n">predictors_qual_dummy</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">one_hot_encoders_nn</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">predictors_trans</span><span class="p">[:,</span> <span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">todense</span><span class="p">())))</span>
+
+    <span class="n">n_test</span> <span class="o">=</span> <span class="n">_check_args_discretize_nn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                                       <span class="n">predictors_cont</span><span class="p">,</span>
+                                       <span class="n">predictors_qual</span><span class="p">)</span>
+
+    <span class="n">proba</span> <span class="o">=</span> <span class="n">_from_weights_to_proba_test</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_cont</span><span class="p">,</span>
+                                        <span class="bp">self</span><span class="o">.</span><span class="n">d_qual</span><span class="p">,</span>
+                                        <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">m_start</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_cont</span><span class="p">,</span>
+                                        <span class="bp">self</span><span class="o">.</span><span class="n">callbacks</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                                        <span class="n">predictors_cont</span><span class="p">,</span>
+                                        <span class="n">predictors_trans</span><span class="p">,</span>
+                                        <span class="n">n_test</span><span class="p">)</span>
+
+    <span class="n">results</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_cont</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_qual</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_cont</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_qual</span><span class="p">):</span>
+        <span class="n">results</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">proba</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span><span class="n">results</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+
+
+<span class="k">def</span> <span class="nf">discretize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">predictors_cont</span><span class="p">,</span> <span class="n">predictors_qual</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Discretizes new continuous and categorical features using a previously</span>
+<span class="sd">    fitted glmdisc object.</span>
+
+<span class="sd">    :param numpy.array predictors_cont:</span>
+<span class="sd">        Continuous predictors to be discretized in a numpy</span>
+<span class="sd">        &quot;numeric&quot; array. Can be provided either here or with</span>
+<span class="sd">        the __init__ method.</span>
+<span class="sd">    :param numpy.array predictors_qual:</span>
+<span class="sd">        Categorical features which levels are to be merged</span>
+<span class="sd">        (also in a numpy &quot;string&quot; array). Can be provided</span>
+<span class="sd">        either here or with the __init__ method.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">check_is_fitted</span><span class="p">()</span>
+
+    <span class="n">glmdisc</span><span class="o">.</span><span class="n">_fit</span><span class="o">.</span><span class="n">_check_args</span><span class="p">(</span><span class="n">predictors_cont</span><span class="o">=</span><span class="n">predictors_cont</span><span class="p">,</span>
+                             <span class="n">predictors_qual</span><span class="o">=</span><span class="n">predictors_qual</span><span class="p">,</span>
+                             <span class="n">labels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                             <span class="n">check_labels</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">algorithm</span> <span class="o">==</span> <span class="s2">&quot;SEM&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">_discretize_sem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">predictors_cont</span><span class="p">,</span> <span class="n">predictors_qual</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">_discretize_nn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">predictors_cont</span><span class="p">,</span> <span class="n">predictors_qual</span><span class="p">)</span>
 </pre></div>
 
            </div>

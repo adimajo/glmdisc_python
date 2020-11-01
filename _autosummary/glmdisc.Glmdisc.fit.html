@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>glmdisc.Glmdisc.fit &mdash; glmdisc 0.1.1 documentation</title>
+  <title>glmdisc.Glmdisc.fit &mdash; glmdisc 0.1.2 documentation</title>
   
 
   
@@ -61,7 +61,7 @@
             
             
               <div class="version">
-                0.1.1
+                0.1.2
               </div>
             
           
@@ -185,30 +185,22 @@
 <h1>glmdisc.Glmdisc.fit<a class="headerlink" href="#glmdisc-glmdisc-fit" title="Permalink to this headline">¶</a></h1>
 <dl class="py method">
 <dt id="glmdisc.Glmdisc.fit">
-<code class="sig-prename descclassname">Glmdisc.</code><code class="sig-name descname">fit</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">predictors_cont</span></em>, <em class="sig-param"><span class="n">predictors_qual</span></em>, <em class="sig-param"><span class="n">labels</span></em><span class="sig-paren">)</span><a class="headerlink" href="#glmdisc.Glmdisc.fit" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">Glmdisc.</code><code class="sig-name descname">fit</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">predictors_cont</span></em>, <em class="sig-param"><span class="n">predictors_qual</span></em>, <em class="sig-param"><span class="n">labels</span></em>, <em class="sig-param"><span class="n">iter</span><span class="o">=</span><span class="default_value">100</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#glmdisc.Glmdisc.fit" title="Permalink to this definition">¶</a></dt>
 <dd><p>Fits the Glmdisc object.</p>
 <div class="admonition-todo admonition" id="id1">
 <p class="admonition-title">Todo</p>
 <p>On regarde si des modalités sont présentes dans validation et pas dans train</p>
 </div>
-<div class="admonition-todo admonition" id="id2">
-<p class="admonition-title">Todo</p>
-<p>Refactor due to complexity</p>
-</div>
-<div class="admonition-todo admonition" id="id3">
-<p class="admonition-title">Todo</p>
-<p>Add glmdisc-NN</p>
-</div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>predictors_cont</strong> (<em>numpy.array</em>) – Continuous predictors to be discretized in a numpy
+<li><p><strong>predictors_cont</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)"><em>numpy.ndarray</em></a>) – Continuous predictors to be discretized in a numpy
 “numeric” array. Can be provided either here or with
 the __init__ method.</p></li>
-<li><p><strong>predictors_qual</strong> (<em>numpy.array</em>) – Categorical features which levels are to be merged
+<li><p><strong>predictors_qual</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)"><em>numpy.ndarray</em></a>) – Categorical features which levels are to be merged
 (also in a numpy “string” array). Can be provided
 either here or with the __init__ method.</p></li>
-<li><p><strong>labels</strong> (<em>numpy.array</em>) – Boolean (0/1) labels of the observations. Must be of
+<li><p><strong>labels</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)"><em>numpy.ndarray</em></a>) – Boolean (0/1) labels of the observations. Must be of
 the same length as predictors_qual and predictors_cont
 (numpy “numeric” array).</p></li>
 </ul>

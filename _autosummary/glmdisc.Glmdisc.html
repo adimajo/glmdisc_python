@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>glmdisc.Glmdisc &mdash; glmdisc 0.1.1 documentation</title>
+  <title>glmdisc.Glmdisc &mdash; glmdisc 0.1.2 documentation</title>
   
 
   
@@ -61,7 +61,7 @@
             
             
               <div class="version">
-                0.1.1
+                0.1.2
               </div>
             
           
@@ -183,7 +183,7 @@
 <h1>glmdisc.Glmdisc<a class="headerlink" href="#glmdisc-glmdisc" title="Permalink to this headline">¶</a></h1>
 <dl class="py class">
 <dt id="glmdisc.Glmdisc">
-<em class="property">class </em><code class="sig-prename descclassname">glmdisc.</code><code class="sig-name descname">Glmdisc</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">test</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">validation</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">criterion</span><span class="o">=</span><span class="default_value">'bic'</span></em>, <em class="sig-param"><span class="n">iter</span><span class="o">=</span><span class="default_value">100</span></em>, <em class="sig-param"><span class="n">m_start</span><span class="o">=</span><span class="default_value">20</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/glmdisc.html#Glmdisc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#glmdisc.Glmdisc" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">glmdisc.</code><code class="sig-name descname">Glmdisc</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">algorithm</span><span class="o">=</span><span class="default_value">'SEM'</span></em>, <em class="sig-param"><span class="n">test</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">validation</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">criterion</span><span class="o">=</span><span class="default_value">'bic'</span></em>, <em class="sig-param"><span class="n">m_start</span><span class="o">=</span><span class="default_value">20</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/glmdisc.html#Glmdisc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#glmdisc.Glmdisc" title="Permalink to this definition">¶</a></dt>
 <dd><p>This class implements a supervised multivariate discretization method,
 factor levels grouping and interaction discovery for logistic regression.</p>
 <dl class="py attribute">
@@ -197,7 +197,7 @@ performance is the Gini index on test set.</p>
 </div></blockquote>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -215,7 +215,7 @@ using the Gini index on the validation set, so
 criterion must be set to “gini”.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -228,7 +228,7 @@ goodness-of-fit of the discretization: “bic” or
 “aic” if no validation set, else “gini”.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -242,7 +242,7 @@ several MCMCs. Computation time can increase
 dramatically.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -257,7 +257,7 @@ predictors_qual, m_start is set (for this variable
 only) to this variable’s number of factor levels.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -269,7 +269,7 @@ only) to this variable’s number of factor levels.</p>
 over the iterations.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)">list</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)">list</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -282,7 +282,7 @@ features and their quantized counterparts that
 allows to quantize the data after learning.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)">list</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)">list</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -305,7 +305,7 @@ allows to quantize the data after learning.</p>
 best_encoder_emap (list): The label encoder of each of the best_link.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)">list</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)">list</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -316,7 +316,7 @@ best_encoder_emap (list): The label encoder of each of the best_link.</p>
 <dd><p>The best ‘criterion’ obtained.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)">list</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)">list</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -327,7 +327,7 @@ best_encoder_emap (list): The label encoder of each of the best_link.</p>
 <dd><p>The line rows corresponding to the splits.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)">list</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)">list</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -357,7 +357,7 @@ best_encoder_emap (list): The label encoder of each of the best_link.</p>
 <tr class="row-even"><td><p><a class="reference internal" href="glmdisc.Glmdisc.fit.html#glmdisc.Glmdisc.fit" title="glmdisc.Glmdisc.fit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit</span></code></a>(predictors_cont, predictors_qual, labels)</p></td>
 <td><p>Fits the Glmdisc object.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="glmdisc.Glmdisc.generate_data.html#glmdisc.Glmdisc.generate_data" title="glmdisc.Glmdisc.generate_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">generate_data</span></code></a>(n, d[, theta, seed])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="glmdisc.Glmdisc.generate_data.html#glmdisc.Glmdisc.generate_data" title="glmdisc.Glmdisc.generate_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">generate_data</span></code></a>(n, d[, theta, plot])</p></td>
 <td><p>Generates some toy continuous data that gets discretized, and a label is drawn from a logistic regression given the discretized features.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="glmdisc.Glmdisc.plot.html#glmdisc.Glmdisc.plot" title="glmdisc.Glmdisc.plot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot</span></code></a>([predictors_cont_number, …])</p></td>
@@ -370,16 +370,17 @@ best_encoder_emap (list): The label encoder of each of the best_link.</p>
 </table>
 <dl class="py method">
 <dt id="glmdisc.Glmdisc.__init__">
-<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">test</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">validation</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">criterion</span><span class="o">=</span><span class="default_value">'bic'</span></em>, <em class="sig-param"><span class="n">iter</span><span class="o">=</span><span class="default_value">100</span></em>, <em class="sig-param"><span class="n">m_start</span><span class="o">=</span><span class="default_value">20</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/glmdisc.html#Glmdisc.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#glmdisc.Glmdisc.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">algorithm</span><span class="o">=</span><span class="default_value">'SEM'</span></em>, <em class="sig-param"><span class="n">test</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">validation</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">criterion</span><span class="o">=</span><span class="default_value">'bic'</span></em>, <em class="sig-param"><span class="n">m_start</span><span class="o">=</span><span class="default_value">20</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/glmdisc.html#Glmdisc.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#glmdisc.Glmdisc.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initializes self by checking if its arguments are appropriately specified.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>test</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – Boolean specifying if a test set is required.
+<li><p><strong>algorithm</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Algorithm to use (SEM or NN).</p></li>
+<li><p><strong>test</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – Boolean specifying if a test set is required.
 If True, the provided data is split to provide 20%
 of observations in a test set and the reported
 performance is the Gini index on test set.</p></li>
-<li><p><strong>validation</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – Boolean (T/F) specifying if a validation set is
+<li><p><strong>validation</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – Boolean (T/F) specifying if a validation set is
 required. If True, the provided data is split to
 provide 20% of observations in a validation set
 and the reported performance is the Gini index on
@@ -387,14 +388,14 @@ the validation set (if no test=False). The quality
 of the discretization at each step is evaluated
 using the Gini index on the validation set, so
 criterion must be set to “gini”.</p></li>
-<li><p><strong>criterion</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The criterion to be used to assess the
+<li><p><strong>criterion</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – The criterion to be used to assess the
 goodness-of-fit of the discretization: “bic” or
 “aic” if no validation set, else “gini”.</p></li>
-<li><p><strong>iter</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – Number of MCMC steps to perform. The more the
+<li><p><strong>iter</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – Number of MCMC steps to perform. The more the
 better, but it may be more intelligent to use
 several MCMCs. Computation time can increase
 dramatically. Defaults to 100.</p></li>
-<li><p><strong>m_start</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – Number of initial discretization intervals for all
+<li><p><strong>m_start</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – Number of initial discretization intervals for all
 variables. If <code class="code docutils literal notranslate"><span class="pre">m_start</span></code> is bigger than the number of
 factor levels for a given variable in
 <code class="code docutils literal notranslate"><span class="pre">predictors_qual</span></code>, <code class="code docutils literal notranslate"><span class="pre">m_start</span></code> is set (for this variable
@@ -415,7 +416,7 @@ only) to this variable’s number of factor levels. Defaults to 20.</p></li>
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#glmdisc.Glmdisc.__init__" title="glmdisc.Glmdisc.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>([test, validation, criterion, …])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#glmdisc.Glmdisc.__init__" title="glmdisc.Glmdisc.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>([algorithm, test, validation, …])</p></td>
 <td><p>Initializes self by checking if its arguments are appropriately specified.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="glmdisc.Glmdisc.best_formula.html#glmdisc.Glmdisc.best_formula" title="glmdisc.Glmdisc.best_formula"><code class="xref py py-obj docutils literal notranslate"><span class="pre">best_formula</span></code></a>()</p></td>
@@ -436,7 +437,7 @@ only) to this variable’s number of factor levels. Defaults to 20.</p></li>
 <tr class="row-odd"><td><p><a class="reference internal" href="glmdisc.Glmdisc.fit.html#glmdisc.Glmdisc.fit" title="glmdisc.Glmdisc.fit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit</span></code></a>(predictors_cont, predictors_qual, labels)</p></td>
 <td><p>Fits the Glmdisc object.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="glmdisc.Glmdisc.generate_data.html#glmdisc.Glmdisc.generate_data" title="glmdisc.Glmdisc.generate_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">generate_data</span></code></a>(n, d[, theta, seed])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="glmdisc.Glmdisc.generate_data.html#glmdisc.Glmdisc.generate_data" title="glmdisc.Glmdisc.generate_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">generate_data</span></code></a>(n, d[, theta, plot])</p></td>
 <td><p>Generates some toy continuous data that gets discretized, and a label is drawn from a logistic regression given the discretized features.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="glmdisc.Glmdisc.plot.html#glmdisc.Glmdisc.plot" title="glmdisc.Glmdisc.plot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot</span></code></a>([predictors_cont_number, …])</p></td>

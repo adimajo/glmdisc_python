@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>glmdisc.Glmdisc.generate_data &mdash; glmdisc 0.1.1 documentation</title>
+  <title>glmdisc.Glmdisc.generate_data &mdash; glmdisc 0.1.2 documentation</title>
   
 
   
@@ -61,7 +61,7 @@
             
             
               <div class="version">
-                0.1.1
+                0.1.2
               </div>
             
           
@@ -185,16 +185,16 @@
 <h1>glmdisc.Glmdisc.generate_data<a class="headerlink" href="#glmdisc-glmdisc-generate-data" title="Permalink to this headline">¶</a></h1>
 <dl class="py method">
 <dt id="glmdisc.Glmdisc.generate_data">
-<em class="property">static </em><code class="sig-prename descclassname">Glmdisc.</code><code class="sig-name descname">generate_data</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">n</span></em>, <em class="sig-param"><span class="n">d</span></em>, <em class="sig-param"><span class="n">theta</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">seed</span><span class="o">=</span><span class="default_value">1</span></em><span class="sig-paren">)</span><a class="headerlink" href="#glmdisc.Glmdisc.generate_data" title="Permalink to this definition">¶</a></dt>
+<em class="property">static </em><code class="sig-prename descclassname">Glmdisc.</code><code class="sig-name descname">generate_data</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">n</span></em>, <em class="sig-param"><span class="n">d</span></em>, <em class="sig-param"><span class="n">theta</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">plot</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#glmdisc.Glmdisc.generate_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generates some toy continuous data that gets discretized, and a label
 is drawn from a logistic regression given the discretized features.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>n</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – Number of observations to draw.</p></li>
-<li><p><strong>d</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – Number of features to draw.</p></li>
+<li><p><strong>n</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – Number of observations to draw.</p></li>
+<li><p><strong>d</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – Number of features to draw.</p></li>
 <li><p><strong>theta</strong> (<em>numpy.array</em>) – Logistic regression coefficient to use (if None, drawn from N(0,2)).</p></li>
-<li><p><strong>seed</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – The seed for random number generation.</p></li>
+<li><p><strong>plot</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – If true, plot the two first x axes with y as color.</p></li>
 </ul>
 </dd>
 </dl>

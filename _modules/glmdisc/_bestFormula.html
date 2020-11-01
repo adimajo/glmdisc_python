@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>glmdisc._bestFormula &mdash; glmdisc 0.1.1 documentation</title>
+  <title>glmdisc._bestFormula &mdash; glmdisc 0.1.2 documentation</title>
   
 
   
@@ -59,7 +59,7 @@
             
             
               <div class="version">
-                0.1.1
+                0.1.2
               </div>
             
           
@@ -158,6 +158,56 @@
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">loguru</span> <span class="kn">import</span> <span class="n">logger</span>
+<span class="kn">from</span> <span class="nn">heapq</span> <span class="kn">import</span> <span class="n">nlargest</span>
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">combinations</span>
+
+
+<span class="k">def</span> <span class="nf">_best_formula_cont_sem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">emap_best</span><span class="p">):</span>
+
+    <span class="n">best_disc</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_cont</span><span class="p">):</span>
+        <span class="n">best_disc</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">emap_best</span><span class="p">[:,</span> <span class="n">j</span><span class="p">]):</span>
+            <span class="n">best_disc</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">nanmin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">predictors_cont</span><span class="p">[</span><span class="n">emap_best</span><span class="p">[:,</span> <span class="n">j</span><span class="p">]</span> <span class="o">==</span> <span class="n">k</span><span class="p">,</span> <span class="n">j</span><span class="p">]))</span>
+        <span class="k">del</span> <span class="n">best_disc</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">best_disc</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmin</span><span class="p">(</span><span class="n">best_disc</span><span class="p">[</span><span class="n">j</span><span class="p">]))[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">best_disc</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;No cut-points found for continuous variable &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">j</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Cut-points found for continuous variable &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">j</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; are &quot;</span>
+                        <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">best_disc</span><span class="p">[</span><span class="n">j</span><span class="p">]))</span>
+
+    <span class="k">return</span> <span class="n">best_disc</span>
+
+
+<span class="k">def</span> <span class="nf">_best_formula_cont_nn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">emap_best</span><span class="p">):</span>
+    <span class="n">best_disc</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">best_weights</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">callbacks</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">best_weights</span>
+    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_cont</span><span class="p">):</span>
+        <span class="n">list_modalites</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">emap_best</span><span class="p">[:,</span> <span class="n">j</span><span class="p">])</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">list_modalites</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">best_disc</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;No cut-points found for continuous variable &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">j</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span><span class="p">)</span>
+            <span class="k">continue</span>
+        <span class="n">points_coupure</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">proba_points_coupure</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">h1</span><span class="p">,</span> <span class="n">h2</span> <span class="ow">in</span> <span class="n">combinations</span><span class="p">(</span><span class="n">list_modalites</span><span class="p">,</span> <span class="n">r</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+            <span class="n">point_coupure</span> <span class="o">=</span> <span class="p">(</span><span class="n">best_weights</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="n">h1</span><span class="p">]</span> <span class="o">-</span> <span class="n">best_weights</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="n">h2</span><span class="p">])</span> <span class="o">/</span> <span class="p">(</span><span class="n">best_weights</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="n">h2</span><span class="p">]</span> <span class="o">-</span>
+                                                                                 <span class="n">best_weights</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="n">h1</span><span class="p">])</span>
+            <span class="n">points_coupure</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">point_coupure</span><span class="p">)</span>
+            <span class="n">proba_point_coupure_num</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">best_weights</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="n">h1</span><span class="p">]</span> <span class="o">+</span> <span class="n">best_weights</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="n">h1</span><span class="p">]</span> <span class="o">*</span> <span class="n">point_coupure</span><span class="p">)</span>
+            <span class="n">proba_points_coupure_denom</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">best_weights</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="n">h</span><span class="p">]</span> <span class="o">+</span>
+                                                        <span class="n">best_weights</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="n">h</span><span class="p">]</span> <span class="o">*</span> <span class="n">point_coupure</span><span class="p">)</span>
+                                                 <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">list_modalites</span><span class="p">])</span>
+            <span class="n">proba_points_coupure</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">proba_point_coupure_num</span> <span class="o">/</span> <span class="n">proba_points_coupure_denom</span><span class="p">)</span>
+
+        <span class="n">largest</span> <span class="o">=</span> <span class="n">nlargest</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">list_modalites</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">proba_points_coupure</span><span class="p">)</span>
+        <span class="n">best_disc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">points_coupure</span><span class="p">)[</span><span class="n">proba_points_coupure</span> <span class="o">&gt;=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmin</span><span class="p">(</span><span class="n">largest</span><span class="p">)])</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Cut-points found for continuous variable &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">j</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; are &quot;</span>
+                    <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">best_disc</span><span class="p">[</span><span class="n">j</span><span class="p">]))</span>
+    <span class="k">return</span> <span class="n">best_disc</span>
 
 
 <span class="k">def</span> <span class="nf">best_formula</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -172,21 +222,25 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">emap_best</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">discretize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">predictors_cont</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">predictors_qual</span><span class="p">)</span>
 
-    <span class="n">best_disc</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_cont</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">algorithm</span> <span class="o">==</span> <span class="s2">&quot;SEM&quot;</span><span class="p">:</span>
+            <span class="n">best_disc</span> <span class="o">=</span> <span class="n">_best_formula_cont_sem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">emap_best</span><span class="p">)</span>
 
-    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_cont</span><span class="p">):</span>
-        <span class="n">best_disc</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
-        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">emap_best</span><span class="p">[:,</span> <span class="n">j</span><span class="p">]):</span>
-            <span class="n">best_disc</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="n">np</span><span class="o">.</span><span class="n">nanmin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">predictors_cont</span><span class="p">[</span><span class="n">emap_best</span><span class="p">[:,</span> <span class="n">j</span><span class="p">]</span> <span class="o">==</span> <span class="n">k</span><span class="p">,</span> <span class="n">j</span><span class="p">]))</span>
-        <span class="k">del</span> <span class="n">best_disc</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">best_disc</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmin</span><span class="p">(</span><span class="n">best_disc</span><span class="p">[</span><span class="n">j</span><span class="p">]))[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]]</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Cut-points found for continuous variable&quot;</span><span class="p">,</span> <span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;are&quot;</span><span class="p">,</span> <span class="n">best_disc</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">algorithm</span> <span class="o">==</span> <span class="s2">&quot;NN&quot;</span><span class="p">:</span>
+            <span class="n">best_disc</span> <span class="o">=</span> <span class="n">_best_formula_cont_nn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">emap_best</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">best_disc</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_qual</span><span class="p">):</span>
         <span class="n">best_disc</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
-        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">emap_best</span><span class="p">[:,</span> <span class="n">j</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_cont</span><span class="p">]):</span>
+        <span class="n">les_modalites</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">emap_best</span><span class="p">[:,</span> <span class="n">j</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_cont</span><span class="p">])</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">les_modalites</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;No regroupments made for categorical variable &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">j</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span><span class="p">)</span>
+            <span class="k">continue</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">les_modalites</span><span class="p">:</span>
             <span class="n">best_disc</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_cont</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">predictors_qual</span><span class="p">[</span><span class="n">emap_best</span><span class="p">[:,</span> <span class="n">j</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_cont</span><span class="p">]</span> <span class="o">==</span> <span class="n">k</span><span class="p">,</span> <span class="n">j</span><span class="p">]))</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Regroupments made for categorical variable&quot;</span><span class="p">,</span> <span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;are&quot;</span><span class="p">,</span> <span class="n">best_disc</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_cont</span><span class="p">])</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Regroupments made for categorical variable &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">j</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; are &quot;</span>
+                    <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">best_disc</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_cont</span><span class="p">]))</span>
 
     <span class="k">return</span> <span class="n">best_disc</span>
 </pre></div>
