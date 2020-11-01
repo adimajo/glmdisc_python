@@ -21,6 +21,8 @@ import numpy as np
 import sklearn as sk
 from loguru import logger
 
+__version__ = "0.1.2"
+
 
 class NotFittedError(sk.exceptions.NotFittedError):
     """Exception class to raise if estimator is used before fitting.

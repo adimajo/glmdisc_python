@@ -16,7 +16,7 @@ import os
 import sys
 sys.path.insert(0, os.path.abspath('../../glmdisc'))
 sys.path.insert(0, os.path.abspath('../..'))
-
+from setup import find_version
 
 # -- Project information -----------------------------------------------------
 
@@ -24,10 +24,12 @@ project = 'glmdisc'
 copyright = '2020, Adrien Ehrhardt'
 author = 'Adrien Ehrhardt'
 
+# Version
+there = os.path.abspath(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 # The short X.Y version
-version = '0.1.2'
+version = find_version(there, "glmdisc/__init__.py")
 # The full version, including alpha/beta/rc tags
-release = '0.1.2'
+release = find_version(there, "glmdisc/__init__.py")
 
 
 # -- General configuration ---------------------------------------------------

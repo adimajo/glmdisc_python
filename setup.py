@@ -26,7 +26,7 @@ def find_version(file_path, file_name):
     -------
     version
     """
-    with codecs.open(os.path.join(file_path, *file_name), 'r') as fp:
+    with codecs.open(os.path.join(file_path, file_name), 'r') as fp:
         version_file = fp.read()
     version_match = re.search(r"^__version__ = ['\"]([^'\"]*)['\"]", version_file, re.M)
     if version_match:
