@@ -3,14 +3,16 @@
 """
 fit function for SEM algorithm
 """
+from collections import Counter
+from copy import deepcopy
+from math import log
+
 import numpy as np
 import sklearn as sk
 import sklearn.linear_model
-from copy import deepcopy
-from glmdisc import _vectorized_multinouilli
-from collections import Counter
 from loguru import logger
-from math import log
+
+from glmdisc import _vectorized_multinouilli
 
 
 def _calculate_criterion(self, emap, model_emap, current_encoder_emap):

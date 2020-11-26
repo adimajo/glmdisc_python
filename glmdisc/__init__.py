@@ -270,12 +270,10 @@ class Glmdisc:
                                               "it means it did not find a better solution than "
                                               "the random initialization.")
         else:
-            try:
-                self.neural_net
-            except AttributeError as e:
-                raise NotFittedError(str(e) + " If you did call fit, try increasing iter: "
-                                              "it means it did not find a better solution than "
-                                              "the random initialization.")
+            if self.callbacks[1].best_weights is None:
+                raise NotFittedError(" If you did call fit, try increasing iter: "
+                                     "it means it did not find a better solution than "
+                                     "the random initialization.")
 
     # Imported methods
     from ._bestFormula import best_formula

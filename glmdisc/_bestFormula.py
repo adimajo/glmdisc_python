@@ -2,10 +2,11 @@
 # -*- coding: utf-8 -*-
 """best_formula method for glmdisc class.
 """
-import numpy as np
-from loguru import logger
 from heapq import nlargest
 from itertools import combinations
+
+import numpy as np
+from loguru import logger
 
 
 def _best_formula_cont_sem(self, emap_best):

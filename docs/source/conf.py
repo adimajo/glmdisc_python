@@ -14,9 +14,11 @@
 #
 import os
 import sys
+
+from setup import find_version
+
 sys.path.insert(0, os.path.abspath('../../glmdisc'))
 sys.path.insert(0, os.path.abspath('../..'))
-from setup import find_version
 
 # -- Project information -----------------------------------------------------
 

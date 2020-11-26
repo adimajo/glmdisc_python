@@ -43,8 +43,6 @@ def test_discrete_data_val_cont():
     d = 2
     x, y, theta = glmdisc.Glmdisc.generate_data(n, d)
     model = glmdisc.Glmdisc(algorithm="NN", validation=True, test=False)
-    random.seed(1)
-    np.random.seed(1)
     model.fit(predictors_cont=x, predictors_qual=None, labels=y, iter=80)
     result = model.discrete_data()
     assert isinstance(result, np.ndarray)

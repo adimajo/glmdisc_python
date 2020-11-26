@@ -3,10 +3,12 @@
 """discretize method for glmdisc class.
 """
 from collections import Counter
-import sklearn as sk
-from scipy import stats
+
 import numpy as np
+import sklearn as sk
 from loguru import logger
+from scipy import stats
+
 import glmdisc
 from glmdisc._fitNN import _from_weights_to_proba_test
 

@@ -3,20 +3,21 @@
 """
 fit function for NN algorithm
 """
+from itertools import chain
+
+import matplotlib.pyplot as plt
 import numpy as np
-from scipy import stats
 import sklearn as sk
 import sklearn.preprocessing
 import tensorflow as tf
-from tensorflow.keras.layers import Input
-from tensorflow.keras.layers import Dense
-from tensorflow.keras.layers import concatenate
+import tensorflow.keras.optimizers
+from loguru import logger
+from scipy import stats
 from tensorflow.keras import Model
 from tensorflow.keras.callbacks import Callback, ReduceLROnPlateau
-import tensorflow.keras.optimizers
-from itertools import chain
-from loguru import logger
-import matplotlib.pyplot as plt
+from tensorflow.keras.layers import Dense
+from tensorflow.keras.layers import Input
+from tensorflow.keras.layers import concatenate
 
 
 def _plot_cont_soft_quant(self):
@@ -59,6 +60,7 @@ class LossHistory(Callback):
         self.d_cont = d_cont
         self.d_qual = d_qual
         self.neural_net = neural_net
+        self.current_weights = None
         self.best_weights = None
         self.losses = None
         self.best_criterion = None
@@ -92,19 +94,24 @@ class LossHistory(Callback):
         logs
         """
         burn_in = 5
-        self.losses.append(_evaluate_disc("train", self.d_cont, self.d_qual, self.neural_net)[0])
+        self.current_weights = []
+        for j in range(self.d_cont):
+            self.current_weights.append(self.neural_net["liste_layers_quant"][j].get_weights())
+        for j in range(self.d_qual):
+            self.current_weights.append(self.neural_net["liste_layers_qual"][j].get_weights())
+        self.losses.append(_evaluate_disc(self, self.d_cont, self.d_qual, self.neural_net)[0])
         if len(self.losses) > burn_in and self.losses[-1] < self.best_criterion:
             self.best_weights = []
             self.best_outputs = []
             self.best_criterion = self.losses[-1]
             for j in range(self.d_cont):
-                self.best_weights.append(self.neural_net["liste_layers_quant"][j].get_weights())
+                self.best_weights.append(self.current_weights[j])
                 self.best_outputs.append(
                     tf.keras.backend.function([self.neural_net["liste_layers_quant"][j].input],
                                               [self.neural_net["liste_layers_quant"][j].output])(
                         [self.neural_net["predictors_cont"][:, j, np.newaxis]]))
             for j in range(self.d_qual):
-                self.best_weights.append(self.neural_net["liste_layers_qual"][j].get_weights())
+                self.best_weights.append(self.current_weights[j + self.d_cont])
                 self.best_outputs.append(
                     tf.keras.backend.function([self.neural_net["liste_layers_qual"][j].input],
                                               [self.neural_net["liste_layers_qual"][j].output])(
@@ -164,9 +171,11 @@ def _initialize_neural_net(self, predictors_qual_dummy):
     self.neural_net = {
         "n": self.n,
         "d_cont": self.d_cont,
+        "m_cont": m_cont,
         "d_qual": self.d_qual,
         "labels": self.labels,
         "predictors_cont": self.predictors_cont,
+        "predictors_qual": self.predictors_qual,
         "predictors_qual_dummy": predictors_qual_dummy,
         "train": self.train,
         "validate": self.validate,
@@ -205,17 +214,18 @@ def _from_layers_to_proba_training(d_cont, d_qual, neural_net):
     for j in range(d_qual):
         results[j + d_cont] = tf.keras.backend.function([neural_net["liste_layers_qual"][j].input],
                                                         [neural_net["liste_layers_qual"][j].output])(
-            [neural_net["predictors_qual_dummy"][j]])
+            [neural_net["predictors_qual_dummy"][j][neural_net["train"]]])
 
     return results
 
 
-def _from_weights_to_proba_test(d_cont, d_qual, m_cont, history, x_quant_test, x_qual_test, n_test):
+def _from_weights_to_proba_test(d_cont, d_qual, m_cont, history, x_quant_test, x_qual_test, n_test, when="test"):
     """
     Calculates the probability of each level for each feature from the provided neural net for a test set.
 
     Parameters
     ----------
+    type: during training or afterwards
     d_cont: number of quantitative features
     d_qual: number of qualitative features
     m_cont
@@ -228,68 +238,102 @@ def _from_weights_to_proba_test(d_cont, d_qual, m_cont, history, x_quant_test, x
     -------
     list of size d_cont + d_qual of numpy.ndarray of probabilities for each level of each feature
     """
+    if when == "test":
+        the_weights = history.best_weights
+    else:
+        the_weights = history.current_weights
+
     results = [None] * (d_cont + d_qual)
 
     for j in range(d_cont):
         results[j] = np.zeros((n_test, m_cont[j]))
         for i in range(m_cont[j]):
-            results[j][:, i] = history.best_weights[j][1][i] + history.best_weights[j][0][0][i] * x_quant_test[:, j]
+            results[j][:, i] = the_weights[j][1][i] + the_weights[j][0][0][i] * x_quant_test[:, j]
 
     for j in range(d_qual):
-        results[j + d_cont] = np.zeros((n_test, history.best_weights[j + d_cont][0].shape[1]))
-        for i in range(history.best_weights[j + d_cont][0].shape[1]):
+        results[j + d_cont] = np.zeros((n_test, the_weights[j + d_cont][0].shape[1]))
+        for i in range(the_weights[j + d_cont][0].shape[1]):
             for k in range(n_test):
-                results[j + d_cont][k, i] = history.best_weights[j + d_cont][0][int(x_qual_test[k, j]), i]
+                results[j + d_cont][k, i] = the_weights[j + d_cont][0][int(x_qual_test[k, j]), i]
 
     return results
 
 
-def _evaluate_disc(type, d_cont, d_qual, neural_net):
-    if type == "train" and not neural_net['validation']:
-        proba = _from_layers_to_proba_training(d_cont, d_qual, neural_net)
-        results = [None] * (d_cont + d_qual)
-        X_transformed = np.ones((len(neural_net['train']), 1))
+def _evaluate_disc(history, d_cont, d_qual, neural_net):
+    labels_idx = neural_net['train']
+    proba = _from_layers_to_proba_training(d_cont, d_qual, neural_net)
+    encoders = []
+    X_transformed = np.ones((len(labels_idx), 1))
+    results = [None] * (d_cont + d_qual)
+    for j in range(d_cont + d_qual):
+        results[j] = np.argmax(proba[j][0], axis=1)
+        encoders.append(sk.preprocessing.OneHotEncoder(categories='auto', sparse=False, handle_unknown="ignore"))
+        X_transformed = np.concatenate(
+            (X_transformed,
+             encoders[j].fit_transform(
+                 X=results[j].reshape(-1, 1))),
+            axis=1)
+
+    proposed_logistic_regression = sk.linear_model.LogisticRegression(
+        fit_intercept=False, solver="lbfgs", C=1e20, tol=1e-8, max_iter=50)
+
+    proposed_logistic_regression.fit(X=X_transformed, y=neural_net["labels"][labels_idx].reshape(
+        (labels_idx.shape[0],)))
+
+    if neural_net['validation']:
+        labels_idx = neural_net['validate']
+        if neural_net["predictors_cont"] is not None:
+            x_quant_test = neural_net["predictors_cont"][labels_idx]
+        else:
+            x_quant_test = None
+        if neural_net["predictors_qual"] is not None:
+            x_qual_test = neural_net["predictors_qual"][labels_idx]
+        else:
+            x_qual_test = None
+        proba = _from_weights_to_proba_test(when="train",
+                                            d_cont=d_cont,
+                                            d_qual=d_qual,
+                                            m_cont=neural_net["m_cont"],
+                                            history=history,
+                                            x_quant_test=x_quant_test,
+                                            x_qual_test=x_qual_test,
+                                            n_test=neural_net['validate'].shape[0])
+        X_transformed = np.ones((len(neural_net['validate']), 1))
         for j in range(d_cont + d_qual):
-            results[j] = np.argmax(proba[j][0], axis=1)
+            results[j] = np.argmax(proba[j], axis=1)
             X_transformed = np.concatenate(
                 (X_transformed,
-                 sk.preprocessing.OneHotEncoder(categories='auto', sparse=False, handle_unknown="ignore").fit_transform(
+                 encoders[j].transform(
                      X=results[j].reshape(-1, 1))),
                 axis=1)
 
-        proposed_logistic_regression = sk.linear_model.LogisticRegression(
-            fit_intercept=False, solver="lbfgs", C=1e20, tol=1e-8, max_iter=50)
-
-        proposed_logistic_regression.fit(X=X_transformed, y=neural_net["labels"][neural_net["train"]].reshape(
-            (neural_net["train"].shape[0],)))
-        if neural_net["criterion"] in ['aic', 'bic']:
-            loglik = sk.metrics.log_loss(
-                neural_net["labels"],
-                proposed_logistic_regression.predict_proba(X=X_transformed)[:, 1],
-                normalize=False
-            )
-            if neural_net["validation"]:
-                performance = 2 * loglik
-                print("\n")
-                logger.info("Current likelihood on validation set: " + str(performance / 2.0))
-            elif neural_net["criterion"] == "bic":
-                performance = 2 * loglik + proposed_logistic_regression.coef_.shape[1] * np.log(neural_net["n"])
-                print("\n")
-                logger.info("Current BIC on training set: " + str(- performance))
-            else:
-                performance = 2 * loglik + 2 * proposed_logistic_regression.coef_.shape[1]
-                print("\n")
-                logger.info("Current AIC on training set: " + str(- performance))
+    if neural_net["criterion"] in ['aic', 'bic']:
+        loglik = sk.metrics.log_loss(
+            neural_net["labels"][labels_idx],
+            proposed_logistic_regression.predict_proba(X=X_transformed)[:, 1],
+            normalize=False
+        )
+        if neural_net["validation"]:
+            performance = 2 * loglik
+            print("\n")
+            logger.info("Current likelihood on validation set: " + str(performance / 2.0))
+        elif neural_net["criterion"] == "bic":
+            performance = 2 * loglik + proposed_logistic_regression.coef_.shape[1] * np.log(
+                labels_idx.shape[0])
+            print("\n")
+            logger.info("Current BIC on training set: " + str(- performance))
         else:
-            msg = "Test evaluation for criterion " + neural_net["criterion"] + " not implemented"
-            logger.error(msg)
-            raise NotImplementedError(msg)
-        predicted = proposed_logistic_regression.predict_proba(X_transformed)[:, 1]
-
+            performance = 2 * loglik + 2 * proposed_logistic_regression.coef_.shape[1]
+            print("\n")
+            logger.info("Current AIC on training set: " + str(- performance))
     else:
-        msg = "Test evaluation for NN not implemented"
-        logger.error(msg)
-        raise NotImplementedError(msg)
+        performance = sk.metrics.roc_auc_score(
+            y_true=neural_net['labels'][labels_idx],
+            y_score=proposed_logistic_regression.predict_proba(X=X_transformed)[:, 1])
+        print("\n")
+        logger.info("Current Gini on training set: " + str(performance))
+
+    predicted = proposed_logistic_regression.predict_proba(X_transformed)[:, 1]
 
     return performance, predicted
 

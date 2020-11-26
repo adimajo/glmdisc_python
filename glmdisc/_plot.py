@@ -2,11 +2,11 @@
 # -*- coding: utf-8 -*-
 """plot method for class glmdisc
 """
-import pandas as pd
 import matplotlib.pyplot as plt
-from pygam import LogisticGAM
 import numpy as np
+import pandas as pd
 from loguru import logger
+from pygam import LogisticGAM
 
 
 def _plot_disc(self, predictors_cont_number, predictors_qual_number):

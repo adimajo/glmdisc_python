@@ -4,11 +4,11 @@
 """
 import numpy as np
 import sklearn as sk
-from scipy import stats
 from loguru import logger
-from glmdisc._fitSEM import _fit_sem
-from glmdisc._fitNN import _fit_nn
+from scipy import stats
 
+from glmdisc._fitNN import _fit_nn
+from glmdisc._fitSEM import _fit_sem
 
 NUMPY_NDARRAY_INPUTS = 'glmdisc only supports numpy.ndarray inputs'
 

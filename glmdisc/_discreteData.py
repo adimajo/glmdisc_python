@@ -2,8 +2,9 @@
 # -*- coding: utf-8 -*-
 """discrete_data method for the glmdisc class.
 """
-from glmdisc._discretizeDummy import discretize_dummy
 from loguru import logger
+
+from glmdisc._discretizeDummy import discretize_dummy
 
 CERTAINLY_OVERFIT_ = "N.B.: glmdisc most certainly overfit the training set!"
 

@@ -36,7 +36,8 @@ jobs:
         pipenv run flake8 . --count --exit-zero --extend-ignore=W503,W50 --max-complexity=10 --max-line-length=120 --statistics --exclude=tests/conftest.py
     - name: Test with coverage and pytest
       run: |
-        pipenv run coverage run -m pytest
+        pipenv run coverage run --source glmdisc/ -m pytest
+        pipenv run coverage report
     - name: Build and check package
       run: |
         pipenv run pipenv-setup sync --dev

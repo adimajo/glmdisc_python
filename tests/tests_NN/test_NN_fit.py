@@ -22,9 +22,9 @@ def test_kwargs():
               predictors_qual=None,
               labels=y,
               plot=True,
-              optim=Adagrad(),
+              optimizer=Adagrad(),
               callbacks=EarlyStopping())
-    assert isinstance(model.model_nn.optimizer, tensorflow.python.keras.optimizer_v2.adam.Adam)
+    assert isinstance(model.model_nn.optimizer, tensorflow.python.keras.optimizer_v2.adagrad.Adagrad)
     assert isinstance(model.callbacks[-1], tensorflow.python.keras.callbacks.EarlyStopping)
 
 
@@ -32,7 +32,7 @@ def test_args_fit():
     n = 100
     d = 2
     x, y, theta = glmdisc.Glmdisc.generate_data(n, d)
-    model = glmdisc.Glmdisc(algorithm="NN")
+    model = glmdisc.Glmdisc(algorithm="NN", criterion="gini", test=False, validation=False)
     cuts = ([0, 0.333, 0.666, 1])
     xd = np.ndarray.copy(x)
 
@@ -228,7 +228,7 @@ def test_not_fit():
     n = 100
     d = 2
     x, y, theta = glmdisc.Glmdisc.generate_data(n, d)
-    model = glmdisc.Glmdisc(algorithm="NN")
+    model = glmdisc.Glmdisc(algorithm="NN", test=False, validation=False)
     for i in range(100):
         random.seed(i)
         np.random.seed(i)

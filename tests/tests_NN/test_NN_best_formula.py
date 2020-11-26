@@ -22,7 +22,11 @@ def test_best_formula(caplog):
     assert len(formula) == 2 * d
     for j in range(2 * d):
         assert isinstance(formula[j], list)
-    assert "No cut-points found for continuous variable 0" in caplog.records[-4].message
-    assert "No cut-points found for continuous variable 1" in caplog.records[-3].message
-    # assert "No regroupments made for categorical variable 0" in caplog.records[-2].message
-    # assert "No regroupments made for categorical variable 1" in caplog.records[-1].message
+    assert ("No cut-points found for continuous variable 0" in caplog.records[-4].message) | \
+        ("Cut-points found for continuous variable 0" in caplog.records[-4].message)
+    assert ("No cut-points found for continuous variable 1" in caplog.records[-3].message) | \
+        ("Cut-points found for continuous variable 1" in caplog.records[-4].message)
+    assert ("No regroupments made for categorical variable 0" in caplog.records[-2].message) | \
+        ("Regroupments made for categorical variable 0" in caplog.records[-2].message)
+    assert ("No regroupments made for categorical variable 1" in caplog.records[-1].message) | \
+        ("Regroupments made for categorical variable 1" in caplog.records[-1].message)
