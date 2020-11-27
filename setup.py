@@ -102,7 +102,6 @@ if __name__ == "__main__":
             "Programming Language :: Python :: 3 :: Only",
             "Programming Language :: Python :: 3.7",
             "Programming Language :: Python :: 3.8",
-            "Programming Language :: Python :: 3.9",
         ],
         keywords="discretization logistic regression levels grouping",
         packages=find_packages(exclude=["contrib", "docs", "tests", "examples", "venv"]),
