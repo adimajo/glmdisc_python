@@ -157,10 +157,12 @@
 <span class="sd">&quot;&quot;&quot;discretize method for glmdisc class.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">Counter</span>
-<span class="kn">import</span> <span class="nn">sklearn</span> <span class="k">as</span> <span class="nn">sk</span>
-<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">stats</span>
+
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">sklearn</span> <span class="k">as</span> <span class="nn">sk</span>
 <span class="kn">from</span> <span class="nn">loguru</span> <span class="kn">import</span> <span class="n">logger</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">stats</span>
+
 <span class="kn">import</span> <span class="nn">glmdisc</span>
 <span class="kn">from</span> <span class="nn">glmdisc._fitNN</span> <span class="kn">import</span> <span class="n">_from_weights_to_proba_test</span>
 
@@ -287,15 +289,18 @@
 <span class="sd">        (also in a numpy &quot;string&quot; array). Can be provided</span>
 <span class="sd">        either here or with the __init__ method.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">predictors_trans</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_qual</span><span class="p">))</span>
-    <span class="n">predictors_qual_dummy</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">predictors_qual</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">predictors_trans</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">predictors_qual</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_qual</span><span class="p">))</span>
+        <span class="n">predictors_qual_dummy</span> <span class="o">=</span> <span class="p">[]</span>
 
-    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_qual</span><span class="p">):</span>
-        <span class="c1"># Label encoding of qualitative input</span>
-        <span class="n">predictors_trans</span><span class="p">[:,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">affectations</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_cont</span><span class="p">]</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span>
-            <span class="n">predictors_qual</span><span class="p">[:,</span> <span class="n">j</span><span class="p">]))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
-        <span class="n">predictors_qual_dummy</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">one_hot_encoders_nn</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">predictors_trans</span><span class="p">[:,</span> <span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">todense</span><span class="p">())))</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_qual</span><span class="p">):</span>
+            <span class="c1"># Label encoding of qualitative input</span>
+            <span class="n">predictors_trans</span><span class="p">[:,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">affectations</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_cont</span><span class="p">]</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span>
+                <span class="n">predictors_qual</span><span class="p">[:,</span> <span class="n">j</span><span class="p">]))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+            <span class="n">predictors_qual_dummy</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model_nn</span><span class="p">[</span><span class="s2">&quot;one_hot_encoders_nn&quot;</span><span class="p">][</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">predictors_trans</span><span class="p">[:,</span> <span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">todense</span><span class="p">())))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">predictors_trans</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="n">n_test</span> <span class="o">=</span> <span class="n">_check_args_discretize_nn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                                        <span class="n">predictors_cont</span><span class="p">,</span>
@@ -304,7 +309,7 @@
     <span class="n">proba</span> <span class="o">=</span> <span class="n">_from_weights_to_proba_test</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_cont</span><span class="p">,</span>
                                         <span class="bp">self</span><span class="o">.</span><span class="n">d_qual</span><span class="p">,</span>
                                         <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">m_start</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_cont</span><span class="p">,</span>
-                                        <span class="bp">self</span><span class="o">.</span><span class="n">callbacks</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                                        <span class="bp">self</span><span class="o">.</span><span class="n">model_nn</span><span class="p">[</span><span class="s2">&quot;callbacks&quot;</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span>
                                         <span class="n">predictors_cont</span><span class="p">,</span>
                                         <span class="n">predictors_trans</span><span class="p">,</span>
                                         <span class="n">n_test</span><span class="p">)</span>
@@ -332,7 +337,7 @@
 <span class="sd">        either here or with the __init__ method.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">check_is_fitted</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_check_is_fitted</span><span class="p">()</span>
 
     <span class="n">glmdisc</span><span class="o">.</span><span class="n">_fit</span><span class="o">.</span><span class="n">_check_args</span><span class="p">(</span><span class="n">predictors_cont</span><span class="o">=</span><span class="n">predictors_cont</span><span class="p">,</span>
                              <span class="n">predictors_qual</span><span class="o">=</span><span class="n">predictors_qual</span><span class="p">,</span>

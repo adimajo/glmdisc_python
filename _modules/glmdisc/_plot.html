@@ -156,11 +156,11 @@
 <span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="sd">&quot;&quot;&quot;plot method for class glmdisc</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="kn">from</span> <span class="nn">pygam</span> <span class="kn">import</span> <span class="n">LogisticGAM</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">from</span> <span class="nn">loguru</span> <span class="kn">import</span> <span class="n">logger</span>
+<span class="kn">from</span> <span class="nn">pygam</span> <span class="kn">import</span> <span class="n">LogisticGAM</span>
 
 
 <span class="k">def</span> <span class="nf">_plot_disc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">predictors_cont_number</span><span class="p">,</span> <span class="n">predictors_qual_number</span><span class="p">):</span>

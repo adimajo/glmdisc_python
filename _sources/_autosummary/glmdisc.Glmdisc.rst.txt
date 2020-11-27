@@ -15,7 +15,6 @@ glmdisc.Glmdisc
    
       ~Glmdisc.__init__
       ~Glmdisc.best_formula
-      ~Glmdisc.check_is_fitted
       ~Glmdisc.discrete_data
       ~Glmdisc.discretize
       ~Glmdisc.discretize_dummy

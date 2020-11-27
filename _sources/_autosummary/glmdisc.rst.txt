@@ -1,4 +1,4 @@
-glmdisc
+﻿glmdisc
 =======
 
 .. automodule:: glmdisc

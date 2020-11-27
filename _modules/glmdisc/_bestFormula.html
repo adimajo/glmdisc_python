@@ -156,10 +156,11 @@
 <span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="sd">&quot;&quot;&quot;best_formula method for glmdisc class.</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">loguru</span> <span class="kn">import</span> <span class="n">logger</span>
 <span class="kn">from</span> <span class="nn">heapq</span> <span class="kn">import</span> <span class="n">nlargest</span>
 <span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">combinations</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">loguru</span> <span class="kn">import</span> <span class="n">logger</span>
 
 
 <span class="k">def</span> <span class="nf">_best_formula_cont_sem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">emap_best</span><span class="p">):</span>
@@ -183,7 +184,7 @@
 
 <span class="k">def</span> <span class="nf">_best_formula_cont_nn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">emap_best</span><span class="p">):</span>
     <span class="n">best_disc</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">best_weights</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">callbacks</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">best_weights</span>
+    <span class="n">best_weights</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_nn</span><span class="p">[</span><span class="s2">&quot;callbacks&quot;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">best_weights</span>
     <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_cont</span><span class="p">):</span>
         <span class="n">list_modalites</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">emap_best</span><span class="p">[:,</span> <span class="n">j</span><span class="p">])</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">list_modalites</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>

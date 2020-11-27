@@ -156,8 +156,9 @@
 <span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="sd">&quot;&quot;&quot;discrete_data method for the glmdisc class.</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">from</span> <span class="nn">glmdisc._discretizeDummy</span> <span class="kn">import</span> <span class="n">discretize_dummy</span>
 <span class="kn">from</span> <span class="nn">loguru</span> <span class="kn">import</span> <span class="n">logger</span>
+
+<span class="kn">from</span> <span class="nn">glmdisc._discretizeDummy</span> <span class="kn">import</span> <span class="n">discretize_dummy</span>
 
 <span class="n">CERTAINLY_OVERFIT_</span> <span class="o">=</span> <span class="s2">&quot;N.B.: glmdisc most certainly overfit the training set!&quot;</span>
 
@@ -186,13 +187,13 @@
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">DISCRETIZED_VALIDATION_SET_</span><span class="p">)</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">MIGHT_OVERFIT_</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">discretize_dummy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                                    <span class="bp">self</span><span class="o">.</span><span class="n">predictors_cont</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">validate</span><span class="p">,</span> <span class="p">:],</span>
-                                    <span class="bp">self</span><span class="o">.</span><span class="n">predictors_qual</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">validate</span><span class="p">,</span> <span class="p">:])</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">predictors_cont</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">validation_rows</span><span class="p">,</span> <span class="p">:],</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">predictors_qual</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">validation_rows</span><span class="p">,</span> <span class="p">:])</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">DISCRETIZED_TRAINING_SET_</span><span class="p">)</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">CERTAINLY_OVERFIT_</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">discretize_dummy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                                <span class="bp">self</span><span class="o">.</span><span class="n">predictors_cont</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">train</span><span class="p">,</span> <span class="p">:],</span>
-                                <span class="bp">self</span><span class="o">.</span><span class="n">predictors_qual</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">train</span><span class="p">,</span> <span class="p">:])</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">predictors_cont</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">train_rows</span><span class="p">,</span> <span class="p">:],</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">predictors_qual</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">train_rows</span><span class="p">,</span> <span class="p">:])</span>
     <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">predictors_cont</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">test</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">DISCRETIZED_TEST_SET_</span><span class="p">)</span>
@@ -203,12 +204,12 @@
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">DISCRETIZED_VALIDATION_SET_</span><span class="p">)</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">MIGHT_OVERFIT_</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">discretize_dummy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                                    <span class="bp">self</span><span class="o">.</span><span class="n">predictors_cont</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">validate</span><span class="p">,</span> <span class="p">:],</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">predictors_cont</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">validation_rows</span><span class="p">,</span> <span class="p">:],</span>
                                     <span class="kc">None</span><span class="p">)</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">DISCRETIZED_TRAINING_SET_</span><span class="p">)</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">CERTAINLY_OVERFIT_</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">discretize_dummy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                                <span class="bp">self</span><span class="o">.</span><span class="n">predictors_cont</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">train</span><span class="p">,</span> <span class="p">:],</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">predictors_cont</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">train_rows</span><span class="p">,</span> <span class="p">:],</span>
                                 <span class="kc">None</span><span class="p">)</span>
     <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">predictors_qual</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">test</span><span class="p">:</span>
@@ -221,12 +222,12 @@
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">MIGHT_OVERFIT_</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">discretize_dummy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                                     <span class="kc">None</span><span class="p">,</span>
-                                    <span class="bp">self</span><span class="o">.</span><span class="n">predictors_qual</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">validate</span><span class="p">,</span> <span class="p">:])</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">predictors_qual</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">validation_rows</span><span class="p">,</span> <span class="p">:])</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">DISCRETIZED_TRAINING_SET_</span><span class="p">)</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">CERTAINLY_OVERFIT_</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">discretize_dummy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                                 <span class="kc">None</span><span class="p">,</span>
-                                <span class="bp">self</span><span class="o">.</span><span class="n">predictors_qual</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">train</span><span class="p">,</span> <span class="p">:])</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">predictors_qual</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">train_rows</span><span class="p">,</span> <span class="p">:])</span>
 </pre></div>
 
            </div>

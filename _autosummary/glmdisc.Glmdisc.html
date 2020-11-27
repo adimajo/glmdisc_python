@@ -90,7 +90,6 @@
 <li class="toctree-l1 current"><a class="reference internal" href="glmdisc.html">glmdisc</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">glmdisc.Glmdisc</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="glmdisc.Glmdisc.best_formula.html">glmdisc.Glmdisc.best_formula</a></li>
-<li class="toctree-l3"><a class="reference internal" href="glmdisc.Glmdisc.check_is_fitted.html">glmdisc.Glmdisc.check_is_fitted</a></li>
 <li class="toctree-l3"><a class="reference internal" href="glmdisc.Glmdisc.discrete_data.html">glmdisc.Glmdisc.discrete_data</a></li>
 <li class="toctree-l3"><a class="reference internal" href="glmdisc.Glmdisc.discretize.html">glmdisc.Glmdisc.discretize</a></li>
 <li class="toctree-l3"><a class="reference internal" href="glmdisc.Glmdisc.discretize_dummy.html">glmdisc.Glmdisc.discretize_dummy</a></li>
@@ -100,7 +99,7 @@
 <li class="toctree-l3"><a class="reference internal" href="glmdisc.Glmdisc.predict.html">glmdisc.Glmdisc.predict</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="glmdisc.Glmdisc.check_is_fitted.html">glmdisc.Glmdisc.check_is_fitted</a></li>
+<li class="toctree-l2"><a class="reference internal" href="glmdisc.Glmdisc._check_is_fitted.html">glmdisc.Glmdisc._check_is_fitted</a></li>
 <li class="toctree-l2"><a class="reference internal" href="glmdisc.Glmdisc.best_formula.html">glmdisc.Glmdisc.best_formula</a></li>
 <li class="toctree-l2"><a class="reference internal" href="glmdisc.Glmdisc.discrete_data.html">glmdisc.Glmdisc.discrete_data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="glmdisc.Glmdisc.discretize.html">glmdisc.Glmdisc.discretize</a></li>
@@ -342,28 +341,25 @@ best_encoder_emap (list): The label encoder of each of the best_link.</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="glmdisc.Glmdisc.best_formula.html#glmdisc.Glmdisc.best_formula" title="glmdisc.Glmdisc.best_formula"><code class="xref py py-obj docutils literal notranslate"><span class="pre">best_formula</span></code></a>()</p></td>
 <td><p>Returns the best quantization found by the MCMC and prints it.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="glmdisc.Glmdisc.check_is_fitted.html#glmdisc.Glmdisc.check_is_fitted" title="glmdisc.Glmdisc.check_is_fitted"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_is_fitted</span></code></a>()</p></td>
-<td><p>Perform is_fitted validation for estimator.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="glmdisc.Glmdisc.discrete_data.html#glmdisc.Glmdisc.discrete_data" title="glmdisc.Glmdisc.discrete_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">discrete_data</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="glmdisc.Glmdisc.discrete_data.html#glmdisc.Glmdisc.discrete_data" title="glmdisc.Glmdisc.discrete_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">discrete_data</span></code></a>()</p></td>
 <td><p>Returns the best discrete data (train, validation or test) found by the MCMC.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="glmdisc.Glmdisc.discretize.html#glmdisc.Glmdisc.discretize" title="glmdisc.Glmdisc.discretize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">discretize</span></code></a>(predictors_cont, predictors_qual)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="glmdisc.Glmdisc.discretize.html#glmdisc.Glmdisc.discretize" title="glmdisc.Glmdisc.discretize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">discretize</span></code></a>(predictors_cont, predictors_qual)</p></td>
 <td><p>Discretizes new continuous and categorical features using a previously fitted glmdisc object.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="glmdisc.Glmdisc.discretize_dummy.html#glmdisc.Glmdisc.discretize_dummy" title="glmdisc.Glmdisc.discretize_dummy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">discretize_dummy</span></code></a>(predictors_cont, …)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="glmdisc.Glmdisc.discretize_dummy.html#glmdisc.Glmdisc.discretize_dummy" title="glmdisc.Glmdisc.discretize_dummy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">discretize_dummy</span></code></a>(predictors_cont, …)</p></td>
 <td><p>Discretizes new continuous and categorical features using a previously fitted glmdisc object as Dummy Variables usable with the best_reglog object.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="glmdisc.Glmdisc.fit.html#glmdisc.Glmdisc.fit" title="glmdisc.Glmdisc.fit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit</span></code></a>(predictors_cont, predictors_qual, labels)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="glmdisc.Glmdisc.fit.html#glmdisc.Glmdisc.fit" title="glmdisc.Glmdisc.fit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit</span></code></a>(predictors_cont, predictors_qual, labels)</p></td>
 <td><p>Fits the Glmdisc object.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="glmdisc.Glmdisc.generate_data.html#glmdisc.Glmdisc.generate_data" title="glmdisc.Glmdisc.generate_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">generate_data</span></code></a>(n, d[, theta, plot])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="glmdisc.Glmdisc.generate_data.html#glmdisc.Glmdisc.generate_data" title="glmdisc.Glmdisc.generate_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">generate_data</span></code></a>(n, d[, theta, plot])</p></td>
 <td><p>Generates some toy continuous data that gets discretized, and a label is drawn from a logistic regression given the discretized features.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="glmdisc.Glmdisc.plot.html#glmdisc.Glmdisc.plot" title="glmdisc.Glmdisc.plot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot</span></code></a>([predictors_cont_number, …])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="glmdisc.Glmdisc.plot.html#glmdisc.Glmdisc.plot" title="glmdisc.Glmdisc.plot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot</span></code></a>([predictors_cont_number, …])</p></td>
 <td><p>Plots the stepwise function associating the continuous features to their discretization, the groupings made and the interactions.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="glmdisc.Glmdisc.predict.html#glmdisc.Glmdisc.predict" title="glmdisc.Glmdisc.predict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">predict</span></code></a>(predictors_cont, predictors_qual)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="glmdisc.Glmdisc.predict.html#glmdisc.Glmdisc.predict" title="glmdisc.Glmdisc.predict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">predict</span></code></a>(predictors_cont, predictors_qual)</p></td>
 <td><p>Predicts the label values with new continuous and categorical features using a previously fitted glmdisc object.</p></td>
 </tr>
 </tbody>
@@ -422,28 +418,25 @@ only) to this variable’s number of factor levels. Defaults to 20.</p></li>
 <tr class="row-even"><td><p><a class="reference internal" href="glmdisc.Glmdisc.best_formula.html#glmdisc.Glmdisc.best_formula" title="glmdisc.Glmdisc.best_formula"><code class="xref py py-obj docutils literal notranslate"><span class="pre">best_formula</span></code></a>()</p></td>
 <td><p>Returns the best quantization found by the MCMC and prints it.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="glmdisc.Glmdisc.check_is_fitted.html#glmdisc.Glmdisc.check_is_fitted" title="glmdisc.Glmdisc.check_is_fitted"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_is_fitted</span></code></a>()</p></td>
-<td><p>Perform is_fitted validation for estimator.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="glmdisc.Glmdisc.discrete_data.html#glmdisc.Glmdisc.discrete_data" title="glmdisc.Glmdisc.discrete_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">discrete_data</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="glmdisc.Glmdisc.discrete_data.html#glmdisc.Glmdisc.discrete_data" title="glmdisc.Glmdisc.discrete_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">discrete_data</span></code></a>()</p></td>
 <td><p>Returns the best discrete data (train, validation or test) found by the MCMC.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="glmdisc.Glmdisc.discretize.html#glmdisc.Glmdisc.discretize" title="glmdisc.Glmdisc.discretize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">discretize</span></code></a>(predictors_cont, predictors_qual)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="glmdisc.Glmdisc.discretize.html#glmdisc.Glmdisc.discretize" title="glmdisc.Glmdisc.discretize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">discretize</span></code></a>(predictors_cont, predictors_qual)</p></td>
 <td><p>Discretizes new continuous and categorical features using a previously fitted glmdisc object.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="glmdisc.Glmdisc.discretize_dummy.html#glmdisc.Glmdisc.discretize_dummy" title="glmdisc.Glmdisc.discretize_dummy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">discretize_dummy</span></code></a>(predictors_cont, …)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="glmdisc.Glmdisc.discretize_dummy.html#glmdisc.Glmdisc.discretize_dummy" title="glmdisc.Glmdisc.discretize_dummy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">discretize_dummy</span></code></a>(predictors_cont, …)</p></td>
 <td><p>Discretizes new continuous and categorical features using a previously fitted glmdisc object as Dummy Variables usable with the best_reglog object.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="glmdisc.Glmdisc.fit.html#glmdisc.Glmdisc.fit" title="glmdisc.Glmdisc.fit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit</span></code></a>(predictors_cont, predictors_qual, labels)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="glmdisc.Glmdisc.fit.html#glmdisc.Glmdisc.fit" title="glmdisc.Glmdisc.fit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit</span></code></a>(predictors_cont, predictors_qual, labels)</p></td>
 <td><p>Fits the Glmdisc object.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="glmdisc.Glmdisc.generate_data.html#glmdisc.Glmdisc.generate_data" title="glmdisc.Glmdisc.generate_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">generate_data</span></code></a>(n, d[, theta, plot])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="glmdisc.Glmdisc.generate_data.html#glmdisc.Glmdisc.generate_data" title="glmdisc.Glmdisc.generate_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">generate_data</span></code></a>(n, d[, theta, plot])</p></td>
 <td><p>Generates some toy continuous data that gets discretized, and a label is drawn from a logistic regression given the discretized features.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="glmdisc.Glmdisc.plot.html#glmdisc.Glmdisc.plot" title="glmdisc.Glmdisc.plot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot</span></code></a>([predictors_cont_number, …])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="glmdisc.Glmdisc.plot.html#glmdisc.Glmdisc.plot" title="glmdisc.Glmdisc.plot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot</span></code></a>([predictors_cont_number, …])</p></td>
 <td><p>Plots the stepwise function associating the continuous features to their discretization, the groupings made and the interactions.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="glmdisc.Glmdisc.predict.html#glmdisc.Glmdisc.predict" title="glmdisc.Glmdisc.predict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">predict</span></code></a>(predictors_cont, predictors_qual)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="glmdisc.Glmdisc.predict.html#glmdisc.Glmdisc.predict" title="glmdisc.Glmdisc.predict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">predict</span></code></a>(predictors_cont, predictors_qual)</p></td>
 <td><p>Predicts the label values with new continuous and categorical features using a previously fitted glmdisc object.</p></td>
 </tr>
 </tbody>

@@ -158,7 +158,7 @@
 <span class="sd">    :toctree:</span>
 
 <span class="sd">    Glmdisc</span>
-<span class="sd">    Glmdisc.check_is_fitted</span>
+<span class="sd">    Glmdisc._check_is_fitted</span>
 <span class="sd">    Glmdisc.best_formula</span>
 <span class="sd">    Glmdisc.discrete_data</span>
 <span class="sd">    Glmdisc.discretize</span>
@@ -391,19 +391,21 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">predictors_cont</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">predictors_qual</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">predictors_labels</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">labels</span> <span class="o">=</span> <span class="kc">None</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">plot_fit</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">criterion_iter</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">best_link</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">best_reglog</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_nn</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">affectations</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">best_encoder_emap</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">performance</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">train</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">validate</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">train_rows</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">validation_rows</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">test_rows</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span></div>
 
-<div class="viewcode-block" id="Glmdisc.check_is_fitted"><a class="viewcode-back" href="../_autosummary/glmdisc.Glmdisc.check_is_fitted.html#glmdisc.Glmdisc.check_is_fitted">[docs]</a>    <span class="k">def</span> <span class="nf">check_is_fitted</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Glmdisc._check_is_fitted"><a class="viewcode-back" href="../_autosummary/glmdisc.Glmdisc._check_is_fitted.html#glmdisc.Glmdisc._check_is_fitted">[docs]</a>    <span class="k">def</span> <span class="nf">_check_is_fitted</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Perform is_fitted validation for estimator.</span>
 <span class="sd">        Checks if the estimator is fitted by verifying the presence of</span>
 <span class="sd">        fitted attributes (ending with a trailing underscore) and otherwise</span>
@@ -422,12 +424,10 @@
                                               <span class="s2">&quot;it means it did not find a better solution than &quot;</span>
                                               <span class="s2">&quot;the random initialization.&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">neural_net</span>
-            <span class="k">except</span> <span class="ne">AttributeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="n">NotFittedError</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; If you did call fit, try increasing iter: &quot;</span>
-                                              <span class="s2">&quot;it means it did not find a better solution than &quot;</span>
-                                              <span class="s2">&quot;the random initialization.&quot;</span><span class="p">)</span></div>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_nn</span><span class="p">[</span><span class="s2">&quot;callbacks&quot;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">best_weights</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">NotFittedError</span><span class="p">(</span><span class="s2">&quot; If you did call fit, try increasing iter: &quot;</span>
+                                     <span class="s2">&quot;it means it did not find a better solution than &quot;</span>
+                                     <span class="s2">&quot;the random initialization.&quot;</span><span class="p">)</span></div>
 
     <span class="c1"># Imported methods</span>
     <span class="kn">from</span> <span class="nn">._bestFormula</span> <span class="kn">import</span> <span class="n">best_formula</span>
