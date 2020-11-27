@@ -168,7 +168,7 @@ def _fit_sem(self, edisc, predictors_trans, continu_complete_case, **kwargs):
                 # On apprend q_j | x_j
                 link[j].fit(y=edisc[self.train_rows, :][continu_complete_case[self.train_rows, j], j],
                             X=self.predictors_cont[self.train_rows, :][continu_complete_case[self.train_rows,
-                                                                                        j], j].reshape(-1, 1))
+                                                                                             j], j].reshape(-1, 1))
 
                 y_p = np.zeros((self.n, len(m[j])))
 
@@ -190,8 +190,8 @@ def _fit_sem(self, edisc, predictors_trans, continu_complete_case, **kwargs):
                 # On gère le cas où une ou plusieurs modalités ont disparu de train
                 if t.shape[1] < y_p.shape[1]:
                     modalites_manquantes = np.in1d(m[j],
-                                                   np.unique(edisc[self.train_rows, :][continu_complete_case[self.train_rows, j],
-                                                                                  j]))
+                                                   np.unique(edisc[self.train_rows,
+                                                             :][continu_complete_case[self.train_rows, j], j]))
                     t2 = np.zeros((sum(continu_complete_case[:, j]), len(m[j])))
                     t2[:, modalites_manquantes] = t
                     t = t2.copy()

@@ -38,10 +38,10 @@ def find_version(file_path, file_name):
     raise RuntimeError("Unable to find version string.")
 
 
-def install_requires():
-    with open(os.path.join(here, 'requirements.txt')) as fp:
-        install_requires = [x.split("/")[-1] for x in fp.read().splitlines()[1:]]
-    return install_requires
+# def install_requires():
+#     with open(os.path.join(here, 'requirements.txt')) as fp:
+#         install_requires = [x.split("/")[-1] for x in fp.read().splitlines()[1:]]
+#     return install_requires
 
 
 if __name__ == "__main__":
@@ -105,9 +105,9 @@ if __name__ == "__main__":
         ],
         keywords="discretization logistic regression levels grouping",
         packages=find_packages(exclude=["contrib", "docs", "tests", "examples", "venv"]),
-        install_requires=install_requires(),
+        install_requires=[],
         test_suite="pytest-runner",
-        tests_require=["pytest"],
+        tests_require=[],
         # If there are data files included in your packages that need to be
         # installed, specify them here.
         #
