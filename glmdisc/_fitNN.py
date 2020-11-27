@@ -65,6 +65,8 @@ class LossHistory(Callback):
         self.losses = None
         self.best_criterion = None
         self.best_outputs = None
+        self.best_encoders = None
+        self.best_reglog = None
 
     def on_train_begin(self, logs=None):
         """
@@ -99,10 +101,13 @@ class LossHistory(Callback):
             self.current_weights.append(self.neural_net["liste_layers_quant"][j].get_weights())
         for j in range(self.d_qual):
             self.current_weights.append(self.neural_net["liste_layers_qual"][j].get_weights())
-        self.losses.append(_evaluate_disc(self, self.d_cont, self.d_qual, self.neural_net)[0])
+        performance, _, encoders, proposed_logistic_regression = _evaluate_disc(self, self.d_cont, self.d_qual, self.neural_net)
+        self.losses.append(performance)
         if len(self.losses) > burn_in and self.losses[-1] < self.best_criterion:
             self.best_weights = []
+            self.best_encoders = encoders
             self.best_outputs = []
+            self.best_reglog = proposed_logistic_regression
             self.best_criterion = self.losses[-1]
             for j in range(self.d_cont):
                 self.best_weights.append(self.current_weights[j])
@@ -335,7 +340,7 @@ def _evaluate_disc(history, d_cont, d_qual, neural_net):
 
     predicted = proposed_logistic_regression.predict_proba(X_transformed)[:, 1]
 
-    return performance, predicted
+    return performance, predicted, encoders, proposed_logistic_regression
 
 
 def _prepare_inputs(self, predictors_trans):
@@ -436,3 +441,5 @@ def _fit_nn(self, predictors_trans, **kwargs):
     optim = _parse_kwargs(self=self, **kwargs)
 
     _compile_and_fit_neural_net(self=self, optim=optim, list_predictors=list_predictors)
+
+    self.best_reglog = self.callbacks[1].best_reglog

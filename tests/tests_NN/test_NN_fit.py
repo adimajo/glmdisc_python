@@ -106,70 +106,13 @@ def test_calculate_shape_categorical():
     cuts = ([0, 0.16, 0.333, 0.5, 0.666, 0.85, 1])
     xd = np.ndarray.copy(x)
     for i in range(d):
-        xd[:, i] = pd.cut(x[:, i], bins=cuts, labels=[0, 1, 2])
+        xd[:, i] = pd.cut(x[:, i], bins=cuts, labels=[0, 1, 2, 3, 4, 5])
     model.fit(predictors_cont=None, predictors_qual=xd, labels=y, iter=11)
     continu_complete_case = model._calculate_shape()
     assert model.n == n
     assert model.d_cont == 0
     assert model.d_qual == d
     assert continu_complete_case is None
-
-
-def test_calculate_criterion():
-    n = 100
-    d = 2
-    x, y, theta = glmdisc.Glmdisc.generate_data(n, d)
-    model = glmdisc.Glmdisc(algorithm="NN", criterion="bic")
-    random.seed(1)
-    np.random.seed(1)
-    model.fit(predictors_cont=x, predictors_qual=None, labels=y, iter=11)
-    emap = np.resize(np.array([np.where(
-        np.random.multinomial(1,
-                              pvals=[0.33, 0.33, 0.34]))[0][0] + 1 for _ in range(n * d)]),
-                     (n, d))
-
-    current_encoder_emap = sk.preprocessing.OneHotEncoder()
-    current_encoder_emap.fit(X=emap.astype(str))
-
-    model_emap = sk.linear_model.LogisticRegression(solver='liblinear',
-                                                    C=1e40,
-                                                    tol=0.001,
-                                                    max_iter=25,
-                                                    warm_start=False)
-    model_emap.fit(X=current_encoder_emap.transform(emap.astype(str)),
-                   y=y)
-
-    modele_bic = model._calculate_criterion(emap, model_emap, current_encoder_emap)
-    assert modele_bic < 0
-
-    model = glmdisc.Glmdisc(algorithm="NN", criterion="aic")
-    random.seed(1)
-    np.random.seed(1)
-    model.fit(predictors_cont=x, predictors_qual=None, labels=y, iter=11)
-    assert math.isclose(model._calculate_criterion(emap, model_emap, current_encoder_emap), modele_bic)
-
-    model = glmdisc.Glmdisc(algorithm="NN", validation=False)
-    random.seed(1)
-    np.random.seed(1)
-    model.fit(predictors_cont=x, predictors_qual=None, labels=y, iter=11)
-    modele_bic = model._calculate_criterion(emap, model_emap, current_encoder_emap)
-
-    model = glmdisc.Glmdisc(algorithm="NN", criterion="aic", validation=False)
-    random.seed(1)
-    np.random.seed(1)
-    model.fit(predictors_cont=x, predictors_qual=None, labels=y, iter=11)
-    assert math.isclose(model._calculate_criterion(emap,
-                                                   model_emap,
-                                                   current_encoder_emap), modele_bic + (
-        math.log(model.n) - 2) * model_emap.coef_.shape[1])
-
-    model = glmdisc.Glmdisc(algorithm="NN", criterion="gini")
-    model.fit(predictors_cont=x, predictors_qual=None, labels=y, iter=11)
-    assert 0 <= model._calculate_criterion(emap, model_emap, current_encoder_emap) <= 1
-
-    model = glmdisc.Glmdisc(algorithm="NN", criterion="gini", validation=False)
-    model.fit(predictors_cont=x, predictors_qual=None, labels=y, iter=11)
-    assert 0 <= model._calculate_criterion(emap, model_emap, current_encoder_emap) <= 1
 
 
 def test_nan():

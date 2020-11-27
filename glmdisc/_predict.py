@@ -19,6 +19,6 @@ def predict(self, predictors_cont, predictors_qual):
         (also in a numpy "string" array). Can be provided
         either here or with the :code:`__init__` method.
     """
-    if self.algorithm == "SEM":
+    if (self.algorithm == "SEM") | (self.algorithm == "NN"):
         return self.best_reglog.predict_proba(self.discretize_dummy(predictors_cont, predictors_qual))
-    raise NotImplementedError
+    raise ValueError("No predict method for algorithm" + str(self.algorithm))

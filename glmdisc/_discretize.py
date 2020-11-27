@@ -135,15 +135,18 @@ def _discretize_nn(self, predictors_cont, predictors_qual):
         (also in a numpy "string" array). Can be provided
         either here or with the __init__ method.
     """
-    predictors_trans = np.zeros((self.n, self.d_qual))
-    predictors_qual_dummy = []
+    if predictors_qual is not None:
+        predictors_trans = np.zeros((predictors_qual.shape[0], self.d_qual))
+        predictors_qual_dummy = []
 
-    for j in range(self.d_qual):
-        # Label encoding of qualitative input
-        predictors_trans[:, j] = (self.affectations[j + self.d_cont].transform(
-            predictors_qual[:, j])).astype(int)
-        predictors_qual_dummy.append(np.squeeze(np.asarray(
-            self.one_hot_encoders_nn[j].transform(predictors_trans[:, j].reshape(-1, 1)).todense())))
+        for j in range(self.d_qual):
+            # Label encoding of qualitative input
+            predictors_trans[:, j] = (self.affectations[j + self.d_cont].transform(
+                predictors_qual[:, j])).astype(int)
+            predictors_qual_dummy.append(np.squeeze(np.asarray(
+                self.one_hot_encoders_nn[j].transform(predictors_trans[:, j].reshape(-1, 1)).todense())))
+    else:
+        predictors_trans = None
 
     n_test = _check_args_discretize_nn(self,
                                        predictors_cont,

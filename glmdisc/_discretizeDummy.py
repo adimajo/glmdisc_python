@@ -31,10 +31,11 @@ def discretize_dummy(self, predictors_cont, predictors_qual):
         results = self.discretize(predictors_cont, predictors_qual)
         emap_dummy = np.ones((results.shape[0], 1))
         for j in range(self.d_cont + self.d_qual):
-            results_dummy = sk.preprocessing.OneHotEncoder(categories='auto',
-                                                           sparse=False,
-                                                           handle_unknown="ignore").fit_transform(
-                X=results[:, j].reshape(-1, 1))
+            # results_dummy = sk.preprocessing.OneHotEncoder(categories='auto',
+            #                                                sparse=False,
+            #                                                handle_unknown="ignore").fit_transform(
+            #     X=results[:, j].reshape(-1, 1))
+            results_dummy = self.callbacks[1].best_encoders[j].transform(X=results[:, j].reshape(-1, 1))
             emap_dummy = np.concatenate(
                 (emap_dummy,
                  results_dummy),
