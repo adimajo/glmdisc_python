@@ -30,7 +30,7 @@ def _best_formula_cont_sem(self, emap_best):
 
 def _best_formula_cont_nn(self, emap_best):
     best_disc = []
-    best_weights = self.callbacks[1].best_weights
+    best_weights = self.model_nn["callbacks"][1].best_weights
     for j in range(self.d_cont):
         list_modalites = np.unique(emap_best[:, j])
         if len(list_modalites) <= 1:

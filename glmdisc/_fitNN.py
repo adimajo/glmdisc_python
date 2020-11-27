@@ -21,15 +21,18 @@ from tensorflow.keras.layers import concatenate
 
 
 def _plot_cont_soft_quant(self):
-    for j in range(self.neural_net["d_cont"]):
-        plt.xlim((np.nanmin(self.neural_net["predictors_cont"][:, j]),
-                  (np.nanmax(self.neural_net["predictors_cont"][:, j]))))
+    """
+    Plots the soft quantization while fitting
+    """
+    for j in range(self.glmdisc_object.d_cont):
+        plt.xlim((np.nanmin(self.glmdisc_object.predictors_cont[:, j]),
+                  (np.nanmax(self.glmdisc_object.predictors_cont[:, j]))))
         plt.ylim((0, 1))
         self.ax[j].clear()
         for k in range(self.best_outputs[j][0].shape[1]):
-            self.ax[j].plot(np.sort(self.neural_net["predictors_cont"][:, j]),
+            self.ax[j].plot(np.sort(self.glmdisc_object.predictors_cont[:, j]),
                             self.best_outputs[j][0][np.argsort(
-                                self.neural_net["predictors_cont"][:, j]), k],
+                                self.glmdisc_object.predictors_cont[:, j]), k],
                             color=['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w'][(k + 2) % 8])
         self.fig.canvas.draw()
         plt.pause(0.05)
@@ -39,7 +42,7 @@ class LossHistory(Callback):
     """
     Custom Callback to evaluate current quantization scheme as a logistic regression
     """
-    def __init__(self, d_cont, d_qual, neural_net):
+    def __init__(self, d_cont, d_qual, glmdisc_object):
         """
         Copying useful objects in self for function :code:`on_train_begin` and
         :code:`on_epoch_end` to which only self is provided.
@@ -48,18 +51,18 @@ class LossHistory(Callback):
         ----------
         d_cont: number of quantitative features
         d_qual: number of qualitative features
-        neural_net: dictionary of neural net structure
+        glmdisc_object: model
         """
         super().__init__()
-        self.plot_fit = neural_net['plot_fit']
+        self.plot_fit = glmdisc_object.plot_fit
         if self.plot_fit:
-            self.fig, self.ax = plt.subplots(neural_net["d_cont"])
+            self.fig, self.ax = plt.subplots(glmdisc_object.d_cont)
             self.fig.show()
             self.fig.canvas.draw()
 
         self.d_cont = d_cont
         self.d_qual = d_qual
-        self.neural_net = neural_net
+        self.glmdisc_object = glmdisc_object
         self.current_weights = None
         self.best_weights = None
         self.losses = None
@@ -81,6 +84,17 @@ class LossHistory(Callback):
         self.best_criterion = float("inf")
         self.best_outputs = []
 
+    def on_train_end(self, logs=None):
+        """
+        Initializes losses and best_outputs as empty lists, best_criterion as infinite.
+
+        Parameters
+        ----------
+        logs
+
+        """
+        del self.glmdisc_object
+
     def on_epoch_end(self, batch, logs=None):
         """
         Evaluates the proposed quantization scheme by going back to a "hard" quantization
@@ -98,10 +112,13 @@ class LossHistory(Callback):
         burn_in = 5
         self.current_weights = []
         for j in range(self.d_cont):
-            self.current_weights.append(self.neural_net["liste_layers_quant"][j].get_weights())
+            self.current_weights.append(self.glmdisc_object.model_nn["liste_layers_quant"][j].get_weights())
         for j in range(self.d_qual):
-            self.current_weights.append(self.neural_net["liste_layers_qual"][j].get_weights())
-        performance, _, encoders, proposed_logistic_regression = _evaluate_disc(self, self.d_cont, self.d_qual, self.neural_net)
+            self.current_weights.append(self.glmdisc_object.model_nn["liste_layers_qual"][j].get_weights())
+        performance, _, encoders, proposed_logistic_regression = _evaluate_disc(self,
+                                                                                self.d_cont,
+                                                                                self.d_qual,
+                                                                                self.glmdisc_object)
         self.losses.append(performance)
         if len(self.losses) > burn_in and self.losses[-1] < self.best_criterion:
             self.best_weights = []
@@ -112,25 +129,23 @@ class LossHistory(Callback):
             for j in range(self.d_cont):
                 self.best_weights.append(self.current_weights[j])
                 self.best_outputs.append(
-                    tf.keras.backend.function([self.neural_net["liste_layers_quant"][j].input],
-                                              [self.neural_net["liste_layers_quant"][j].output])(
-                        [self.neural_net["predictors_cont"][:, j, np.newaxis]]))
+                    tf.keras.backend.function([self.glmdisc_object.model_nn["liste_layers_quant"][j].input],
+                                              [self.glmdisc_object.model_nn["liste_layers_quant"][j].output])(
+                        [self.glmdisc_object.predictors_cont[:, j, np.newaxis]]))
             for j in range(self.d_qual):
                 self.best_weights.append(self.current_weights[j + self.d_cont])
                 self.best_outputs.append(
-                    tf.keras.backend.function([self.neural_net["liste_layers_qual"][j].input],
-                                              [self.neural_net["liste_layers_qual"][j].output])(
-                        [self.neural_net["predictors_qual_dummy"][j]]))
+                    tf.keras.backend.function([self.glmdisc_object.model_nn["liste_layers_qual"][j].input],
+                                              [self.glmdisc_object.model_nn["liste_layers_qual"][j].output])(
+                        [self.glmdisc_object.predictors_qual_dummy[j]]))
 
             if self.plot_fit:
                 _plot_cont_soft_quant(self)
 
 
-def _initialize_neural_net(self, predictors_qual_dummy):
+def _initialize_neural_net(self):
     """
     Constructs the neural network
-
-    .. todo:: shouldn't predictors_qual_dummy be stored in self?
     """
     m_cont = [self.m_start] * self.d_cont
     m_qual = [self.m_start] * (self.d_cont + self.d_qual)
@@ -173,29 +188,17 @@ def _initialize_neural_net(self, predictors_qual_dummy):
         liste_layers_qual_inputs[i] = liste_layers_qual[i](
             liste_inputs_qual[i])
 
-    self.neural_net = {
-        "n": self.n,
-        "d_cont": self.d_cont,
-        "m_cont": m_cont,
-        "d_qual": self.d_qual,
-        "labels": self.labels,
-        "predictors_cont": self.predictors_cont,
-        "predictors_qual": self.predictors_qual,
-        "predictors_qual_dummy": predictors_qual_dummy,
-        "train": self.train,
-        "validate": self.validate,
-        "validation": self.validation,
-        "criterion": self.criterion,
+    self.model_nn.update({
         "liste_inputs_quant": liste_inputs_quant,
         "liste_layers_quant": liste_layers_quant,
         "liste_layers_quant_inputs": liste_layers_quant_inputs,
         "liste_inputs_qual": liste_inputs_qual,
         "liste_layers_qual": liste_layers_qual,
         "liste_layers_qual_inputs": liste_layers_qual_inputs
-    }
+    })
 
 
-def _from_layers_to_proba_training(d_cont, d_qual, neural_net):
+def _from_layers_to_proba_training(d_cont, d_qual, glmdisc_object):
     """
     Calculates the probability of each level for each feature from the provided neural net for the training set.
 
@@ -203,7 +206,7 @@ def _from_layers_to_proba_training(d_cont, d_qual, neural_net):
     ----------
     d_cont: number of quantitative features
     d_qual: number of qualitative features
-    neural_net: neural net
+    glmdisc_object: model
 
     Returns
     -------
@@ -212,14 +215,14 @@ def _from_layers_to_proba_training(d_cont, d_qual, neural_net):
     results = [None] * (d_cont + d_qual)
 
     for j in range(d_cont):
-        results[j] = tf.keras.backend.function([neural_net["liste_layers_quant"][j].input],
-                                               [neural_net["liste_layers_quant"][j].output])(
-            [neural_net["predictors_cont"][neural_net["train"], j, np.newaxis]])
+        results[j] = tf.keras.backend.function([glmdisc_object.model_nn["liste_layers_quant"][j].input],
+                                               [glmdisc_object.model_nn["liste_layers_quant"][j].output])(
+            [glmdisc_object.predictors_cont[glmdisc_object.train_rows, j, np.newaxis]])
 
     for j in range(d_qual):
-        results[j + d_cont] = tf.keras.backend.function([neural_net["liste_layers_qual"][j].input],
-                                                        [neural_net["liste_layers_qual"][j].output])(
-            [neural_net["predictors_qual_dummy"][j][neural_net["train"]]])
+        results[j + d_cont] = tf.keras.backend.function([glmdisc_object.model_nn["liste_layers_qual"][j].input],
+                                                        [glmdisc_object.model_nn["liste_layers_qual"][j].output])(
+            [glmdisc_object.predictors_qual_dummy[j][glmdisc_object.train_rows]])
 
     return results
 
@@ -264,9 +267,9 @@ def _from_weights_to_proba_test(d_cont, d_qual, m_cont, history, x_quant_test, x
     return results
 
 
-def _evaluate_disc(history, d_cont, d_qual, neural_net):
-    labels_idx = neural_net['train']
-    proba = _from_layers_to_proba_training(d_cont, d_qual, neural_net)
+def _evaluate_disc(history, d_cont, d_qual, glmdisc_object):
+    labels_idx = glmdisc_object.train_rows
+    proba = _from_layers_to_proba_training(d_cont, d_qual, glmdisc_object)
     encoders = []
     X_transformed = np.ones((len(labels_idx), 1))
     results = [None] * (d_cont + d_qual)
@@ -282,28 +285,28 @@ def _evaluate_disc(history, d_cont, d_qual, neural_net):
     proposed_logistic_regression = sk.linear_model.LogisticRegression(
         fit_intercept=False, solver="lbfgs", C=1e20, tol=1e-8, max_iter=50)
 
-    proposed_logistic_regression.fit(X=X_transformed, y=neural_net["labels"][labels_idx].reshape(
+    proposed_logistic_regression.fit(X=X_transformed, y=glmdisc_object.labels[labels_idx].reshape(
         (labels_idx.shape[0],)))
 
-    if neural_net['validation']:
-        labels_idx = neural_net['validate']
-        if neural_net["predictors_cont"] is not None:
-            x_quant_test = neural_net["predictors_cont"][labels_idx]
+    if glmdisc_object.validation:
+        labels_idx = glmdisc_object.validation_rows
+        if glmdisc_object.predictors_cont is not None:
+            x_quant_test = glmdisc_object.predictors_cont[labels_idx]
         else:
             x_quant_test = None
-        if neural_net["predictors_qual"] is not None:
-            x_qual_test = neural_net["predictors_qual"][labels_idx]
+        if glmdisc_object.predictors_qual is not None:
+            x_qual_test = glmdisc_object.predictors_qual[labels_idx]
         else:
             x_qual_test = None
         proba = _from_weights_to_proba_test(when="train",
                                             d_cont=d_cont,
                                             d_qual=d_qual,
-                                            m_cont=neural_net["m_cont"],
+                                            m_cont=[glmdisc_object.m_start] * glmdisc_object.d_cont,
                                             history=history,
                                             x_quant_test=x_quant_test,
                                             x_qual_test=x_qual_test,
-                                            n_test=neural_net['validate'].shape[0])
-        X_transformed = np.ones((len(neural_net['validate']), 1))
+                                            n_test=glmdisc_object.validation_rows.shape[0])
+        X_transformed = np.ones((len(glmdisc_object.validation_rows), 1))
         for j in range(d_cont + d_qual):
             results[j] = np.argmax(proba[j], axis=1)
             X_transformed = np.concatenate(
@@ -312,17 +315,17 @@ def _evaluate_disc(history, d_cont, d_qual, neural_net):
                      X=results[j].reshape(-1, 1))),
                 axis=1)
 
-    if neural_net["criterion"] in ['aic', 'bic']:
+    if glmdisc_object.criterion in ['aic', 'bic']:
         loglik = sk.metrics.log_loss(
-            neural_net["labels"][labels_idx],
+            glmdisc_object.labels[labels_idx],
             proposed_logistic_regression.predict_proba(X=X_transformed)[:, 1],
             normalize=False
         )
-        if neural_net["validation"]:
+        if glmdisc_object.validation:
             performance = 2 * loglik
             print("\n")
             logger.info("Current likelihood on validation set: " + str(performance / 2.0))
-        elif neural_net["criterion"] == "bic":
+        elif glmdisc_object.criterion == "bic":
             performance = 2 * loglik + proposed_logistic_regression.coef_.shape[1] * np.log(
                 labels_idx.shape[0])
             print("\n")
@@ -333,7 +336,7 @@ def _evaluate_disc(history, d_cont, d_qual, neural_net):
             logger.info("Current AIC on training set: " + str(- performance))
     else:
         performance = sk.metrics.roc_auc_score(
-            y_true=neural_net['labels'][labels_idx],
+            y_true=glmdisc_object.labels[labels_idx],
             y_score=proposed_logistic_regression.predict_proba(X=X_transformed)[:, 1])
         print("\n")
         logger.info("Current Gini on training set: " + str(performance))
@@ -345,31 +348,31 @@ def _evaluate_disc(history, d_cont, d_qual, neural_net):
 
 def _prepare_inputs(self, predictors_trans):
     if self.predictors_qual is not None:
-        self.one_hot_encoders_nn = []
-        predictors_qual_dummy = []
+        self.model_nn['one_hot_encoders_nn'] = []
+        self.predictors_qual_dummy = []
         for j in range(self.d_qual):
             one_hot_encoder = sk.preprocessing.OneHotEncoder()
-            predictors_qual_dummy.append(np.squeeze(np.asarray(
+            self.predictors_qual_dummy.append(np.squeeze(np.asarray(
                 one_hot_encoder.fit_transform(predictors_trans[:, j].reshape(-1, 1)).todense())))
-            self.one_hot_encoders_nn.append(one_hot_encoder)
+            self.model_nn['one_hot_encoders_nn'].append(one_hot_encoder)
     else:
-        predictors_qual_dummy = None
+        self.predictors_qual_dummy = None
 
     if self.predictors_cont is not None:
         if self.predictors_qual is not None:
-            list_predictors = list(self.predictors_cont[self.train, :].T) + \
-                              [x[self.train, :] for x in predictors_qual_dummy]
+            list_predictors = list(self.predictors_cont[self.train_rows, :].T) + \
+                              [x[self.train_rows, :] for x in self.predictors_qual_dummy]
         else:
-            list_predictors = list(self.predictors_cont[self.train, :].T)
+            list_predictors = list(self.predictors_cont[self.train_rows, :].T)
     else:
         if self.predictors_qual is not None:
-            list_predictors = [x[self.train, :] for x in predictors_qual_dummy]
+            list_predictors = [x[self.train_rows, :] for x in self.predictors_qual_dummy]
         else:
             msg = "No training data provided."
             logger.error(msg)
             raise ValueError(msg)
 
-    return predictors_qual_dummy, list_predictors
+    return list_predictors
 
 
 def _compile_and_fit_neural_net(self, optim, list_predictors):
@@ -377,23 +380,23 @@ def _compile_and_fit_neural_net(self, optim, list_predictors):
     full_hidden = concatenate(
         list(
             chain.from_iterable(
-                [self.neural_net["liste_layers_quant_inputs"],
-                 self.neural_net["liste_layers_qual_inputs"]])))
+                [self.model_nn["liste_layers_quant_inputs"],
+                 self.model_nn["liste_layers_qual_inputs"]])))
     output = Dense(1, activation='sigmoid')(full_hidden)
-    self.model_nn = Model(
-        inputs=list(chain.from_iterable([self.neural_net["liste_inputs_quant"],
-                                         self.neural_net["liste_inputs_qual"]])),
+    self.model_nn["tensorflow_model"] = Model(
+        inputs=list(chain.from_iterable([self.model_nn["liste_inputs_quant"],
+                                         self.model_nn["liste_inputs_qual"]])),
         outputs=[output])
 
-    self.model_nn.compile(loss='binary_crossentropy', optimizer=optim, metrics=['accuracy'])
+    self.model_nn["tensorflow_model"].compile(loss='binary_crossentropy', optimizer=optim, metrics=['accuracy'])
 
-    self.model_nn.fit(
+    self.model_nn["tensorflow_model"].fit(
         list_predictors,
-        self.labels[self.train],
+        self.labels[self.train_rows],
         epochs=self.iter,
         batch_size=128,
         verbose=1,
-        callbacks=self.callbacks
+        callbacks=self.model_nn["callbacks"]
     )
 
 
@@ -404,16 +407,14 @@ def _parse_kwargs(self, **kwargs):
             logger.error(msg)
             raise ValueError(msg)
         else:
-            self.neural_net['plot_fit'] = kwargs['plot']
-    else:
-        self.neural_net['plot_fit'] = False
+            self.plot_fit = kwargs['plot']
 
     if "optimizer" in kwargs:
         optim = kwargs['optimizer']
     else:
         optim = tensorflow.keras.optimizers.RMSprop(lr=0.5, rho=0.9, epsilon=None, decay=0.0)
 
-    self.callbacks = [
+    self.model_nn["callbacks"] = [
         ReduceLROnPlateau(
             monitor='loss',
             factor=0.5,
@@ -425,21 +426,23 @@ def _parse_kwargs(self, **kwargs):
             min_lr=0),
         LossHistory(d_cont=self.d_cont,
                     d_qual=self.d_qual,
-                    neural_net=self.neural_net)]
+                    glmdisc_object=self)]
 
     if "callbacks" in kwargs:
-        self.callbacks.append(kwargs['callbacks'])
+        self.model_nn["callbacks"].append(kwargs['callbacks'])
 
     return optim
 
 
 def _fit_nn(self, predictors_trans, **kwargs):
-    predictors_qual_dummy, list_predictors = _prepare_inputs(self=self, predictors_trans=predictors_trans)
+    list_predictors = _prepare_inputs(self=self, predictors_trans=predictors_trans)
 
-    _initialize_neural_net(self=self, predictors_qual_dummy=predictors_qual_dummy)
+    _initialize_neural_net(self=self)
 
     optim = _parse_kwargs(self=self, **kwargs)
 
     _compile_and_fit_neural_net(self=self, optim=optim, list_predictors=list_predictors)
 
-    self.best_reglog = self.callbacks[1].best_reglog
+    self.best_reglog = self.model_nn["callbacks"][1].best_reglog
+    self.performance = self.model_nn["callbacks"][1].best_criterion
+    self.criterion_iter = self.model_nn["callbacks"][1].losses

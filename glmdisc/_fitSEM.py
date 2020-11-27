@@ -30,10 +30,10 @@ def _calculate_criterion(self, emap, model_emap, current_encoder_emap):
     criterion value
     """
     if self.criterion in ['aic', 'bic']:
-        loglik = -sk.metrics.log_loss(self.labels[self.train],
+        loglik = -sk.metrics.log_loss(self.labels[self.train_rows],
                                       model_emap.predict_proba(
                                           X=current_encoder_emap.transform(
-                                              emap[self.train, :].astype(str))),
+                                              emap[self.train_rows, :].astype(str))),
                                       normalize=False)
         if self.validation:
             performance = loglik
@@ -49,16 +49,16 @@ def _calculate_criterion(self, emap, model_emap, current_encoder_emap):
 
     if self.criterion == 'gini' and self.validation:
         performance = sk.metrics.roc_auc_score(
-            self.labels[self.validate], model_emap.predict_proba(
+            self.labels[self.validation_rows], model_emap.predict_proba(
                 X=current_encoder_emap.transform(
-                    emap[self.validate, :].astype(str)))[:, 1:])
+                    emap[self.validation_rows, :].astype(str)))[:, 1:])
         logger.info("Current Gini on validation set: " + str(performance))
 
     if self.criterion == 'gini' and not self.validation:
         performance = sk.metrics.roc_auc_score(
-            self.labels[self.train], model_emap.predict_proba(
+            self.labels[self.train_rows], model_emap.predict_proba(
                 X=current_encoder_emap.transform(
-                    emap[self.train, :].astype(str)))[:, 1:])
+                    emap[self.train_rows, :].astype(str)))[:, 1:])
         logger.info("Current Gini on training set: " + str(performance))
 
     if performance is None:
@@ -130,12 +130,12 @@ def _fit_sem(self, edisc, predictors_trans, continu_complete_case, **kwargs):
 
         # Learning p(y|q) et p(y|q(x))
         model_edisc.fit(X=current_encoder_edisc.transform(
-            edisc[self.train, :].astype(str)),
-            y=self.labels[self.train])
+            edisc[self.train_rows, :].astype(str)),
+            y=self.labels[self.train_rows])
 
         model_emap.fit(X=current_encoder_emap.transform(
-            emap[self.train, :].astype(str)),
-            y=self.labels[self.train])
+            emap[self.train_rows, :].astype(str)),
+            y=self.labels[self.train_rows])
 
         # Criterion calculation
         self.criterion_iter.append(_calculate_criterion(self,
@@ -166,8 +166,8 @@ def _fit_sem(self, edisc, predictors_trans, continu_complete_case, **kwargs):
             # On commence par les quantitatives
             if j < self.d_cont:
                 # On apprend q_j | x_j
-                link[j].fit(y=edisc[self.train, :][continu_complete_case[self.train, j], j],
-                            X=self.predictors_cont[self.train, :][continu_complete_case[self.train,
+                link[j].fit(y=edisc[self.train_rows, :][continu_complete_case[self.train_rows, j], j],
+                            X=self.predictors_cont[self.train_rows, :][continu_complete_case[self.train_rows,
                                                                                         j], j].reshape(-1, 1))
 
                 y_p = np.zeros((self.n, len(m[j])))
@@ -190,7 +190,7 @@ def _fit_sem(self, edisc, predictors_trans, continu_complete_case, **kwargs):
                 # On gère le cas où une ou plusieurs modalités ont disparu de train
                 if t.shape[1] < y_p.shape[1]:
                     modalites_manquantes = np.in1d(m[j],
-                                                   np.unique(edisc[self.train, :][continu_complete_case[self.train, j],
+                                                   np.unique(edisc[self.train_rows, :][continu_complete_case[self.train_rows, j],
                                                                                   j]))
                     t2 = np.zeros((sum(continu_complete_case[:, j]), len(m[j])))
                     t2[:, modalites_manquantes] = t
@@ -216,8 +216,8 @@ def _fit_sem(self, edisc, predictors_trans, continu_complete_case, **kwargs):
             else:
                 # On fait le tableau de contingence q_j | x_j
                 link[j] = Counter([tuple(element) for element in np.column_stack(
-                    (predictors_trans[self.train, j - self.d_cont],
-                     edisc[self.train, j]))])
+                    (predictors_trans[self.train_rows, j - self.d_cont],
+                     edisc[self.train_rows, j]))])
 
                 y_p = np.zeros((self.n, len(m[j])))
 

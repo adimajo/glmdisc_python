@@ -3,8 +3,6 @@
 import pytest
 import numpy as np
 import pandas as pd
-import sklearn as sk
-import math
 import random
 import glmdisc
 import tensorflow
@@ -24,8 +22,10 @@ def test_kwargs():
               plot=True,
               optimizer=Adagrad(),
               callbacks=EarlyStopping())
-    assert isinstance(model.model_nn.optimizer, tensorflow.python.keras.optimizer_v2.adagrad.Adagrad)
-    assert isinstance(model.callbacks[-1], tensorflow.python.keras.callbacks.EarlyStopping)
+    assert isinstance(model.model_nn['tensorflow_model'].optimizer,
+                      tensorflow.python.keras.optimizer_v2.adagrad.Adagrad)
+    assert isinstance(model.model_nn['callbacks'][-1],
+                      tensorflow.python.keras.callbacks.EarlyStopping)
 
 
 def test_args_fit():
@@ -133,37 +133,37 @@ def test_split():
     random.seed(1)
     np.random.seed(1)
     model.fit(predictors_cont=x, predictors_qual=None, labels=y, iter=11)
-    training = model.train
-    validating = model.validate
+    training = model.train_rows
+    validating = model.validation_rows
     testing = model.test_rows
 
     model = glmdisc.Glmdisc(algorithm="NN")
     random.seed(1)
     np.random.seed(1)
     model.fit(predictors_cont=x, predictors_qual=None, labels=y, iter=11)
-    np.testing.assert_array_equal(training, model.train)
-    np.testing.assert_array_equal(validating, model.validate)
+    np.testing.assert_array_equal(training, model.train_rows)
+    np.testing.assert_array_equal(validating, model.validation_rows)
     np.testing.assert_array_equal(testing, model.test_rows)
-    assert len(model.train) > 0
-    assert len(model.validate) > 0
+    assert len(model.train_rows) > 0
+    assert len(model.validation_rows) > 0
     assert len(model.test_rows) > 0
 
     model = glmdisc.Glmdisc(algorithm="NN", validation=False)
     model.fit(predictors_cont=x, predictors_qual=None, labels=y, iter=11)
-    assert len(model.train) > 0
-    assert model.validate is None
+    assert len(model.train_rows) > 0
+    assert model.validation_rows is None
     assert len(model.test_rows) > 0
 
     model = glmdisc.Glmdisc(algorithm="NN", test=False)
     model.fit(predictors_cont=x, predictors_qual=None, labels=y, iter=11)
-    assert len(model.train) > 0
-    assert len(model.validate) > 0
+    assert len(model.train_rows) > 0
+    assert len(model.validation_rows) > 0
     assert model.test_rows is None
 
     model = glmdisc.Glmdisc(algorithm="NN", validation=False, test=False)
     model.fit(predictors_cont=x, predictors_qual=None, labels=y, iter=11)
-    assert len(model.train) > 0
-    assert model.validate is None
+    assert len(model.train_rows) > 0
+    assert model.validation_rows is None
     assert model.test_rows is None
 
 
@@ -177,8 +177,8 @@ def test_not_fit():
         np.random.seed(i)
         model.fit(predictors_cont=x, predictors_qual=None, labels=y, iter=11)
         try:
-            model.check_is_fitted()
+            model._check_is_fitted()
         except glmdisc.NotFittedError:
             with pytest.raises(glmdisc.NotFittedError):
-                model.check_is_fitted()
+                model._check_is_fitted()
             break

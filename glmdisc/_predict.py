@@ -20,5 +20,6 @@ def predict(self, predictors_cont, predictors_qual):
         either here or with the :code:`__init__` method.
     """
     if (self.algorithm == "SEM") | (self.algorithm == "NN"):
+        self._check_is_fitted()
         return self.best_reglog.predict_proba(self.discretize_dummy(predictors_cont, predictors_qual))
     raise ValueError("No predict method for algorithm" + str(self.algorithm))

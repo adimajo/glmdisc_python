@@ -33,13 +33,13 @@ def discrete_data(self):
             logger.info(DISCRETIZED_VALIDATION_SET_)
             logger.info(MIGHT_OVERFIT_)
             return discretize_dummy(self,
-                                    self.predictors_cont[self.validate, :],
-                                    self.predictors_qual[self.validate, :])
+                                    self.predictors_cont[self.validation_rows, :],
+                                    self.predictors_qual[self.validation_rows, :])
         logger.info(DISCRETIZED_TRAINING_SET_)
         logger.info(CERTAINLY_OVERFIT_)
         return discretize_dummy(self,
-                                self.predictors_cont[self.train, :],
-                                self.predictors_qual[self.train, :])
+                                self.predictors_cont[self.train_rows, :],
+                                self.predictors_qual[self.train_rows, :])
     elif self.predictors_cont is not None:
         if self.test:
             logger.info(DISCRETIZED_TEST_SET_)
@@ -50,12 +50,12 @@ def discrete_data(self):
             logger.info(DISCRETIZED_VALIDATION_SET_)
             logger.info(MIGHT_OVERFIT_)
             return discretize_dummy(self,
-                                    self.predictors_cont[self.validate, :],
+                                    self.predictors_cont[self.validation_rows, :],
                                     None)
         logger.info(DISCRETIZED_TRAINING_SET_)
         logger.info(CERTAINLY_OVERFIT_)
         return discretize_dummy(self,
-                                self.predictors_cont[self.train, :],
+                                self.predictors_cont[self.train_rows, :],
                                 None)
     elif self.predictors_qual is not None:
         if self.test:
@@ -68,9 +68,9 @@ def discrete_data(self):
             logger.info(MIGHT_OVERFIT_)
             return discretize_dummy(self,
                                     None,
-                                    self.predictors_qual[self.validate, :])
+                                    self.predictors_qual[self.validation_rows, :])
         logger.info(DISCRETIZED_TRAINING_SET_)
         logger.info(CERTAINLY_OVERFIT_)
         return discretize_dummy(self,
                                 None,
-                                self.predictors_qual[self.train, :])
+                                self.predictors_qual[self.train_rows, :])

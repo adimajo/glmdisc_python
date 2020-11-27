@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.7, 3.8]
+        python-version: [3.7, 3.8, 3.9.0-rc.2]
 
     steps:
     - uses: actions/checkout@v2
@@ -42,5 +42,6 @@ jobs:
       run: |
         pipenv run pipenv-setup sync --dev
         pipenv run pip install --upgrade keyring keyrings.alt
+        pipenv lock -r > requirements.txt
         python setup.py build sdist bdist_wheel
         pipenv run twine check dist/*

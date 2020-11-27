@@ -144,7 +144,7 @@ def _discretize_nn(self, predictors_cont, predictors_qual):
             predictors_trans[:, j] = (self.affectations[j + self.d_cont].transform(
                 predictors_qual[:, j])).astype(int)
             predictors_qual_dummy.append(np.squeeze(np.asarray(
-                self.one_hot_encoders_nn[j].transform(predictors_trans[:, j].reshape(-1, 1)).todense())))
+                self.model_nn["one_hot_encoders_nn"][j].transform(predictors_trans[:, j].reshape(-1, 1)).todense())))
     else:
         predictors_trans = None
 
@@ -155,7 +155,7 @@ def _discretize_nn(self, predictors_cont, predictors_qual):
     proba = _from_weights_to_proba_test(self.d_cont,
                                         self.d_qual,
                                         [self.m_start] * self.d_cont,
-                                        self.callbacks[1],
+                                        self.model_nn["callbacks"][1],
                                         predictors_cont,
                                         predictors_trans,
                                         n_test)
@@ -183,7 +183,7 @@ def discretize(self, predictors_cont, predictors_qual):
         either here or with the __init__ method.
     """
 
-    self.check_is_fitted()
+    self._check_is_fitted()
 
     glmdisc._fit._check_args(predictors_cont=predictors_cont,
                              predictors_qual=predictors_qual,

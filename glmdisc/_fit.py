@@ -126,21 +126,21 @@ def _split(self):
     Splits the dataset in train, validation and test given user-chosen parameters.
     """
     if self.validation and self.test:
-        self.train, self.validate, self.test_rows = np.split(np.random.choice(self.n,
+        self.train_rows, self.validation_rows, self.test_rows = np.split(np.random.choice(self.n,
                                                                               self.n,
                                                                               replace=False),
                                                              [int(.6 * self.n), int(.8 * self.n)])
     elif self.validation:
-        self.train, self.validate = np.split(np.random.choice(self.n, self.n, replace=False),
+        self.train_rows, self.validation_rows = np.split(np.random.choice(self.n, self.n, replace=False),
                                              [int(.6 * self.n)])
         self.test_rows = None
     elif self.test:
-        self.train, self.test_rows = np.split(np.random.choice(self.n, self.n, replace=False),
+        self.train_rows, self.test_rows = np.split(np.random.choice(self.n, self.n, replace=False),
                                               [int(.6 * self.n)])
-        self.validate = None
+        self.validation_rows = None
     else:
-        self.train = np.random.choice(self.n, self.n, replace=False)
-        self.validate = None
+        self.train_rows = np.random.choice(self.n, self.n, replace=False)
+        self.validation_rows = None
         self.test_rows = None
 
 

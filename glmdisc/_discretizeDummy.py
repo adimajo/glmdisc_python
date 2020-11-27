@@ -3,7 +3,6 @@
 """discretizeDummy module for the glmdisc class.
 """
 import numpy as np
-import sklearn as sk
 
 
 def discretize_dummy(self, predictors_cont, predictors_qual):
@@ -35,7 +34,7 @@ def discretize_dummy(self, predictors_cont, predictors_qual):
             #                                                sparse=False,
             #                                                handle_unknown="ignore").fit_transform(
             #     X=results[:, j].reshape(-1, 1))
-            results_dummy = self.callbacks[1].best_encoders[j].transform(X=results[:, j].reshape(-1, 1))
+            results_dummy = self.model_nn["callbacks"][1].best_encoders[j].transform(X=results[:, j].reshape(-1, 1))
             emap_dummy = np.concatenate(
                 (emap_dummy,
                  results_dummy),

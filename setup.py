@@ -44,7 +44,6 @@ def install_requires():
     return install_requires
 
 
-
 if __name__ == "__main__":
     # Arguments marked as "Required" below must be included for upload to PyPI.
     # Fields marked as "Optional" may be commented out.

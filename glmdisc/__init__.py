@@ -6,7 +6,7 @@ post-learning graphical tools.
     :toctree:
 
     Glmdisc
-    Glmdisc.check_is_fitted
+    Glmdisc._check_is_fitted
     Glmdisc.best_formula
     Glmdisc.discrete_data
     Glmdisc.discretize
@@ -239,19 +239,21 @@ class Glmdisc:
 
         self.predictors_cont = None
         self.predictors_qual = None
-        self.predictors_labels = None
+        self.labels = None
 
+        self.plot_fit = False
         self.criterion_iter = []
         self.best_link = []
         self.best_reglog = None
+        self.model_nn = {}
         self.affectations = []
         self.best_encoder_emap = None
         self.performance = -np.inf
-        self.train = np.array([])
-        self.validate = np.array([])
+        self.train_rows = np.array([])
+        self.validation_rows = np.array([])
         self.test_rows = np.array([])
 
-    def check_is_fitted(self):
+    def _check_is_fitted(self):
         """Perform is_fitted validation for estimator.
         Checks if the estimator is fitted by verifying the presence of
         fitted attributes (ending with a trailing underscore) and otherwise
@@ -270,7 +272,7 @@ class Glmdisc:
                                               "it means it did not find a better solution than "
                                               "the random initialization.")
         else:
-            if self.callbacks[1].best_weights is None:
+            if self.model_nn["callbacks"][1].best_weights is None:
                 raise NotFittedError(" If you did call fit, try increasing iter: "
                                      "it means it did not find a better solution than "
                                      "the random initialization.")
