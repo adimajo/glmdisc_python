@@ -21,6 +21,8 @@ import numpy as np
 import sklearn as sk
 from loguru import logger
 
+from ._gini_utils import gini  # noqa: F401
+
 __version__ = "0.1.2"
 
 
@@ -149,7 +151,7 @@ class Glmdisc:
         :type: list
     """
 
-    def __init__(self, algorithm="SEM", test=True, validation=True, criterion="bic", m_start=20):
+    def __init__(self, algorithm="SEM", test=True, validation=True, criterion="bic", m_start=20, burn_in=5):
         """
         Initializes self by checking if its arguments are appropriately specified.
 
@@ -184,7 +186,7 @@ class Glmdisc:
                             :code:`predictors_qual`, :code:`m_start` is set (for this variable
                             only) to this variable's number of factor levels. Defaults to 20.
 
-        .. todo:: Gérer un try catch pour warm start ?
+        :param int burn_in: Number of iterations to discard in the performance evaluation.
         """
 
         # Tests des variables d'entrée
@@ -231,6 +233,7 @@ class Glmdisc:
         self.validation = validation
         self.criterion = criterion
         self.m_start = m_start
+        self.burn_in = burn_in
 
         # Attributes from fit
         self.n = 0
@@ -272,8 +275,13 @@ class Glmdisc:
                                               "it means it did not find a better solution than "
                                               "the random initialization.")
         else:
-            if self.model_nn["callbacks"][1].best_weights is None:
-                raise NotFittedError(" If you did call fit, try increasing iter: "
+            try:
+                if self.model_nn["callbacks"][1].best_weights is None:
+                    raise NotFittedError("If you did call fit, try increasing iter: "
+                                         "it means it did not find a better solution than "
+                                         "the random initialization.")
+            except KeyError:
+                raise NotFittedError("If you did call fit, try increasing iter: "
                                      "it means it did not find a better solution than "
                                      "the random initialization.")
 

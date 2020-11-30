@@ -5,6 +5,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from itertools import combinations
 
 
 @staticmethod
@@ -43,7 +44,11 @@ def generate_data(n, d, theta=None, plot=False):
     p = 1 / (1 + np.exp(- log_odd))
     y = np.random.binomial(1, p)
 
-    if plot:
-        plt.scatter(x[:, 0], x[:, 1], c=y, s=[1 for _ in range(len(x))])
+    if plot and d > 1:
+        for unique_pair_of_feature_as_tuple in combinations(range(d), 2):
+            plt.scatter(x[:, unique_pair_of_feature_as_tuple[0]],
+                        x[:, unique_pair_of_feature_as_tuple[1]],
+                        c=y,
+                        s=[1 for _ in range(len(x))])
 
     return [x, y, theta]

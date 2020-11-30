@@ -61,11 +61,6 @@ def _calculate_criterion(self, emap, model_emap, current_encoder_emap):
                     emap[self.train_rows, :].astype(str)))[:, 1:])
         logger.info("Current Gini on training set: " + str(performance))
 
-    if performance is None:
-        msg = "Bug encountered, please open an issue at https://github.com/adimajo/glmdisc_python."
-        logger.error(msg)
-        raise ValueError(msg)
-
     return performance
 
 

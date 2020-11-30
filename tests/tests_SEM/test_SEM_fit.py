@@ -52,6 +52,20 @@ def test_args_fit():
                   labels=y[0:50])
 
 
+def test_kwargs_fit(caplog):
+    n = 100
+    d = 2
+    x, y, theta = glmdisc.Glmdisc.generate_data(n, d)
+    model = glmdisc.Glmdisc(validation=False, test=False)
+
+    model.fit(predictors_cont=x,
+              predictors_qual=None,
+              labels=y,
+              toto="tata")
+
+    assert "**kwargs not used for algorithm = 'SEM'" in caplog.records[0].message
+
+
 def test_iter():
     n = 100
     d = 2

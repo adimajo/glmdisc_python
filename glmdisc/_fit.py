@@ -196,3 +196,5 @@ def fit(self, predictors_cont, predictors_qual, labels, iter=100, **kwargs):
         _fit_sem(self, edisc, predictors_trans, continu_complete_case, **kwargs)
     elif self.algorithm == "NN":
         _fit_nn(self, predictors_trans, **kwargs)
+
+    return self

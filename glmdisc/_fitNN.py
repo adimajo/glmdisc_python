@@ -55,6 +55,7 @@ class LossHistory(Callback):
         """
         super().__init__()
         self.plot_fit = glmdisc_object.plot_fit
+        self.burn_in = glmdisc_object.burn_in
         if self.plot_fit:
             self.fig, self.ax = plt.subplots(glmdisc_object.d_cont)
             self.fig.show()
@@ -109,7 +110,6 @@ class LossHistory(Callback):
         batch
         logs
         """
-        burn_in = 5
         self.current_weights = []
         for j in range(self.d_cont):
             self.current_weights.append(self.glmdisc_object.model_nn["liste_layers_quant"][j].get_weights())
@@ -120,7 +120,7 @@ class LossHistory(Callback):
                                                                                 self.d_qual,
                                                                                 self.glmdisc_object)
         self.losses.append(performance)
-        if len(self.losses) > burn_in and self.losses[-1] < self.best_criterion:
+        if len(self.losses) > self.burn_in and self.losses[-1] < self.best_criterion:
             self.best_weights = []
             self.best_encoders = encoders
             self.best_outputs = []
@@ -145,7 +145,8 @@ class LossHistory(Callback):
 
 def _initialize_neural_net(self):
     """
-    Constructs the neural network
+    Constructs the neural network by putting TensorFlow objects :code:`Inputs` and layers in a dictionary stored in
+    the class object.
     """
     m_cont = [self.m_start] * self.d_cont
     m_qual = [self.m_start] * (self.d_cont + self.d_qual)
@@ -153,7 +154,7 @@ def _initialize_neural_net(self):
     for j in range(self.d_qual):
         num_levels = stats.describe(sk.preprocessing.LabelEncoder().fit(self.predictors_qual[:, j]).transform(
             self.predictors_qual[:, j])).minmax[1]
-        if self.m_start > num_levels + 1:
+        if self.m_start > num_levels:
             m_qual[j] = num_levels
 
     liste_inputs_quant = [None] * self.d_cont
@@ -174,16 +175,10 @@ def _initialize_neural_net(self):
 
     for i in range(self.d_qual):
         liste_inputs_qual[i] = Input((len(np.unique(self.predictors_qual[:, i])), ))
-        if len(np.unique(self.predictors_qual[:, i])) > m_qual[i]:
-            liste_layers_qual[i] = Dense(
-                m_qual[i],
-                activation='softmax',
-                use_bias=False)
-        else:
-            liste_layers_qual[i] = Dense(
-                len(np.unique(self.predictors_qual[:, i])),
-                activation='softmax',
-                use_bias=False)
+        liste_layers_qual[i] = Dense(
+            m_qual[i],
+            activation='softmax',
+            use_bias=False)
 
         liste_layers_qual_inputs[i] = liste_layers_qual[i](
             liste_inputs_qual[i])
@@ -233,14 +228,14 @@ def _from_weights_to_proba_test(d_cont, d_qual, m_cont, history, x_quant_test, x
 
     Parameters
     ----------
-    type: during training or afterwards
     d_cont: number of quantitative features
     d_qual: number of qualitative features
-    m_cont
-    history
-    x_quant_test
-    x_qual_test
+    m_cont: number of levels for continuous features
+    history: the custom Callback's history
+    x_quant_test: the continuous features to discretize
+    x_qual_test: the qualitative features which levels are grouped
     n_test: number of test samples
+    when: if "test", then apply the :code:`best_weights`, otherwise the :code:`current_weights`
 
     Returns
     -------
@@ -267,7 +262,24 @@ def _from_weights_to_proba_test(d_cont, d_qual, m_cont, history, x_quant_test, x
     return results
 
 
-def _evaluate_disc(history, d_cont, d_qual, glmdisc_object):
+def _evaluate_disc(history, d_cont: int, d_qual: int, glmdisc_object):
+    """
+    Evaluates the quality of a proposed quantization
+
+    Parameters
+    ----------
+    history: the custom Callback's history
+    d_cont: number of continuous features
+    d_qual: number of categorical features
+    glmdisc_object
+
+    Returns
+    ----------
+    performance: the performance (depends on the provided criterion) of the current quantization
+    predicted: the probability of class 1 for each training or validation (if :code:`validation` is True) samples
+    encoders: the one hot encoders used for this quantization
+    proposed_logistic_regression: the logistic regression associated with this quantization (always on training set)
+    """
     labels_idx = glmdisc_object.train_rows
     proba = _from_layers_to_proba_training(d_cont, d_qual, glmdisc_object)
     encoders = []
@@ -347,6 +359,13 @@ def _evaluate_disc(history, d_cont, d_qual, glmdisc_object):
 
 
 def _prepare_inputs(self, predictors_trans):
+    """
+    Transforms categorical inputs into dummies and prepares inputs into an appropriate list for Tensorflow
+
+    Returns
+    _______
+    list_predictors: list of np.ndarray
+    """
     if self.predictors_qual is not None:
         self.model_nn['one_hot_encoders_nn'] = []
         self.predictors_qual_dummy = []
@@ -364,19 +383,16 @@ def _prepare_inputs(self, predictors_trans):
                               [x[self.train_rows, :] for x in self.predictors_qual_dummy]
         else:
             list_predictors = list(self.predictors_cont[self.train_rows, :].T)
-    else:
-        if self.predictors_qual is not None:
-            list_predictors = [x[self.train_rows, :] for x in self.predictors_qual_dummy]
-        else:
-            msg = "No training data provided."
-            logger.error(msg)
-            raise ValueError(msg)
+    elif self.predictors_qual is not None:
+        list_predictors = [x[self.train_rows, :] for x in self.predictors_qual_dummy]
 
     return list_predictors
 
 
 def _compile_and_fit_neural_net(self, optim, list_predictors):
-
+    """
+    Creates, compiles and fits the Tensorflow model
+    """
     full_hidden = concatenate(
         list(
             chain.from_iterable(
@@ -401,6 +417,9 @@ def _compile_and_fit_neural_net(self, optim, list_predictors):
 
 
 def _parse_kwargs(self, **kwargs):
+    """
+    Parses eventual kwargs to the :code:`fit` method, like plot, optimizer and callbacks.
+    """
     if 'plot' in kwargs:
         if not isinstance(kwargs['plot'], bool):
             msg = "plot parameter provided but not boolean"
@@ -434,7 +453,76 @@ def _parse_kwargs(self, **kwargs):
     return optim
 
 
+def _final_result(self):
+    if self.test:
+        if self.predictors_cont is None:
+            pred_cont = None
+        else:
+            pred_cont = self.predictors_cont[self.test_rows, :]
+        if self.predictors_qual is None:
+            pred_qual = None
+        else:
+            pred_qual = self.predictors_qual[self.test_rows, :]
+        subset = "test"
+        labels = self.labels[self.test_rows]
+        predictions = self.predict(predictors_cont=pred_cont, predictors_qual=pred_qual)
+    elif self.validation:
+        if self.predictors_cont is None:
+            pred_cont = None
+        else:
+            pred_cont = self.predictors_cont[self.validation_rows, :]
+        if self.predictors_qual is None:
+            pred_qual = None
+        else:
+            pred_qual = self.predictors_qual[self.validation_rows, :]
+        subset = "validation"
+        labels = self.labels[self.validation_rows]
+        predictions = self.predict(predictors_cont=pred_cont, predictors_qual=pred_qual)
+    else:
+        if self.predictors_cont is None:
+            pred_cont = None
+        else:
+            pred_cont = self.predictors_cont[self.train_rows, :]
+        if self.predictors_qual is None:
+            pred_qual = None
+        else:
+            pred_qual = self.predictors_qual[self.train_rows, :]
+        subset = "training"
+        labels = self.labels[self.train_rows]
+        predictions = self.predict(predictors_cont=pred_cont, predictors_qual=pred_qual)
+
+    if self.criterion in ['aic', 'bic']:
+        loglik = sk.metrics.log_loss(
+            labels,
+            predictions[:, 1],
+            normalize=False
+        )
+        if self.validation | self.test:
+            performance = 2 * loglik
+            print("\n")
+            logger.info("Best likelihood on " + subset + " set: " + str(performance / 2.0))
+        elif self.criterion == "bic":
+            performance = 2 * loglik + self.best_reglog.coef_.shape[1] * np.log(
+                self.train_rows.shape[0])
+            print("\n")
+            logger.info("Best BIC on training set: " + str(- performance))
+        else:
+            performance = 2 * loglik + 2 * self.best_reglog.coef_.shape[1]
+            print("\n")
+            logger.info("Best AIC on training set: " + str(- performance))
+    else:
+        performance = sk.metrics.roc_auc_score(
+            y_true=labels,
+            y_score=predictions[:, 1])
+        print("\n")
+        logger.info("Best Gini on " + subset + " set: " + str(performance))
+
+
 def _fit_nn(self, predictors_trans, **kwargs):
+    """
+    Wrap-up method: calls all functions to prepare inputs, construct the layers, parse the kwargs, creating, compiling
+    and fitting the neural network, then stores the best results.
+    """
     list_predictors = _prepare_inputs(self=self, predictors_trans=predictors_trans)
 
     _initialize_neural_net(self=self)
@@ -446,3 +534,5 @@ def _fit_nn(self, predictors_trans, **kwargs):
     self.best_reglog = self.model_nn["callbacks"][1].best_reglog
     self.performance = self.model_nn["callbacks"][1].best_criterion
     self.criterion_iter = self.model_nn["callbacks"][1].losses
+
+    _final_result(self)

@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+import numpy as np
+import pytest
 import glmdisc
 
 
@@ -13,3 +15,12 @@ def test_predict_new():
     assert results.shape == (100, 2)
     assert (results > 0).all() and (results < 1).all()
     assert (results.sum(axis=1) == 1).all()
+
+    model.fit(predictors_cont=x, predictors_qual=None, labels=y, iter=100)
+    results = model.predict(predictors_cont=x, predictors_qual=None)
+
+    glmdisc.gini(y, results[:, 1], sample_weight=None)
+    glmdisc.gini(y, results[:, 1], sample_weight=np.ones(y.shape[0]))
+
+    with pytest.raises(ValueError):
+        glmdisc.gini(y, results[:, 1], level="toto")

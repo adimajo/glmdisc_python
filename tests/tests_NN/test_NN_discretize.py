@@ -19,7 +19,7 @@ def test_discretize_new():
     random.seed(1)
     np.random.seed(1)
     model.fit(predictors_cont=x[0:200], predictors_qual=None, labels=y[0:200], iter=200)
-    emap = model.discretize(predictors_cont=x[0:200], predictors_qual=None)
+    model.discretize(predictors_cont=x[0:200], predictors_qual=None)
 
 
 def test_discretize_cont():
@@ -30,7 +30,7 @@ def test_discretize_cont():
     random.seed(1)
     np.random.seed(1)
     model.fit(predictors_cont=x, predictors_qual=None, labels=y, iter=11)
-    emap = model.discretize(predictors_cont=x, predictors_qual=None)
+    model.discretize(predictors_cont=x, predictors_qual=None)
 
 
 def test_discretize_qual():
@@ -47,7 +47,7 @@ def test_discretize_qual():
     random.seed(1)
     np.random.seed(1)
     model.fit(predictors_cont=None, predictors_qual=xd, labels=y, iter=50)
-    emap = model.discretize(predictors_cont=None, predictors_qual=xd)
+    model.discretize(predictors_cont=None, predictors_qual=xd)
 
 
 def test_discretize_wrong():

@@ -165,19 +165,6 @@ def fast_de_long_no_weights(predictions_sorted_transposed, label_1_count):
     return aucs, delongcov
 
 
-def calc_pvalue(aucs, sigma):
-    """Computes log(10) of p-values.
-    Args:
-       aucs: 1D array of AUCs
-       sigma: AUC DeLong covariances
-    Returns:
-       log10(pvalue)
-    """
-    x = np.array([[1, -1]])
-    z = np.abs(np.diff(aucs)) / np.sqrt(np.dot(np.dot(x, sigma), x.T))
-    return np.log10(2) + scipy.stats.norm.logsf(z, loc=0, scale=1) / np.log(10)
-
-
 def compute_ground_truth_statistics(ground_truth, sample_weight):
     assert np.array_equal(np.unique(ground_truth), [0, 1])
     order = (-ground_truth).argsort()
@@ -196,10 +183,34 @@ def delong_roc_variance(ground_truth, predictions, sample_weight=None):
     Args:
        ground_truth: np.array of 0 and 1
        predictions: np.array of floats of the probability of being class 1
+       sample_weight: np.array of floats of the sample weights
     """
     order, label_1_count, ordered_sample_weight = compute_ground_truth_statistics(
         ground_truth, sample_weight)
     predictions_sorted_transposed = predictions[np.newaxis, order]
     aucs, delongcov = fast_de_long(predictions_sorted_transposed, label_1_count, ordered_sample_weight)
-    assert len(aucs) == 1, "There is a bug in the code, please forward this to the developers"
     return aucs[0], delongcov
+
+
+def gini(ground_truth, predictions, sample_weight=None, level=.95):
+    """
+    Computes gini and confidence interval for a single set of predictions
+    Args:
+       ground_truth: np.array of 0 and 1
+       predictions: np.array of floats of the probability of being class 1
+       sample_weight: np.array of floats of the sample weights
+       level: float (between 0 and 1) describing the level required for the confidence interval
+    """
+    if (not isinstance(level, float)) or (not level < 1 and level > 0):
+        raise ValueError("level should be a single float between 0 and 1")
+    auc, auc_cov = delong_roc_variance(ground_truth, predictions, sample_weight)
+    auc_std = np.sqrt(auc_cov)
+    lower_upper_q = np.abs(np.array([0, 1]) - (1 - level) / 2)
+
+    ci = scipy.stats.norm.ppf(
+        lower_upper_q,
+        loc=auc,
+        scale=auc_std)
+
+    ci[ci > 1] = 1
+    return 2 * auc - 1, 2 * ci - 1

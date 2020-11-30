@@ -10,10 +10,10 @@ from tensorflow.keras.optimizers import Adagrad
 from tensorflow.keras.callbacks import EarlyStopping
 
 
-def test_kwargs():
+def test_kwargs(caplog):
     n = 100
     d = 2
-    x, y, theta = glmdisc.Glmdisc.generate_data(n, d)
+    x, y, theta = glmdisc.Glmdisc.generate_data(n, d, plot=True)
     model = glmdisc.Glmdisc(algorithm="NN", validation=False, test=False)
 
     model.fit(predictors_cont=x,
@@ -26,6 +26,14 @@ def test_kwargs():
                       tensorflow.python.keras.optimizer_v2.adagrad.Adagrad)
     assert isinstance(model.model_nn['callbacks'][-1],
                       tensorflow.python.keras.callbacks.EarlyStopping)
+    with pytest.raises(ValueError):
+        model.fit(predictors_cont=x,
+                  predictors_qual=None,
+                  labels=y,
+                  plot="toto",
+                  optimizer=Adagrad(),
+                  callbacks=EarlyStopping())
+    assert "plot parameter provided but not boolean" in caplog.records[-1].message
 
 
 def test_args_fit():
@@ -168,17 +176,36 @@ def test_split():
 
 
 def test_not_fit():
+    model = glmdisc.Glmdisc(algorithm="NN", test=False, validation=False)
+    with pytest.raises(glmdisc.NotFittedError):
+        model._check_is_fitted()
     n = 100
     d = 2
     x, y, theta = glmdisc.Glmdisc.generate_data(n, d)
-    model = glmdisc.Glmdisc(algorithm="NN", test=False, validation=False)
-    for i in range(100):
-        random.seed(i)
-        np.random.seed(i)
+    model = glmdisc.Glmdisc(algorithm="NN", test=False, validation=False, burn_in=20)
+    with pytest.raises(glmdisc.NotFittedError):
         model.fit(predictors_cont=x, predictors_qual=None, labels=y, iter=11)
-        try:
-            model._check_is_fitted()
-        except glmdisc.NotFittedError:
-            with pytest.raises(glmdisc.NotFittedError):
-                model._check_is_fitted()
-            break
+
+
+def test_fit():
+    n = 100
+    d = 2
+    x, y, theta = glmdisc.Glmdisc.generate_data(n, d)
+    model = glmdisc.Glmdisc(algorithm="NN", criterion="bic", validation=True)
+    model.fit(predictors_cont=x, predictors_qual=None, labels=y, iter=20)
+    model = glmdisc.Glmdisc(algorithm="NN", criterion="aic", validation=True)
+    model.fit(predictors_cont=x, predictors_qual=None, labels=y, iter=20)
+    model = glmdisc.Glmdisc(algorithm="NN", criterion="gini", validation=True)
+    model.fit(predictors_cont=x, predictors_qual=None, labels=y, iter=20)
+    model = glmdisc.Glmdisc(algorithm="NN", criterion="bic", validation=False)
+    model.fit(predictors_cont=x, predictors_qual=None, labels=y, iter=20)
+    model = glmdisc.Glmdisc(algorithm="NN", criterion="aic", validation=False)
+    model.fit(predictors_cont=x, predictors_qual=None, labels=y, iter=20)
+    model = glmdisc.Glmdisc(algorithm="NN", criterion="gini", validation=False)
+    model.fit(predictors_cont=x, predictors_qual=None, labels=y, iter=20)
+    model = glmdisc.Glmdisc(algorithm="NN", criterion="bic", test=False, validation=False)
+    model.fit(predictors_cont=x, predictors_qual=None, labels=y, iter=20)
+    model = glmdisc.Glmdisc(algorithm="NN", criterion="aic", test=False, validation=False)
+    model.fit(predictors_cont=x, predictors_qual=None, labels=y, iter=20)
+    model = glmdisc.Glmdisc(algorithm="NN", criterion="gini", test=False, validation=False)
+    model.fit(predictors_cont=x, predictors_qual=None, labels=y, iter=20)
