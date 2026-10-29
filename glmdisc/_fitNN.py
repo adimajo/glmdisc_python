@@ -12,7 +12,6 @@ import sklearn.preprocessing
 import tensorflow as tf
 import tensorflow.keras.optimizers
 from loguru import logger
-from scipy import stats
 from tensorflow.keras import Model
 from tensorflow.keras.callbacks import Callback, ReduceLROnPlateau
 from tensorflow.keras.layers import Dense
@@ -152,8 +151,7 @@ def _initialize_neural_net(self):
     m_qual = [self.m_start] * (self.d_cont + self.d_qual)
 
     for j in range(self.d_qual):
-        num_levels = stats.describe(sk.preprocessing.LabelEncoder().fit(self.predictors_qual[:, j]).transform(
-            self.predictors_qual[:, j])).minmax[1]
+        num_levels = len(self.affectations[j + self.d_cont].classes_) - 1
         if self.m_start > num_levels:
             m_qual[j] = num_levels
 

@@ -16,9 +16,14 @@ def _best_formula_cont_sem(self, emap_best):
     for j in range(self.d_cont):
         best_disc.append([])
         for k in np.unique(emap_best[:, j]):
-            best_disc[j].append(
-                np.nanmin(self.predictors_cont[emap_best[:, j] == k, j]))
-        del best_disc[j][np.where(best_disc[j] == np.nanmin(best_disc[j]))[0][0]]
+            lower_bound = self.predictors_cont[emap_best[:, j] == k, j]
+            lower_bound = lower_bound[~np.isnan(lower_bound)]
+            # the level reserved for missing values has no lower bound
+            if lower_bound.size > 0:
+                best_disc[j].append(lower_bound.min())
+        # the smallest lower bound is not a cut-point
+        if best_disc[j]:
+            del best_disc[j][np.argmin(best_disc[j])]
         if len(best_disc[j]) < 1:
             logger.info("No cut-points found for continuous variable " + str(j) + ".")
         else:

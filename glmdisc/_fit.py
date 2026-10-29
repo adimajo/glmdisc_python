@@ -5,7 +5,6 @@
 import numpy as np
 import sklearn as sk
 from loguru import logger
-from scipy import stats
 
 from glmdisc._fitNN import _fit_nn
 from glmdisc._fitSEM import _fit_sem
@@ -96,7 +95,7 @@ def _init_disc(self, continu_complete_case):
     initial quantization and transformation of categorical features to integers
     """
     self.affectations = [None] * (self.d_cont + self.d_qual)
-    edisc = np.random.choice(list(range(self.m_start)), size=(self.n, self.d_cont + self.d_qual))
+    edisc = np.random.randint(0, self.m_start, size=(self.n, self.d_cont + self.d_qual))
 
     for j in range(self.d_cont):
         edisc[np.invert(continu_complete_case[:, j]), j] = self.m_start
@@ -105,16 +104,9 @@ def _init_disc(self, continu_complete_case):
 
     for j in range(self.d_qual):
         self.affectations[j + self.d_cont] = sk.preprocessing.LabelEncoder().fit(self.predictors_qual[:, j])
-        if (self.m_start > stats.describe(sk.preprocessing.LabelEncoder().fit(self.predictors_qual[:, j]).transform(
-                self.predictors_qual[:, j])).minmax[1] + 1):
-            edisc[:, j + self.d_cont] = np.random.choice(list(range(
-                stats.describe(sk.preprocessing.LabelEncoder().fit(
-                    self.predictors_qual[:, j]).transform(
-                        self.predictors_qual[:, j])).minmax[1])),
-                size=self.n)
-        else:
-            edisc[:, j + self.d_cont] = np.random.choice(list(range(self.m_start)),
-                                                         size=self.n)
+        # a feature cannot start with more groups than it has levels
+        m_init = min(self.m_start, len(self.affectations[j + self.d_cont].classes_))
+        edisc[:, j + self.d_cont] = np.random.randint(0, m_init, size=self.n)
 
         predictors_trans[:, j] = (self.affectations[j + self.d_cont].transform(
             self.predictors_qual[:, j])).astype(int)

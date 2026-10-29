@@ -5,6 +5,8 @@ import numpy as np
 import pandas as pd
 import random
 import glmdisc
+import sklearn as sk
+from glmdisc._fitNN import _initialize_neural_net
 import tensorflow
 from tensorflow.keras.optimizers import Adagrad
 from tensorflow.keras.callbacks import EarlyStopping
@@ -209,3 +211,20 @@ def test_fit():
     model.fit(predictors_cont=x, predictors_qual=None, labels=y, iter=20)
     model = glmdisc.Glmdisc(algorithm="NN", criterion="gini", test=False, validation=False)
     model.fit(predictors_cont=x, predictors_qual=None, labels=y, iter=20)
+
+
+def test_initialize_neural_net_reuses_label_encoders(monkeypatch):
+    np.random.seed(0)
+    x, y, theta = glmdisc.Glmdisc.generate_data(100, 2)
+    xd = np.digitize(x, [0.333, 0.666]).astype(float)
+    model = glmdisc.Glmdisc(algorithm="NN", validation=False, test=False)
+    model.predictors_cont = x
+    model.predictors_qual = xd
+    model.labels = y
+    model._init_disc(model._calculate_shape())
+
+    def fail_fit(self, y):
+        raise AssertionError("LabelEncoder fitted again")
+
+    monkeypatch.setattr(sk.preprocessing.LabelEncoder, "fit", fail_fit)
+    _initialize_neural_net(model)

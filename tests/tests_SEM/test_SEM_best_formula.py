@@ -3,6 +3,7 @@
 import numpy as np
 import pandas as pd
 import glmdisc
+from glmdisc._bestFormula import _best_formula_cont_sem
 
 
 def test_best_formula(caplog):
@@ -45,3 +46,27 @@ def test_best_formula_no_cont():
     model = glmdisc.Glmdisc(validation=False, test=False)
     model.fit(predictors_cont=None, predictors_qual=xd, labels=y, iter=11)
     model.best_formula()
+
+
+class _Stub:
+    d_cont = 2
+
+
+def test_best_formula_cont_sem_missing_values():
+    stub = _Stub()
+    stub.predictors_cont = np.array([[1., np.nan],
+                                     [2., np.nan],
+                                     [3., np.nan],
+                                     [4., np.nan]])
+    emap_best = np.array([[0, 0], [0, 0], [1, 0], [1, 0]])
+    assert _best_formula_cont_sem(stub, emap_best) == [[3.], []]
+
+
+def test_best_formula_cont_sem_missing_level():
+    stub = _Stub()
+    stub.predictors_cont = np.array([[1., 5.],
+                                     [2., 6.],
+                                     [3., np.nan],
+                                     [np.nan, 7.]])
+    emap_best = np.array([[0, 0], [0, 0], [1, 1], [2, 1]])
+    assert _best_formula_cont_sem(stub, emap_best) == [[3.], [7.]]

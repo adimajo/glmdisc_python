@@ -36,19 +36,20 @@ def generate_data(n, d, theta=None, plot=False):
     for i in range(d):
         xd[:, i] = pd.cut(x[:, i], bins=cuts, labels=[0, 1, 2])
 
-    log_odd = np.array([0] * n)
+    log_odd = np.zeros(n)
     for i in range(n):
         for j in range(d):
             log_odd[i] += theta[int(xd[i, j]), j]
 
     p = 1 / (1 + np.exp(- log_odd))
-    y = np.random.binomial(1, p)
+    y = np.random.binomial(1, p, size=n)
 
     if plot and d > 1:
-        for unique_pair_of_feature_as_tuple in combinations(range(d), 2):
-            plt.scatter(x[:, unique_pair_of_feature_as_tuple[0]],
-                        x[:, unique_pair_of_feature_as_tuple[1]],
-                        c=y,
-                        s=[1 for _ in range(len(x))])
+        for j1, j2 in combinations(range(d), 2):
+            plt.figure()
+            plt.scatter(x[:, j1], x[:, j2], c=y, s=1)
+            plt.xlabel("x" + str(j1))
+            plt.ylabel("x" + str(j2))
+            plt.show(block=False)
 
     return [x, y, theta]

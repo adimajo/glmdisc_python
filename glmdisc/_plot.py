@@ -50,24 +50,31 @@ def _plot_disc(self, predictors_cont_number, predictors_qual_number):
 
 
 def _plot_logodd(self):
-    # Gérer les manquants dans le GAM
-    lignes_completes = np.invert(
-        np.isnan(self.predictors_cont).sum(axis=1).astype(bool))
+    # Handle missing values in the GAM: keep the complete rows of the continuous features
+    if self.d_cont > 0:
+        lignes_completes = np.invert(np.isnan(self.predictors_cont).any(axis=1))
+    else:
+        lignes_completes = np.ones(self.n, dtype=bool)
 
-    # Fit du GAM sur tout le monde
+    features = []
+    if self.d_cont > 0:
+        features.append(pd.DataFrame(self.predictors_cont[lignes_completes, :]).apply(
+            lambda x: x.astype('float')))
+    if self.d_qual > 0:
+        features.append(pd.DataFrame(self.predictors_qual[lignes_completes, :]).apply(
+            lambda x: x.astype('category')))
+
+    # Fit the GAM on everyone
     gam = LogisticGAM(dtype=['numerical' for _ in range(self.d_cont)] + ['categorical' for _ in range(
-        self.d_qual)]).fit(
-        pd.concat([pd.DataFrame(self.predictors_cont[lignes_completes, :]).apply(
-            lambda x: x.astype('float')),
-            pd.DataFrame(self.predictors_qual[lignes_completes, :]).apply(
-                lambda x: x.astype('category'))], axis=1), self.labels[lignes_completes])
+        self.d_qual)]).fit(pd.concat(features, axis=1), self.labels[lignes_completes])
 
-    # Quelles que soient les valeurs de predictors_cont_number et
-    # predictors_qual_number, on plot tout pour l'instant
+    # Whatever the values of predictors_cont_number and
+    # predictors_qual_number, everything is plotted for now
     plt.figure()
-    fig, axs = plt.subplots(1, self.d_cont + self.d_qual)
+    # squeeze=False keeps axs a 2D array even with a single feature
+    fig, axs = plt.subplots(1, self.d_cont + self.d_qual, squeeze=False)
     plt.rcParams['figure.figsize'] = (28, 8)
-    for i, ax in enumerate(axs):
+    for i, ax in enumerate(axs[0]):
         try:
             XX = gam.generate_X_grid(term=i)
             ax.plot(XX[:, i], gam.partial_dependence(term=i, X=XX))

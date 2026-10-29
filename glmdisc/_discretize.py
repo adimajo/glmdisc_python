@@ -36,7 +36,7 @@ def _check_args_discretize_nn(self, predictors_cont, predictors_qual):
         raise ValueError(msg)
     if d_2 != self.d_qual:
         msg = ('Shape of ' + str(d_2) +
-               ' for predictors_cont does not match training set of size ' + str(self.d_qual) + '.')
+               ' for predictors_qual does not match training set of size ' + str(self.d_qual) + '.')
         logger.error(msg)
         raise ValueError(msg)
 
@@ -70,7 +70,7 @@ def _check_args_discretize_sem(self, predictors_cont, predictors_qual):
         raise ValueError(msg)
     if d_2 != sum(d_2bis) or d_2 != self.d_qual:
         msg = ('Shape of ' + str(d_2) +
-               ' for predictors_cont does not match provided link function '
+               ' for predictors_qual does not match provided link function '
                'of size ' + str(sum(d_2bis)) + ' and/or training set of size ' + str(self.d_qual) + '.')
         logger.error(msg)
         raise ValueError(msg)

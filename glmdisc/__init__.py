@@ -215,8 +215,14 @@ class Glmdisc:
             raise ValueError(msg)
 
         # m_start doit être pas déconnant
-        if not 2 <= m_start <= 50:
-            msg = 'Please set 2 <= m_start <= 50'
+        if not isinstance(m_start, (int, np.integer)) or not 2 <= m_start <= 50:
+            msg = 'Please set an integer 2 <= m_start <= 50'
+            logger.error(msg)
+            raise ValueError(msg)
+
+        # burn_in must be a non-negative integer
+        if not isinstance(burn_in, (int, np.integer)) or isinstance(burn_in, bool) or burn_in < 0:
+            msg = 'Please set an integer burn_in >= 0'
             logger.error(msg)
             raise ValueError(msg)
 
@@ -266,6 +272,8 @@ class Glmdisc:
         """
         if self.algorithm == "SEM":
             try:
+                if self.best_reglog is None:
+                    raise sk.exceptions.NotFittedError("This Glmdisc instance is not fitted yet.")
                 sk.utils.validation.check_is_fitted(self.best_reglog)
                 for link in self.best_link:
                     if isinstance(link, sk.linear_model.LogisticRegression):
