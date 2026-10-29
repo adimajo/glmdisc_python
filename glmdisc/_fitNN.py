@@ -294,7 +294,7 @@ def _evaluate_disc(history, d_cont: int, d_qual: int, glmdisc_object):
     results = [None] * (d_cont + d_qual)
     for j in range(d_cont + d_qual):
         results[j] = np.argmax(proba[j][0], axis=1)
-        encoders.append(sk.preprocessing.OneHotEncoder(categories='auto', sparse=False, handle_unknown="ignore"))
+        encoders.append(sk.preprocessing.OneHotEncoder(categories='auto', sparse_output=False, handle_unknown="ignore"))
         X_transformed = np.concatenate(
             (X_transformed,
              encoders[j].fit_transform(
