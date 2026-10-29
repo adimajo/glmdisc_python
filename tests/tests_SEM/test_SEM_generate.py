@@ -51,3 +51,17 @@ def test_generate_log_odd_not_truncated(monkeypatch):
     levels = np.digitize(x[:, 0], [0.333, 0.666])
     expected = 1 / (1 + np.exp(-theta[levels, 0]))
     np.testing.assert_allclose(drawn["p"], expected)
+
+
+def test_generate_labels_size(monkeypatch):
+    sizes = []
+    binomial = np.random.binomial
+
+    def spy_binomial(n, p, size=None):
+        sizes.append(size)
+        return binomial(n, p, size=size)
+
+    monkeypatch.setattr(np.random, "binomial", spy_binomial)
+    x, y, theta = glmdisc.Glmdisc.generate_data(n=1, d=3)
+    assert sizes == [1]
+    assert y.shape == (1,)

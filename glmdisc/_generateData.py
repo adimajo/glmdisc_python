@@ -42,7 +42,7 @@ def generate_data(n, d, theta=None, plot=False):
             log_odd[i] += theta[int(xd[i, j]), j]
 
     p = 1 / (1 + np.exp(- log_odd))
-    y = np.random.binomial(1, p)
+    y = np.random.binomial(1, p, size=n)
 
     if plot and d > 1:
         for unique_pair_of_feature_as_tuple in combinations(range(d), 2):
