@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+import matplotlib.pyplot as plt
 import pytest
 import numpy as np
 import glmdisc
@@ -65,3 +66,13 @@ def test_generate_labels_size(monkeypatch):
     x, y, theta = glmdisc.Glmdisc.generate_data(n=1, d=3)
     assert sizes == [1]
     assert y.shape == (1,)
+
+
+def test_generate_plot_one_figure_per_pair():
+    plt.close('all')
+    glmdisc.Glmdisc.generate_data(n=50, d=3, plot=True)
+    assert len(plt.get_fignums()) == 3
+    for num in plt.get_fignums():
+        ax = plt.figure(num).axes[0]
+        assert len(ax.collections) == 1
+    plt.close('all')
