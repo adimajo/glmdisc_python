@@ -5,6 +5,7 @@ import pandas as pd
 import pytest
 import random
 import glmdisc
+from glmdisc._discretize import _check_args_discretize_nn
 
 
 def test_discretize_new():
@@ -67,3 +68,34 @@ def test_discretize_wrong():
         model.discretize(predictors_cont=None, predictors_qual=xd)
     with pytest.raises(ValueError):
         model.discretize(predictors_cont=x, predictors_qual=xd)
+
+
+def test_discretize_wrong_messages(caplog):
+    n = 100
+    d = 2
+    x, y, theta = glmdisc.Glmdisc.generate_data(n, d)
+    model = glmdisc.Glmdisc(validation=False, test=False)
+    random.seed(1)
+    np.random.seed(1)
+    model.fit(predictors_cont=x, predictors_qual=None, labels=y, iter=11)
+    with pytest.raises(ValueError):
+        model.discretize(predictors_cont=x, predictors_qual=x.astype(str))
+    assert "Shape of 2 for predictors_qual" in caplog.records[-1].message
+    with pytest.raises(ValueError):
+        model.discretize(predictors_cont=x[:, :1], predictors_qual=None)
+    assert "Shape of 1 for predictors_cont" in caplog.records[-1].message
+
+
+class _Stub:
+    d_cont = 1
+    d_qual = 1
+
+
+def test_check_args_discretize_nn_messages(caplog):
+    x = np.zeros((5, 1))
+    with pytest.raises(ValueError):
+        _check_args_discretize_nn(_Stub(), x, np.zeros((5, 3)))
+    assert "Shape of 3 for predictors_qual" in caplog.records[-1].message
+    with pytest.raises(ValueError):
+        _check_args_discretize_nn(_Stub(), np.zeros((5, 2)), np.zeros((5, 1)))
+    assert "Shape of 2 for predictors_cont" in caplog.records[-1].message
