@@ -266,6 +266,8 @@ class Glmdisc:
         """
         if self.algorithm == "SEM":
             try:
+                if self.best_reglog is None:
+                    raise sk.exceptions.NotFittedError("This Glmdisc instance is not fitted yet.")
                 sk.utils.validation.check_is_fitted(self.best_reglog)
                 for link in self.best_link:
                     if isinstance(link, sk.linear_model.LogisticRegression):

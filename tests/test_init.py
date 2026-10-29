@@ -83,3 +83,11 @@ def test_validation_criterion(caplog):
 
     assert caplog.records[0].message == ('No need to penalize the log-likelihood when a validation set is used. '
                                          'Using log-likelihood instead.')
+
+
+def test_not_fitted_sem():
+    model = glmdisc.Glmdisc()
+    with pytest.raises(glmdisc.NotFittedError):
+        model._check_is_fitted()
+    with pytest.raises(glmdisc.NotFittedError):
+        model.predict(np.zeros((3, 1)), None)
