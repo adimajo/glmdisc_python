@@ -64,6 +64,17 @@ def test_m_start():
     with pytest.raises(ValueError):
         glmdisc.Glmdisc(m_start=1)
 
+    with pytest.raises(ValueError):
+        glmdisc.Glmdisc(m_start=2.5)
+
+
+def test_burn_in():
+    assert glmdisc.Glmdisc(burn_in=0).burn_in == 0
+
+    for burn_in in [-1, 2.5, "5", None, True]:
+        with pytest.raises(ValueError):
+            glmdisc.Glmdisc(burn_in=burn_in)
+
 
 def test_gini_penalized(caplog):
     glmdisc.Glmdisc(validation=False,

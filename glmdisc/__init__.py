@@ -215,8 +215,14 @@ class Glmdisc:
             raise ValueError(msg)
 
         # m_start doit être pas déconnant
-        if not 2 <= m_start <= 50:
-            msg = 'Please set 2 <= m_start <= 50'
+        if not isinstance(m_start, (int, np.integer)) or not 2 <= m_start <= 50:
+            msg = 'Please set an integer 2 <= m_start <= 50'
+            logger.error(msg)
+            raise ValueError(msg)
+
+        # burn_in must be a non-negative integer
+        if not isinstance(burn_in, (int, np.integer)) or isinstance(burn_in, bool) or burn_in < 0:
+            msg = 'Please set an integer burn_in >= 0'
             logger.error(msg)
             raise ValueError(msg)
 
