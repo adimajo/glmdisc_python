@@ -78,3 +78,17 @@ def test_plot_logodd_qual_only():
     model.fit(predictors_cont=None, predictors_qual=_digitized(x), labels=y, iter=11)
     model.plot(plot_type="logodd")
     plt.close('all')
+
+
+def test_plot_logodd_single_feature():
+    np.random.seed(1)
+    x, y, theta = glmdisc.Glmdisc.generate_data(300, 2)
+    model = glmdisc.Glmdisc(validation=False, test=False)
+    model.fit(predictors_cont=x[:, :1], predictors_qual=None, labels=y, iter=11)
+    model.plot(plot_type="logodd")
+    plt.close('all')
+
+    model = glmdisc.Glmdisc(validation=False, test=False)
+    model.fit(predictors_cont=None, predictors_qual=_digitized(x[:, :1]), labels=y, iter=11)
+    model.plot(plot_type="logodd")
+    plt.close('all')

@@ -71,9 +71,10 @@ def _plot_logodd(self):
     # Quelles que soient les valeurs de predictors_cont_number et
     # predictors_qual_number, on plot tout pour l'instant
     plt.figure()
-    fig, axs = plt.subplots(1, self.d_cont + self.d_qual)
+    # squeeze=False keeps axs a 2D array even with a single feature
+    fig, axs = plt.subplots(1, self.d_cont + self.d_qual, squeeze=False)
     plt.rcParams['figure.figsize'] = (28, 8)
-    for i, ax in enumerate(axs):
+    for i, ax in enumerate(axs[0]):
         try:
             XX = gam.generate_X_grid(term=i)
             ax.plot(XX[:, i], gam.partial_dependence(term=i, X=XX))
