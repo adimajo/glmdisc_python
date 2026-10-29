@@ -56,3 +56,25 @@ def test_plot_log(caplog):
     assert caplog.records[-1].message == ("A single int (more than 0 and less than the "
                                           "number of columns in predictors_cont) must be "
                                           "provided for predictors_cont_number")
+
+
+def _digitized(x):
+    return np.digitize(x, [0.333, 0.666]).astype(float)
+
+
+def test_plot_logodd_cont_only():
+    np.random.seed(1)
+    x, y, theta = glmdisc.Glmdisc.generate_data(300, 2)
+    model = glmdisc.Glmdisc(validation=False, test=False)
+    model.fit(predictors_cont=x, predictors_qual=None, labels=y, iter=11)
+    model.plot(plot_type="logodd")
+    plt.close('all')
+
+
+def test_plot_logodd_qual_only():
+    np.random.seed(1)
+    x, y, theta = glmdisc.Glmdisc.generate_data(300, 2)
+    model = glmdisc.Glmdisc(validation=False, test=False)
+    model.fit(predictors_cont=None, predictors_qual=_digitized(x), labels=y, iter=11)
+    model.plot(plot_type="logodd")
+    plt.close('all')
