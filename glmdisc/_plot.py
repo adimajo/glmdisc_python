@@ -68,8 +68,8 @@ def _plot_logodd(self):
     gam = LogisticGAM(dtype=['numerical' for _ in range(self.d_cont)] + ['categorical' for _ in range(
         self.d_qual)]).fit(pd.concat(features, axis=1), self.labels[lignes_completes])
 
-    # Quelles que soient les valeurs de predictors_cont_number et
-    # predictors_qual_number, on plot tout pour l'instant
+    # Whatever the values of predictors_cont_number and
+    # predictors_qual_number, everything is plotted for now
     plt.figure()
     # squeeze=False keeps axs a 2D array even with a single feature
     fig, axs = plt.subplots(1, self.d_cont + self.d_qual, squeeze=False)
