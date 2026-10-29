@@ -28,3 +28,26 @@ def test_init_disc_fits_each_label_encoder_once(monkeypatch):
     complete = model._calculate_shape()
     model._init_disc(complete)
     assert len(fits) == model.d_qual
+
+
+def test_init_disc_draws_every_level():
+    np.random.seed(0)
+    model = _model(levels=("a", "b", "c"), m_start=20)
+    edisc, predictors_trans = model._init_disc(model._calculate_shape())
+    for j in range(model.d_qual):
+        assert set(np.unique(edisc[:, model.d_cont + j])) == {0, 1, 2}
+
+
+def test_init_disc_caps_groups_at_m_start():
+    np.random.seed(0)
+    model = _model(levels=tuple("abcdefgh"), m_start=3)
+    edisc, predictors_trans = model._init_disc(model._calculate_shape())
+    for j in range(model.d_qual):
+        assert set(np.unique(edisc[:, model.d_cont + j])) == {0, 1, 2}
+
+
+def test_init_disc_single_level():
+    np.random.seed(0)
+    model = _model(levels=("a",), m_start=20)
+    edisc, predictors_trans = model._init_disc(model._calculate_shape())
+    np.testing.assert_array_equal(edisc[:, 2:], 0)
