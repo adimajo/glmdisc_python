@@ -36,7 +36,6 @@ dependencies = [
 [project.optional-dependencies]
 test = ["coverage", "flake8", "pytest"]
 docs = ["numpydoc", "sphinx", "sphinx-rtd-theme"]
-release = ["build", "twine"]
 
 [project.urls]
 Homepage = "https://adimajo.github.io/glmdisc_python"
