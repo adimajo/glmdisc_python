@@ -201,7 +201,7 @@ def gini(ground_truth, predictions, sample_weight=None, level=.95):
        sample_weight: np.array of floats of the sample weights
        level: float (between 0 and 1) describing the level required for the confidence interval
     """
-    if (not isinstance(level, float)) or (not level < 1 and level > 0):
+    if not isinstance(level, float) or not 0 < level < 1:
         raise ValueError("level should be a single float between 0 and 1")
     auc, auc_cov = delong_roc_variance(ground_truth, predictions, sample_weight)
     auc_std = np.sqrt(auc_cov)

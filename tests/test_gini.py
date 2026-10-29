@@ -33,3 +33,18 @@ def test_gini_with_sample_weight():
     w = np.random.RandomState(1).uniform(0.5, 2, size=len(y))
     value, _ = glmdisc.gini(y, p, sample_weight=w)
     assert value == pytest.approx(2 * roc_auc_score(y, p, sample_weight=w) - 1)
+
+
+@pytest.mark.parametrize("level", [0., -.5, 1., 1.5, 1, "0.95", None])
+def test_gini_invalid_level(level):
+    y, p = _scores()
+    with pytest.raises(ValueError):
+        glmdisc.gini(y, p, level=level)
+
+
+def test_gini_level_widens_interval():
+    y, p = _scores()
+    _, ci_90 = glmdisc.gini(y, p, level=.9)
+    _, ci_99 = glmdisc.gini(y, p, level=.99)
+    assert ci_99[0] < ci_90[0]
+    assert ci_99[1] >= ci_90[1]
