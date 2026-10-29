@@ -34,3 +34,20 @@ def test_generate_theta_error():
 
     with pytest.raises(ValueError):
         glmdisc.Glmdisc.generate_data(n=800, d=d, theta=theta)
+
+
+def test_generate_log_odd_not_truncated(monkeypatch):
+    theta = np.array([[0.4], [0.9], [-0.6]])
+    drawn = {}
+
+    def fake_binomial(n, p, size=None):
+        drawn["p"] = p
+        return np.zeros(len(p), dtype=int)
+
+    monkeypatch.setattr(np.random, "binomial", fake_binomial)
+    np.random.seed(0)
+    x, y, theta2 = glmdisc.Glmdisc.generate_data(n=50, d=1, theta=theta)
+
+    levels = np.digitize(x[:, 0], [0.333, 0.666])
+    expected = 1 / (1 + np.exp(-theta[levels, 0]))
+    np.testing.assert_allclose(drawn["p"], expected)

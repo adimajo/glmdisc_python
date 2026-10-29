@@ -36,7 +36,7 @@ def generate_data(n, d, theta=None, plot=False):
     for i in range(d):
         xd[:, i] = pd.cut(x[:, i], bins=cuts, labels=[0, 1, 2])
 
-    log_odd = np.array([0] * n)
+    log_odd = np.zeros(n)
     for i in range(n):
         for j in range(d):
             log_odd[i] += theta[int(xd[i, j]), j]
