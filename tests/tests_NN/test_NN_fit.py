@@ -6,7 +6,7 @@ import pandas as pd
 import random
 import glmdisc
 import sklearn as sk
-from glmdisc._fitNN import _initialize_neural_net
+from glmdisc._fitNN import _initialize_neural_net, _parse_kwargs
 import tensorflow
 from tensorflow.keras.optimizers import Adagrad
 from tensorflow.keras.callbacks import EarlyStopping
@@ -228,3 +228,9 @@ def test_initialize_neural_net_reuses_label_encoders(monkeypatch):
 
     monkeypatch.setattr(sk.preprocessing.LabelEncoder, "fit", fail_fit)
     _initialize_neural_net(model)
+
+
+def test_default_optimizer():
+    model = glmdisc.Glmdisc(algorithm="NN")
+    optim = _parse_kwargs(model)
+    assert float(optim.learning_rate) == pytest.approx(0.5)

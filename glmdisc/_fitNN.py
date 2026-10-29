@@ -429,7 +429,7 @@ def _parse_kwargs(self, **kwargs):
     if "optimizer" in kwargs:
         optim = kwargs['optimizer']
     else:
-        optim = tensorflow.keras.optimizers.RMSprop(lr=0.5, rho=0.9, epsilon=None, decay=0.0)
+        optim = tensorflow.keras.optimizers.RMSprop(learning_rate=0.5, rho=0.9, epsilon=1e-7)
 
     self.model_nn["callbacks"] = [
         ReduceLROnPlateau(
