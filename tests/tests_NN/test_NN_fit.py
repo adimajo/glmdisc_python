@@ -7,7 +7,6 @@ import random
 import glmdisc
 import sklearn as sk
 from glmdisc._fitNN import _initialize_neural_net, _layer_output, _parse_kwargs
-import tensorflow
 from tensorflow.keras.optimizers import Adagrad
 from tensorflow.keras.callbacks import EarlyStopping
 
@@ -24,10 +23,8 @@ def test_kwargs(caplog):
               plot=True,
               optimizer=Adagrad(),
               callbacks=EarlyStopping())
-    assert isinstance(model.model_nn['tensorflow_model'].optimizer,
-                      tensorflow.python.keras.optimizer_v2.adagrad.Adagrad)
-    assert isinstance(model.model_nn['callbacks'][-1],
-                      tensorflow.python.keras.callbacks.EarlyStopping)
+    assert isinstance(model.model_nn['tensorflow_model'].optimizer, Adagrad)
+    assert isinstance(model.model_nn['callbacks'][-1], EarlyStopping)
     with pytest.raises(ValueError):
         model.fit(predictors_cont=x,
                   predictors_qual=None,
