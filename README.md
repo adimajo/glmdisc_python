@@ -1,7 +1,6 @@
 [![PyPI version](https://badge.fury.io/py/glmdisc.svg)](https://badge.fury.io/py/glmdisc)
 [![PyPI pyversions](https://img.shields.io/pypi/pyversions/glmdisc.svg)](https://pypi.python.org/pypi/glmdisc/)
 [![PyPi Downloads](https://img.shields.io/pypi/dm/glmdisc)](https://img.shields.io/pypi/dm/glmdisc)
-[![Build Status](https://travis-ci.org/adimajo/glmdisc_python.svg?branch=master)](https://travis-ci.org/adimajo/glmdisc_python)
 ![Python package](https://github.com/adimajo/glmdisc_python/workflows/Python%20package/badge.svg)
 [![codecov](https://codecov.io/gh/adimajo/glmdisc_python/branch/master/graph/badge.svg)](https://codecov.io/gh/adimajo/glmdisc_python)
 
@@ -32,7 +31,7 @@ These instructions will get you a copy of the project up and running on your loc
 
 ### Prerequisites
 
-This code is supported on Python 3.7, 3.8, 3.9 and 3.10 (see [tox file](tox.ini)).
+This code is supported on Python 3.10, 3.11 and 3.12 (see the [CI workflow](.github/workflows/python-package.yml)).
 
 ### Installing the package
 
@@ -541,11 +540,10 @@ You can clone this project using:
 git clone https://github.com/adimajo/glmdisc_python.git
 ```
 
-You can install all dependencies, including development dependencies, using (note that 
-this command requires `pipenv` which can be installed by typing `pip install pipenv`):
+You can install the package in editable mode with its development dependencies using:
 
 ```PowerShell
-pipenv install -d
+pip install -e ".[test,docs]"
 ```
 
 You can build the documentation by going into the `docs` directory and typing `make html`.
@@ -556,7 +554,6 @@ as it will build the docs there so as to allow me to push this other directory a
 You can run the tests by typing `coverage run -m pytest`, which relies on packages 
 [coverage](https://coverage.readthedocs.io/en/coverage-5.2/) and [pytest](https://docs.pytest.org/en/latest/).
 
-To run the tests in different environments (one for each version of Python), install `pyenv` (see [the instructions here](https://github.com/pyenv/pyenv)),
-install all versions you want to test (see [tox.ini](tox.ini)), e.g. with `pyenv install 3.7.0` and run 
-`pipenv run pyenv local 3.7.0 [...]` (and all other versions) followed by `pipenv run tox`.
- 
+The continuous integration runs the tests on each supported version of Python (see
+[the workflow](.github/workflows/python-package.yml)). You can check the style locally with `flake8 .`
+(the settings are in [.flake8](.flake8)).
