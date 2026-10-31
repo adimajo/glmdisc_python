@@ -50,3 +50,5 @@ include = ["glmdisc*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+# NumPy will turn this deprecation into an error
+filterwarnings = ["error:Conversion of an array with ndim:DeprecationWarning"]
