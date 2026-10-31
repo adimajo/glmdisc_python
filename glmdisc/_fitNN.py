@@ -19,6 +19,19 @@ from tensorflow.keras.layers import Input
 from tensorflow.keras.layers import concatenate
 
 
+def _layer_output(layer, x):
+    """
+    Applies a layer to an array of inputs.
+
+    :param layer: a Keras layer
+    :param numpy.ndarray x: the inputs of the layer
+    :returns: a list holding the numpy array of outputs (the format returned by
+        :code:`tf.keras.backend.function`, which does not exist in Keras 3)
+    :rtype: list
+    """
+    return [np.asarray(layer(tf.convert_to_tensor(x, dtype=tf.float32)))]
+
+
 def _plot_cont_soft_quant(self):
     """
     Plots the soft quantization while fitting
@@ -128,15 +141,13 @@ class LossHistory(Callback):
             for j in range(self.d_cont):
                 self.best_weights.append(self.current_weights[j])
                 self.best_outputs.append(
-                    tf.keras.backend.function([self.glmdisc_object.model_nn["liste_layers_quant"][j].input],
-                                              [self.glmdisc_object.model_nn["liste_layers_quant"][j].output])(
-                        [self.glmdisc_object.predictors_cont[:, j, np.newaxis]]))
+                    _layer_output(self.glmdisc_object.model_nn["liste_layers_quant"][j],
+                                  self.glmdisc_object.predictors_cont[:, j, np.newaxis]))
             for j in range(self.d_qual):
                 self.best_weights.append(self.current_weights[j + self.d_cont])
                 self.best_outputs.append(
-                    tf.keras.backend.function([self.glmdisc_object.model_nn["liste_layers_qual"][j].input],
-                                              [self.glmdisc_object.model_nn["liste_layers_qual"][j].output])(
-                        [self.glmdisc_object.predictors_qual_dummy[j]]))
+                    _layer_output(self.glmdisc_object.model_nn["liste_layers_qual"][j],
+                                  self.glmdisc_object.predictors_qual_dummy[j]))
 
             if self.plot_fit:
                 _plot_cont_soft_quant(self)
@@ -208,14 +219,12 @@ def _from_layers_to_proba_training(d_cont, d_qual, glmdisc_object):
     results = [None] * (d_cont + d_qual)
 
     for j in range(d_cont):
-        results[j] = tf.keras.backend.function([glmdisc_object.model_nn["liste_layers_quant"][j].input],
-                                               [glmdisc_object.model_nn["liste_layers_quant"][j].output])(
-            [glmdisc_object.predictors_cont[glmdisc_object.train_rows, j, np.newaxis]])
+        results[j] = _layer_output(glmdisc_object.model_nn["liste_layers_quant"][j],
+                                   glmdisc_object.predictors_cont[glmdisc_object.train_rows, j, np.newaxis])
 
     for j in range(d_qual):
-        results[j + d_cont] = tf.keras.backend.function([glmdisc_object.model_nn["liste_layers_qual"][j].input],
-                                                        [glmdisc_object.model_nn["liste_layers_qual"][j].output])(
-            [glmdisc_object.predictors_qual_dummy[j][glmdisc_object.train_rows]])
+        results[j + d_cont] = _layer_output(glmdisc_object.model_nn["liste_layers_qual"][j],
+                                            glmdisc_object.predictors_qual_dummy[j][glmdisc_object.train_rows])
 
     return results
 
@@ -285,7 +294,7 @@ def _evaluate_disc(history, d_cont: int, d_qual: int, glmdisc_object):
     results = [None] * (d_cont + d_qual)
     for j in range(d_cont + d_qual):
         results[j] = np.argmax(proba[j][0], axis=1)
-        encoders.append(sk.preprocessing.OneHotEncoder(categories='auto', sparse=False, handle_unknown="ignore"))
+        encoders.append(sk.preprocessing.OneHotEncoder(categories='auto', sparse_output=False, handle_unknown="ignore"))
         X_transformed = np.concatenate(
             (X_transformed,
              encoders[j].fit_transform(
@@ -429,7 +438,7 @@ def _parse_kwargs(self, **kwargs):
     if "optimizer" in kwargs:
         optim = kwargs['optimizer']
     else:
-        optim = tensorflow.keras.optimizers.RMSprop(lr=0.5, rho=0.9, epsilon=None, decay=0.0)
+        optim = tensorflow.keras.optimizers.RMSprop(learning_rate=0.5, rho=0.9, epsilon=1e-7)
 
     self.model_nn["callbacks"] = [
         ReduceLROnPlateau(

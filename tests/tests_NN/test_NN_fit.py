@@ -6,8 +6,7 @@ import pandas as pd
 import random
 import glmdisc
 import sklearn as sk
-from glmdisc._fitNN import _initialize_neural_net
-import tensorflow
+from glmdisc._fitNN import _initialize_neural_net, _layer_output, _parse_kwargs
 from tensorflow.keras.optimizers import Adagrad
 from tensorflow.keras.callbacks import EarlyStopping
 
@@ -24,10 +23,8 @@ def test_kwargs(caplog):
               plot=True,
               optimizer=Adagrad(),
               callbacks=EarlyStopping())
-    assert isinstance(model.model_nn['tensorflow_model'].optimizer,
-                      tensorflow.python.keras.optimizer_v2.adagrad.Adagrad)
-    assert isinstance(model.model_nn['callbacks'][-1],
-                      tensorflow.python.keras.callbacks.EarlyStopping)
+    assert isinstance(model.model_nn['tensorflow_model'].optimizer, Adagrad)
+    assert isinstance(model.model_nn['callbacks'][-1], EarlyStopping)
     with pytest.raises(ValueError):
         model.fit(predictors_cont=x,
                   predictors_qual=None,
@@ -228,3 +225,26 @@ def test_initialize_neural_net_reuses_label_encoders(monkeypatch):
 
     monkeypatch.setattr(sk.preprocessing.LabelEncoder, "fit", fail_fit)
     _initialize_neural_net(model)
+
+
+def test_default_optimizer():
+    model = glmdisc.Glmdisc(algorithm="NN")
+    optim = _parse_kwargs(model)
+    assert float(optim.learning_rate) == pytest.approx(0.5)
+
+
+def test_layer_output():
+    from tensorflow.keras.layers import Dense, Input
+    layer = Dense(3, activation='softmax')
+    layer(Input((1, )))
+    kernel = np.array([[1., -1., 0.]])
+    bias = np.array([0., .5, 0.])
+    layer.set_weights([kernel, bias])
+    x = np.array([[0.], [2.]])
+
+    output = _layer_output(layer, x)
+
+    logits = x @ kernel + bias
+    expected = np.exp(logits) / np.exp(logits).sum(axis=1, keepdims=True)
+    assert isinstance(output, list) and len(output) == 1
+    np.testing.assert_allclose(output[0], expected, rtol=1e-5)
