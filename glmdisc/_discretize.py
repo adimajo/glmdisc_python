@@ -108,8 +108,8 @@ def _discretize_sem(self, predictors_cont, predictors_qual):
 
             for i in range(n):
                 for k in range(int(m) + 1):
-                    t[i, k] = self.best_link[j][(int((self.affectations[j].transform(
-                        np.ravel(predictors_qual[i, j - d_1])))), k)] / n
+                    t[i, k] = self.best_link[j][(int(self.affectations[j].transform(
+                        np.ravel(predictors_qual[i, j - d_1]))[0]), k)] / n
 
             emap[:, j] = np.argmax(t, axis=1)
 
