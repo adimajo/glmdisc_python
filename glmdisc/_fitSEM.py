@@ -92,7 +92,6 @@ def _init_fit_sem(self, edisc):
 
     for j in range(self.d_cont):
         link[j] = sk.linear_model.LogisticRegression(C=1e40,
-                                                     multi_class='multinomial',
                                                      solver='newton-cg',
                                                      max_iter=25,
                                                      tol=0.001,
