@@ -85,6 +85,16 @@ def _fit_link(x, y):
     return link.fit(X=x, y=y)
 
 
+def _likelihood_of_labels(proba, labels):
+    """
+    Probability given to the observed label of each row: p(y = 1) where y is 1, p(y = 0) elsewhere
+
+    :param numpy.ndarray proba: predict_proba output of the logistic regression, columns (y = 0, y = 1)
+    :param numpy.ndarray labels: observed labels
+    """
+    return np.where(np.ravel(labels) == 1, proba[:, 1], proba[:, 0])
+
+
 def _init_fit_sem(self, edisc):
     # Initialization for following the performance of the discretization
     current_best = 0
@@ -188,12 +198,12 @@ def _fit_sem(self, edisc, predictors_trans, continu_complete_case, **kwargs):
                 for k in range(len(m[j])):
                     modalites = np.zeros((self.n, len(m[j])))
                     modalites[:, k] = np.ones((self.n, ))
-                    y_p[:, k] = model_edisc.predict_proba(np.column_stack(
+                    y_p[:, k] = _likelihood_of_labels(model_edisc.predict_proba(np.column_stack(
                         (base_disjonctive[:, 0:(sum(list(map(len, m[0:j]))))],
                          modalites,
                          base_disjonctive[:, (sum(list(map(len,
-                                                           m[0:(j + 1)])))):(sum(list(map(len, m))))]))
-                    )[:, 1] * (2 * np.ravel(self.labels) - 1) - np.ravel(self.labels) + 1
+                                                           m[0:(j + 1)])))):(sum(list(map(len, m))))]))),
+                                                      self.labels)
 
                 # On calcule q_j | x_j sur tout le monde
                 t = link[j].predict_proba(
@@ -238,12 +248,12 @@ def _fit_sem(self, edisc, predictors_trans, continu_complete_case, **kwargs):
                     modalites = np.zeros((self.n, len(m[j])))
                     modalites[:, k] = np.ones((self.n, ))
 
-                    y_p[:, k] = model_edisc.predict_proba(np.column_stack(
+                    y_p[:, k] = _likelihood_of_labels(model_edisc.predict_proba(np.column_stack(
                         (base_disjonctive[:, 0:(sum(list(map(len, m[0:j]))))],
                          modalites,
                          base_disjonctive[:,
-                         (sum(list(map(len, m[0:(j + 1)])))):(sum(list(map(len, m))))]))
-                    )[:, 1] * (2 * np.ravel(self.labels) - 1) - np.ravel(self.labels) + 1
+                         (sum(list(map(len, m[0:(j + 1)])))):(sum(list(map(len, m))))]))),
+                                                      self.labels)
 
                 t = np.zeros((self.n, int(len(m[j]))))
 

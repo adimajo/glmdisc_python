@@ -213,6 +213,12 @@ def test_fit_sem_collapsed_continuous_feature():
     assert isinstance(model.best_link[0], glmdisc._fitSEM._SingleClassLink)
 
 
+def test_likelihood_of_labels():
+    proba = np.array([[0.7, 0.3], [0.2, 0.8], [0.6, 0.4], [0.1, 0.9]])
+    for labels in (np.array([0, 1, 1, 0]), np.array([[0], [1], [1], [0]]), np.array([False, True, True, False])):
+        np.testing.assert_allclose(glmdisc._fitSEM._likelihood_of_labels(proba, labels), [0.7, 0.8, 0.4, 0.1])
+
+
 def test_nan():
     n = 100
     d = 2
