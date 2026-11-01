@@ -38,28 +38,20 @@ def _calculate_criterion(self, emap, model_emap, current_encoder_emap):
         if self.validation:
             performance = loglik
             logger.info("Current likelihood on validation set: " + str(performance))
-
-    if self.criterion == 'aic' and not self.validation:
-        performance = -(2 * model_emap.coef_.shape[1] - 2 * loglik)
-        logger.info("Current AIC on train set: " + str(- performance))
-
-    if self.criterion == 'bic' and not self.validation:
-        performance = -(log(self.n) * model_emap.coef_.shape[1] - 2 * loglik)
-        logger.info("Current BIC on train set: " + str(- performance))
-
-    if self.criterion == 'gini' and self.validation:
+        elif self.criterion == 'aic':
+            performance = -(2 * model_emap.coef_.shape[1] - 2 * loglik)
+            logger.info("Current AIC on train set: " + str(- performance))
+        else:
+            performance = -(log(self.n) * model_emap.coef_.shape[1] - 2 * loglik)
+            logger.info("Current BIC on train set: " + str(- performance))
+    else:
+        rows = self.validation_rows if self.validation else self.train_rows
         performance = sk.metrics.roc_auc_score(
-            self.labels[self.validation_rows], model_emap.predict_proba(
+            self.labels[rows], model_emap.predict_proba(
                 X=current_encoder_emap.transform(
-                    emap[self.validation_rows, :].astype(str)))[:, 1:])
-        logger.info("Current Gini on validation set: " + str(performance))
-
-    if self.criterion == 'gini' and not self.validation:
-        performance = sk.metrics.roc_auc_score(
-            self.labels[self.train_rows], model_emap.predict_proba(
-                X=current_encoder_emap.transform(
-                    emap[self.train_rows, :].astype(str)))[:, 1:])
-        logger.info("Current Gini on training set: " + str(performance))
+                    emap[rows, :].astype(str)))[:, 1:])
+        logger.info("Current Gini on " + ("validation" if self.validation else "training") + " set: " +
+                    str(performance))
 
     return performance
 
