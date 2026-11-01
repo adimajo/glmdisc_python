@@ -56,6 +56,35 @@ def _calculate_criterion(self, emap, model_emap, current_encoder_emap):
     return performance
 
 
+class _SingleClassLink(sk.linear_model.LogisticRegression):
+    """
+    Link p(e|x) when all complete training rows carry the same label, which a logistic regression cannot fit
+    """
+
+    def fit(self, X, y, sample_weight=None):
+        self.classes_ = np.unique(y)
+        return self
+
+    def predict_proba(self, X):
+        return np.ones((X.shape[0], 1))
+
+
+def _new_link():
+    return sk.linear_model.LogisticRegression(C=1e40,
+                                              solver='newton-cg',
+                                              max_iter=25,
+                                              tol=0.001,
+                                              warm_start=False)
+
+
+def _fit_link(x, y):
+    """
+    Fit p(e|x) of one continuous feature, falling back to a constant when y has a single label
+    """
+    link = _SingleClassLink() if np.unique(y).size < 2 else _new_link()
+    return link.fit(X=x, y=y)
+
+
 def _init_fit_sem(self, edisc):
     # Initialization for following the performance of the discretization
     current_best = 0
@@ -83,11 +112,7 @@ def _init_fit_sem(self, edisc):
     m = [None] * (self.d_cont + self.d_qual)
 
     for j in range(self.d_cont):
-        link[j] = sk.linear_model.LogisticRegression(C=1e40,
-                                                     solver='newton-cg',
-                                                     max_iter=25,
-                                                     tol=0.001,
-                                                     warm_start=False)
+        link[j] = _new_link()
 
     return current_best, emap, model_edisc, model_emap, current_encoder_edisc, current_encoder_emap, link, m
 
@@ -152,9 +177,10 @@ def _fit_sem(self, edisc, predictors_trans, continu_complete_case, **kwargs):
             # On commence par les quantitatives
             if j < self.d_cont:
                 # On apprend q_j | x_j
-                link[j].fit(y=edisc[self.train_rows, :][continu_complete_case[self.train_rows, j], j],
-                            X=self.predictors_cont[self.train_rows, :][continu_complete_case[self.train_rows,
-                                                                                             j], j].reshape(-1, 1))
+                link[j] = _fit_link(
+                    x=self.predictors_cont[self.train_rows, :][continu_complete_case[self.train_rows,
+                                                                                     j], j].reshape(-1, 1),
+                    y=edisc[self.train_rows, :][continu_complete_case[self.train_rows, j], j])
 
                 y_p = np.zeros((self.n, len(m[j])))
 

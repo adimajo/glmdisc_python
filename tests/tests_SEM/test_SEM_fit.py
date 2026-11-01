@@ -187,6 +187,32 @@ def test_calculate_criterion_bic_penalty_uses_train_size():
     assert math.isclose(glmdisc._fitSEM._calculate_criterion(model, emap, reglog, encoder), expected)
 
 
+def test_fit_link_single_class():
+    x = np.linspace(0, 1, 20).reshape(-1, 1)
+    link = glmdisc._fitSEM._fit_link(x, np.full(20, 3))
+    assert isinstance(link, sk.linear_model.LogisticRegression)
+    np.testing.assert_array_equal(link.classes_, [3])
+    np.testing.assert_array_equal(link.predict_proba(x), np.ones((20, 1)))
+
+    link = glmdisc._fitSEM._fit_link(x, np.arange(20) % 2)
+    assert link.predict_proba(x).shape == (20, 2)
+
+
+def test_fit_sem_collapsed_continuous_feature():
+    np.random.seed(1)
+    n = 100
+    x, y, theta = glmdisc.Glmdisc.generate_data(n, 2)
+    model = glmdisc.Glmdisc(criterion="bic", validation=False, test=False, m_start=2)
+    model.fit(predictors_cont=x, predictors_qual=None, labels=y, iter=11)
+    model.predict(predictors_cont=x, predictors_qual=None)
+    edisc = np.zeros((n, 2), dtype=int)
+    edisc[:, 1] = np.random.randint(0, 2, size=n)
+    model._calculate_shape()
+    complete = np.ones((n, 2), dtype=bool)
+    glmdisc._fitSEM._fit_sem(model, edisc, None, complete)
+    assert isinstance(model.best_link[0], glmdisc._fitSEM._SingleClassLink)
+
+
 def test_nan():
     n = 100
     d = 2
