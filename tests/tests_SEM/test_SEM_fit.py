@@ -187,6 +187,22 @@ def test_calculate_criterion_bic_penalty_uses_train_size():
     assert math.isclose(glmdisc._fitSEM._calculate_criterion(model, emap, reglog, encoder), expected)
 
 
+def test_calculate_criterion_validation_likelihood_uses_validation_rows():
+    n = 100
+    x, y, theta = glmdisc.Glmdisc.generate_data(n, 2)
+    np.random.seed(1)
+    model = glmdisc.Glmdisc(criterion="bic", validation=True)
+    model.fit(predictors_cont=x, predictors_qual=None, labels=y, iter=11)
+    emap = np.random.randint(0, 3, size=(n, 2))
+    encoder = sk.preprocessing.OneHotEncoder().fit(X=emap.astype(str))
+    reglog = sk.linear_model.LogisticRegression(C=1e40, tol=0.001, max_iter=25)
+    reglog.fit(encoder.transform(emap[model.train_rows].astype(str)), y[model.train_rows])
+    rows = model.validation_rows
+    expected = -sk.metrics.log_loss(y[rows], reglog.predict_proba(encoder.transform(emap[rows].astype(str))),
+                                    normalize=False)
+    assert math.isclose(glmdisc._fitSEM._calculate_criterion(model, emap, reglog, encoder), expected)
+
+
 def test_fit_link_single_class():
     x = np.linspace(0, 1, 20).reshape(-1, 1)
     link = glmdisc._fitSEM._fit_link(x, np.full(20, 3))

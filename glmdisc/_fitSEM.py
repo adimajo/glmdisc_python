@@ -29,11 +29,12 @@ def _calculate_criterion(self, emap, model_emap, current_encoder_emap):
     -------
     criterion value
     """
+    rows = self.validation_rows if self.validation else self.train_rows
     if self.criterion in ['aic', 'bic']:
-        loglik = -sk.metrics.log_loss(self.labels[self.train_rows],
+        loglik = -sk.metrics.log_loss(self.labels[rows],
                                       model_emap.predict_proba(
                                           X=current_encoder_emap.transform(
-                                              emap[self.train_rows, :].astype(str))),
+                                              emap[rows, :].astype(str))),
                                       normalize=False)
         if self.validation:
             performance = loglik
@@ -45,7 +46,6 @@ def _calculate_criterion(self, emap, model_emap, current_encoder_emap):
             performance = -(log(len(self.train_rows)) * model_emap.coef_.shape[1] - 2 * loglik)
             logger.info("Current BIC on train set: " + str(- performance))
     else:
-        rows = self.validation_rows if self.validation else self.train_rows
         performance = sk.metrics.roc_auc_score(
             self.labels[rows], model_emap.predict_proba(
                 X=current_encoder_emap.transform(
