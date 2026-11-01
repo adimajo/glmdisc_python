@@ -158,7 +158,7 @@ def test_calculate_criterion():
     np.random.seed(1)
     model.fit(predictors_cont=x, predictors_qual=None, labels=y, iter=11)
     assert math.isclose(glmdisc._fitSEM._calculate_criterion(model, emap, model_emap, current_encoder_emap),
-                        modele_bic + (math.log(model.n) - 2) * model_emap.coef_.shape[1])
+                        modele_bic + (math.log(len(model.train_rows)) - 2) * model_emap.coef_.shape[1])
 
     model = glmdisc.Glmdisc(criterion="gini")
     model.fit(predictors_cont=x, predictors_qual=None, labels=y, iter=11)
@@ -167,6 +167,72 @@ def test_calculate_criterion():
     model = glmdisc.Glmdisc(criterion="gini", validation=False)
     model.fit(predictors_cont=x, predictors_qual=None, labels=y, iter=11)
     assert 0 <= glmdisc._fitSEM._calculate_criterion(model, emap, model_emap, current_encoder_emap) <= 1
+
+
+def test_calculate_criterion_bic_penalty_uses_train_size():
+    n = 100
+    x, y, theta = glmdisc.Glmdisc.generate_data(n, 2)
+    np.random.seed(1)
+    model = glmdisc.Glmdisc(criterion="bic", validation=False)
+    model.fit(predictors_cont=x, predictors_qual=None, labels=y, iter=11)
+    assert len(model.train_rows) < n
+    emap = np.random.randint(0, 3, size=(n, 2))
+    encoder = sk.preprocessing.OneHotEncoder().fit(X=emap.astype(str))
+    reglog = sk.linear_model.LogisticRegression(C=1e40, tol=0.001, max_iter=25)
+    reglog.fit(encoder.transform(emap[model.train_rows].astype(str)), y[model.train_rows])
+    loglik = -sk.metrics.log_loss(y[model.train_rows],
+                                  reglog.predict_proba(encoder.transform(emap[model.train_rows].astype(str))),
+                                  normalize=False)
+    expected = -(math.log(len(model.train_rows)) * reglog.coef_.shape[1] - 2 * loglik)
+    assert math.isclose(glmdisc._fitSEM._calculate_criterion(model, emap, reglog, encoder), expected)
+
+
+def test_calculate_criterion_validation_likelihood_uses_validation_rows():
+    n = 100
+    x, y, theta = glmdisc.Glmdisc.generate_data(n, 2)
+    np.random.seed(1)
+    model = glmdisc.Glmdisc(criterion="bic", validation=True)
+    model.fit(predictors_cont=x, predictors_qual=None, labels=y, iter=11)
+    emap = np.random.randint(0, 3, size=(n, 2))
+    encoder = sk.preprocessing.OneHotEncoder().fit(X=emap.astype(str))
+    reglog = sk.linear_model.LogisticRegression(C=1e40, tol=0.001, max_iter=25)
+    reglog.fit(encoder.transform(emap[model.train_rows].astype(str)), y[model.train_rows])
+    rows = model.validation_rows
+    expected = -sk.metrics.log_loss(y[rows], reglog.predict_proba(encoder.transform(emap[rows].astype(str))),
+                                    normalize=False)
+    assert math.isclose(glmdisc._fitSEM._calculate_criterion(model, emap, reglog, encoder), expected)
+
+
+def test_fit_link_single_class():
+    x = np.linspace(0, 1, 20).reshape(-1, 1)
+    link = glmdisc._fitSEM._fit_link(x, np.full(20, 3))
+    assert isinstance(link, sk.linear_model.LogisticRegression)
+    np.testing.assert_array_equal(link.classes_, [3])
+    np.testing.assert_array_equal(link.predict_proba(x), np.ones((20, 1)))
+
+    link = glmdisc._fitSEM._fit_link(x, np.arange(20) % 2)
+    assert link.predict_proba(x).shape == (20, 2)
+
+
+def test_fit_sem_collapsed_continuous_feature():
+    np.random.seed(1)
+    n = 100
+    x, y, theta = glmdisc.Glmdisc.generate_data(n, 2)
+    model = glmdisc.Glmdisc(criterion="bic", validation=False, test=False, m_start=2)
+    model.fit(predictors_cont=x, predictors_qual=None, labels=y, iter=11)
+    model.predict(predictors_cont=x, predictors_qual=None)
+    edisc = np.zeros((n, 2), dtype=int)
+    edisc[:, 1] = np.random.randint(0, 2, size=n)
+    model._calculate_shape()
+    complete = np.ones((n, 2), dtype=bool)
+    glmdisc._fitSEM._fit_sem(model, edisc, None, complete)
+    assert isinstance(model.best_link[0], glmdisc._fitSEM._SingleClassLink)
+
+
+def test_likelihood_of_labels():
+    proba = np.array([[0.7, 0.3], [0.2, 0.8], [0.6, 0.4], [0.1, 0.9]])
+    for labels in (np.array([0, 1, 1, 0]), np.array([[0], [1], [1], [0]]), np.array([False, True, True, False])):
+        np.testing.assert_allclose(glmdisc._fitSEM._likelihood_of_labels(proba, labels), [0.7, 0.8, 0.4, 0.1])
 
 
 def test_nan():

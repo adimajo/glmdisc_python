@@ -29,39 +29,70 @@ def _calculate_criterion(self, emap, model_emap, current_encoder_emap):
     -------
     criterion value
     """
+    rows = self.validation_rows if self.validation else self.train_rows
     if self.criterion in ['aic', 'bic']:
-        loglik = -sk.metrics.log_loss(self.labels[self.train_rows],
+        loglik = -sk.metrics.log_loss(self.labels[rows],
                                       model_emap.predict_proba(
                                           X=current_encoder_emap.transform(
-                                              emap[self.train_rows, :].astype(str))),
+                                              emap[rows, :].astype(str))),
                                       normalize=False)
         if self.validation:
             performance = loglik
             logger.info("Current likelihood on validation set: " + str(performance))
-
-    if self.criterion == 'aic' and not self.validation:
-        performance = -(2 * model_emap.coef_.shape[1] - 2 * loglik)
-        logger.info("Current AIC on train set: " + str(- performance))
-
-    if self.criterion == 'bic' and not self.validation:
-        performance = -(log(self.n) * model_emap.coef_.shape[1] - 2 * loglik)
-        logger.info("Current BIC on train set: " + str(- performance))
-
-    if self.criterion == 'gini' and self.validation:
+        elif self.criterion == 'aic':
+            performance = -(2 * model_emap.coef_.shape[1] - 2 * loglik)
+            logger.info("Current AIC on train set: " + str(- performance))
+        else:
+            performance = -(log(len(self.train_rows)) * model_emap.coef_.shape[1] - 2 * loglik)
+            logger.info("Current BIC on train set: " + str(- performance))
+    else:
         performance = sk.metrics.roc_auc_score(
-            self.labels[self.validation_rows], model_emap.predict_proba(
+            self.labels[rows], model_emap.predict_proba(
                 X=current_encoder_emap.transform(
-                    emap[self.validation_rows, :].astype(str)))[:, 1:])
-        logger.info("Current Gini on validation set: " + str(performance))
-
-    if self.criterion == 'gini' and not self.validation:
-        performance = sk.metrics.roc_auc_score(
-            self.labels[self.train_rows], model_emap.predict_proba(
-                X=current_encoder_emap.transform(
-                    emap[self.train_rows, :].astype(str)))[:, 1:])
-        logger.info("Current Gini on training set: " + str(performance))
+                    emap[rows, :].astype(str)))[:, 1:])
+        logger.info("Current Gini on " + ("validation" if self.validation else "training") + " set: " +
+                    str(performance))
 
     return performance
+
+
+class _SingleClassLink(sk.linear_model.LogisticRegression):
+    """
+    Link p(e|x) when all complete training rows carry the same label, which a logistic regression cannot fit
+    """
+
+    def fit(self, X, y, sample_weight=None):
+        self.classes_ = np.unique(y)
+        return self
+
+    def predict_proba(self, X):
+        return np.ones((X.shape[0], 1))
+
+
+def _new_link():
+    return sk.linear_model.LogisticRegression(C=1e40,
+                                              solver='newton-cg',
+                                              max_iter=25,
+                                              tol=0.001,
+                                              warm_start=False)
+
+
+def _fit_link(x, y):
+    """
+    Fit p(e|x) of one continuous feature, falling back to a constant when y has a single label
+    """
+    link = _SingleClassLink() if np.unique(y).size < 2 else _new_link()
+    return link.fit(X=x, y=y)
+
+
+def _likelihood_of_labels(proba, labels):
+    """
+    Probability given to the observed label of each row: p(y = 1) where y is 1, p(y = 0) elsewhere
+
+    :param numpy.ndarray proba: predict_proba output of the logistic regression, columns (y = 0, y = 1)
+    :param numpy.ndarray labels: observed labels
+    """
+    return np.where(np.ravel(labels) == 1, proba[:, 1], proba[:, 0])
 
 
 def _init_fit_sem(self, edisc):
@@ -91,11 +122,7 @@ def _init_fit_sem(self, edisc):
     m = [None] * (self.d_cont + self.d_qual)
 
     for j in range(self.d_cont):
-        link[j] = sk.linear_model.LogisticRegression(C=1e40,
-                                                     solver='newton-cg',
-                                                     max_iter=25,
-                                                     tol=0.001,
-                                                     warm_start=False)
+        link[j] = _new_link()
 
     return current_best, emap, model_edisc, model_emap, current_encoder_edisc, current_encoder_emap, link, m
 
@@ -160,9 +187,10 @@ def _fit_sem(self, edisc, predictors_trans, continu_complete_case, **kwargs):
             # On commence par les quantitatives
             if j < self.d_cont:
                 # On apprend q_j | x_j
-                link[j].fit(y=edisc[self.train_rows, :][continu_complete_case[self.train_rows, j], j],
-                            X=self.predictors_cont[self.train_rows, :][continu_complete_case[self.train_rows,
-                                                                                             j], j].reshape(-1, 1))
+                link[j] = _fit_link(
+                    x=self.predictors_cont[self.train_rows, :][continu_complete_case[self.train_rows,
+                                                                                     j], j].reshape(-1, 1),
+                    y=edisc[self.train_rows, :][continu_complete_case[self.train_rows, j], j])
 
                 y_p = np.zeros((self.n, len(m[j])))
 
@@ -170,12 +198,12 @@ def _fit_sem(self, edisc, predictors_trans, continu_complete_case, **kwargs):
                 for k in range(len(m[j])):
                     modalites = np.zeros((self.n, len(m[j])))
                     modalites[:, k] = np.ones((self.n, ))
-                    y_p[:, k] = model_edisc.predict_proba(np.column_stack(
+                    y_p[:, k] = _likelihood_of_labels(model_edisc.predict_proba(np.column_stack(
                         (base_disjonctive[:, 0:(sum(list(map(len, m[0:j]))))],
                          modalites,
                          base_disjonctive[:, (sum(list(map(len,
-                                                           m[0:(j + 1)])))):(sum(list(map(len, m))))]))
-                    )[:, 1] * (2 * np.ravel(self.labels) - 1) - np.ravel(self.labels) + 1
+                                                           m[0:(j + 1)])))):(sum(list(map(len, m))))]))),
+                                                      self.labels)
 
                 # On calcule q_j | x_j sur tout le monde
                 t = link[j].predict_proba(
@@ -220,12 +248,12 @@ def _fit_sem(self, edisc, predictors_trans, continu_complete_case, **kwargs):
                     modalites = np.zeros((self.n, len(m[j])))
                     modalites[:, k] = np.ones((self.n, ))
 
-                    y_p[:, k] = model_edisc.predict_proba(np.column_stack(
+                    y_p[:, k] = _likelihood_of_labels(model_edisc.predict_proba(np.column_stack(
                         (base_disjonctive[:, 0:(sum(list(map(len, m[0:j]))))],
                          modalites,
                          base_disjonctive[:,
-                         (sum(list(map(len, m[0:(j + 1)])))):(sum(list(map(len, m))))]))
-                    )[:, 1] * (2 * np.ravel(self.labels) - 1) - np.ravel(self.labels) + 1
+                         (sum(list(map(len, m[0:(j + 1)])))):(sum(list(map(len, m))))]))),
+                                                      self.labels)
 
                 t = np.zeros((self.n, int(len(m[j]))))
 
