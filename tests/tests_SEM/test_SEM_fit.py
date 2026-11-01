@@ -158,7 +158,7 @@ def test_calculate_criterion():
     np.random.seed(1)
     model.fit(predictors_cont=x, predictors_qual=None, labels=y, iter=11)
     assert math.isclose(glmdisc._fitSEM._calculate_criterion(model, emap, model_emap, current_encoder_emap),
-                        modele_bic + (math.log(model.n) - 2) * model_emap.coef_.shape[1])
+                        modele_bic + (math.log(len(model.train_rows)) - 2) * model_emap.coef_.shape[1])
 
     model = glmdisc.Glmdisc(criterion="gini")
     model.fit(predictors_cont=x, predictors_qual=None, labels=y, iter=11)
@@ -167,6 +167,24 @@ def test_calculate_criterion():
     model = glmdisc.Glmdisc(criterion="gini", validation=False)
     model.fit(predictors_cont=x, predictors_qual=None, labels=y, iter=11)
     assert 0 <= glmdisc._fitSEM._calculate_criterion(model, emap, model_emap, current_encoder_emap) <= 1
+
+
+def test_calculate_criterion_bic_penalty_uses_train_size():
+    n = 100
+    x, y, theta = glmdisc.Glmdisc.generate_data(n, 2)
+    np.random.seed(1)
+    model = glmdisc.Glmdisc(criterion="bic", validation=False)
+    model.fit(predictors_cont=x, predictors_qual=None, labels=y, iter=11)
+    assert len(model.train_rows) < n
+    emap = np.random.randint(0, 3, size=(n, 2))
+    encoder = sk.preprocessing.OneHotEncoder().fit(X=emap.astype(str))
+    reglog = sk.linear_model.LogisticRegression(C=1e40, tol=0.001, max_iter=25)
+    reglog.fit(encoder.transform(emap[model.train_rows].astype(str)), y[model.train_rows])
+    loglik = -sk.metrics.log_loss(y[model.train_rows],
+                                  reglog.predict_proba(encoder.transform(emap[model.train_rows].astype(str))),
+                                  normalize=False)
+    expected = -(math.log(len(model.train_rows)) * reglog.coef_.shape[1] - 2 * loglik)
+    assert math.isclose(glmdisc._fitSEM._calculate_criterion(model, emap, reglog, encoder), expected)
 
 
 def test_nan():

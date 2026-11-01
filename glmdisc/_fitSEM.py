@@ -42,7 +42,7 @@ def _calculate_criterion(self, emap, model_emap, current_encoder_emap):
             performance = -(2 * model_emap.coef_.shape[1] - 2 * loglik)
             logger.info("Current AIC on train set: " + str(- performance))
         else:
-            performance = -(log(self.n) * model_emap.coef_.shape[1] - 2 * loglik)
+            performance = -(log(len(self.train_rows)) * model_emap.coef_.shape[1] - 2 * loglik)
             logger.info("Current BIC on train set: " + str(- performance))
     else:
         rows = self.validation_rows if self.validation else self.train_rows
